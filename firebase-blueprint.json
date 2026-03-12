@@ -82,6 +82,62 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["orgId", "leadId", "text", "authorId", "createdAt"]
+    },
+    "WebsiteSettings": {
+      "title": "WebsiteSettings",
+      "description": "Settings for the organization's public website.",
+      "type": "object",
+      "properties": {
+        "orgId": { "type": "string" },
+        "themeColor": { "type": "string" },
+        "heroTitle": { "type": "string" },
+        "heroSubtitle": { "type": "string" },
+        "heroImage": { "type": "string" },
+        "cloudinaryCloudName": { "type": "string" },
+        "cloudinaryUploadPreset": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["orgId", "updatedAt"]
+    },
+    "Package": {
+      "title": "Package",
+      "description": "A travel package offered by the organization.",
+      "type": "object",
+      "properties": {
+        "orgId": { "type": "string" },
+        "title": { "type": "string" },
+        "destination": { "type": "string" },
+        "description": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "priceDouble": { "type": "number" },
+        "priceTriple": { "type": "number" },
+        "priceQuad": { "type": "number" },
+        "duration": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["orgId", "title", "destination", "createdAt"]
+    },
+    "Booking": {
+      "title": "Booking",
+      "description": "A booking for a travel package.",
+      "type": "object",
+      "properties": {
+        "orgId": { "type": "string" },
+        "packageId": { "type": "string" },
+        "packageTitle": { "type": "string" },
+        "customerName": { "type": "string" },
+        "customerEmail": { "type": "string" },
+        "customerPhone": { "type": "string" },
+        "travelDate": { "type": "string" },
+        "paxDouble": { "type": "number" },
+        "paxTriple": { "type": "number" },
+        "paxQuad": { "type": "number" },
+        "totalPrice": { "type": "number" },
+        "status": { "type": "string", "enum": ["Pending", "Confirmed", "Cancelled"] },
+        "source": { "type": "string", "enum": ["Website", "CRM"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["orgId", "packageId", "customerName", "customerPhone", "status", "createdAt"]
     }
   },
   "firestore": {
@@ -104,6 +160,18 @@
     "remarks/{remarkId}": {
       "schema": { "$ref": "#/entities/Remark" },
       "description": "Stores remarks for leads."
+    },
+    "website_settings/{orgId}": {
+      "schema": { "$ref": "#/entities/WebsiteSettings" },
+      "description": "Stores website settings for organizations."
+    },
+    "packages/{packageId}": {
+      "schema": { "$ref": "#/entities/Package" },
+      "description": "Stores travel packages."
+    },
+    "bookings/{bookingId}": {
+      "schema": { "$ref": "#/entities/Booking" },
+      "description": "Stores package bookings."
     }
   }
 }

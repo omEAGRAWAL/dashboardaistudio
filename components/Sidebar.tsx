@@ -1,6 +1,6 @@
 'use client';
 
-import { LayoutDashboard, Users, Settings, LogOut, Shield } from 'lucide-react';
+import { LayoutDashboard, Users, Settings, LogOut, Shield, Package, CalendarCheck, Globe } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -20,7 +20,7 @@ export function Sidebar() {
         <span className="font-bold text-xl text-gray-800 tracking-tight">Travlyy</span>
       </div>
 
-      <nav className="flex-1 p-4 space-y-2">
+      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         <Link 
           href="/" 
           className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
@@ -28,9 +28,29 @@ export function Sidebar() {
           }`}
         >
           <LayoutDashboard className="w-5 h-5" />
-          Dashboard
+          Leads
+        </Link>
+
+        <Link 
+          href="/bookings" 
+          className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
+            pathname === '/bookings' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:bg-gray-50'
+          }`}
+        >
+          <CalendarCheck className="w-5 h-5" />
+          Bookings
         </Link>
         
+        <Link 
+          href="/packages" 
+          className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
+            pathname === '/packages' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:bg-gray-50'
+          }`}
+        >
+          <Package className="w-5 h-5" />
+          Packages
+        </Link>
+
         {isTeamVisible && (
           <Link 
             href="/team" 
@@ -40,6 +60,18 @@ export function Sidebar() {
           >
             <Users className="w-5 h-5" />
             Team
+          </Link>
+        )}
+
+        {isTeamVisible && (
+          <Link 
+            href="/website-builder" 
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
+              pathname === '/website-builder' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            <Globe className="w-5 h-5" />
+            Website Builder
           </Link>
         )}
         

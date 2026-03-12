@@ -130,6 +130,50 @@ service cloud.firestore {
              data.createdAt is timestamp;
     }
 
+    function isValidWebsiteSettings(data) {
+      return hasOnlyAllowedFields(['orgId', 'themeColor', 'heroTitle', 'heroSubtitle', 'heroImage', 'cloudinaryCloudName', 'cloudinaryUploadPreset', 'updatedAt']) &&
+             data.orgId is string && data.orgId.size() > 0 && data.orgId.size() < 100 &&
+             (!('themeColor' in data) || (data.themeColor is string && data.themeColor.size() < 50)) &&
+             (!('heroTitle' in data) || (data.heroTitle is string && data.heroTitle.size() < 200)) &&
+             (!('heroSubtitle' in data) || (data.heroSubtitle is string && data.heroSubtitle.size() < 500)) &&
+             (!('heroImage' in data) || (data.heroImage is string && data.heroImage.size() < 1000)) &&
+             (!('cloudinaryCloudName' in data) || (data.cloudinaryCloudName is string && data.cloudinaryCloudName.size() < 100)) &&
+             (!('cloudinaryUploadPreset' in data) || (data.cloudinaryUploadPreset is string && data.cloudinaryUploadPreset.size() < 100)) &&
+             data.updatedAt is timestamp;
+    }
+
+    function isValidPackage(data) {
+      return hasOnlyAllowedFields(['orgId', 'title', 'destination', 'description', 'imageUrl', 'priceDouble', 'priceTriple', 'priceQuad', 'duration', 'createdAt']) &&
+             data.orgId is string && data.orgId.size() > 0 && data.orgId.size() < 100 &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+             data.destination is string && data.destination.size() > 0 && data.destination.size() < 200 &&
+             (!('description' in data) || (data.description is string && data.description.size() < 5000)) &&
+             (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() < 1000)) &&
+             (!('priceDouble' in data) || (data.priceDouble is number && data.priceDouble >= 0)) &&
+             (!('priceTriple' in data) || (data.priceTriple is number && data.priceTriple >= 0)) &&
+             (!('priceQuad' in data) || (data.priceQuad is number && data.priceQuad >= 0)) &&
+             (!('duration' in data) || (data.duration is string && data.duration.size() < 100)) &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidBooking(data) {
+      return hasOnlyAllowedFields(['orgId', 'packageId', 'packageTitle', 'customerName', 'customerEmail', 'customerPhone', 'travelDate', 'paxDouble', 'paxTriple', 'paxQuad', 'totalPrice', 'status', 'source', 'createdAt']) &&
+             data.orgId is string && data.orgId.size() > 0 && data.orgId.size() < 100 &&
+             data.packageId is string && data.packageId.size() > 0 && data.packageId.size() < 100 &&
+             (!('packageTitle' in data) || (data.packageTitle is string && data.packageTitle.size() < 200)) &&
+             data.customerName is string && data.customerName.size() > 0 && data.customerName.size() < 100 &&
+             (!('customerEmail' in data) || (data.customerEmail is string && data.customerEmail.size() < 100)) &&
+             data.customerPhone is string && data.customerPhone.size() > 0 && data.customerPhone.size() < 50 &&
+             (!('travelDate' in data) || (data.travelDate is string && data.travelDate.size() < 100)) &&
+             (!('paxDouble' in data) || (data.paxDouble is number && data.paxDouble >= 0)) &&
+             (!('paxTriple' in data) || (data.paxTriple is number && data.paxTriple >= 0)) &&
+             (!('paxQuad' in data) || (data.paxQuad is number && data.paxQuad >= 0)) &&
+             (!('totalPrice' in data) || (data.totalPrice is number && data.totalPrice >= 0)) &&
+             data.status in ['Pending', 'Confirmed', 'Cancelled'] &&
+             (!('source' in data) || data.source in ['Website', 'CRM']) &&
+             data.createdAt is timestamp;
+    }
+
     // Rules
     match /organizations/{orgId} {
       allow read: if isAuthenticated();
@@ -176,6 +220,25 @@ service cloud.firestore {
                     request.resource.data.createdAt == resource.data.createdAt &&
                     (request.resource.data.authorId == request.auth.uid || isAdmin());
       allow delete: if isAdmin() || (isAuthenticated() && resource.data.authorId == request.auth.uid);
+    }
+
+    match /website_settings/{orgId} {
+      allow read: if true;
+      allow create, update: if isAuthenticated() && isValidWebsiteSettings(request.resource.data) && getUserOrgId() == orgId;
+    }
+
+    match /packages/{packageId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && isValidPackage(request.resource.data) && getUserOrgId() == request.resource.data.orgId;
+      allow update: if isAuthenticated() && isValidPackage(request.resource.data) && getUserOrgId() == resource.data.orgId && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isAuthenticated() && getUserOrgId() == resource.data.orgId;
+    }
+
+    match /bookings/{bookingId} {
+      allow read: if isAuthenticated() && resource.data.orgId == getUserOrgId();
+      allow create: if isValidBooking(request.resource.data);
+      allow update: if isAuthenticated() && isValidBooking(request.resource.data) && resource.data.orgId == getUserOrgId() && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isAuthenticated() && resource.data.orgId == getUserOrgId();
     }
   }
 }

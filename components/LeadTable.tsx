@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, getDocs, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from './AuthProvider';
-import { format } from 'date-fns';
-import { Phone, MessageCircle, Plus, MoreHorizontal, Check, Users } from 'lucide-react';
+import { format, isToday } from 'date-fns';
+import { Phone, MessageCircle, Plus, MoreHorizontal, Check, Users, BarChart3 } from 'lucide-react';
+import { Stats } from './Stats';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
 const STATUSES = [
   "New Enquiry", "Call Not Picked", "Call me later", "Contacted", 
@@ -14,6 +16,7 @@ const STATUSES = [
 ];
 
 const CATEGORIES = ["Hot", "Warm", "Cold", "Repeating Customer", "Group", "None"];
+const COLORS = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316', '#14b8a6', '#6366f1', '#84cc16'];
 
 export function LeadTable() {
   const { user, role, orgId } = useAuth();
@@ -26,6 +29,7 @@ export function LeadTable() {
   const [activeSource, setActiveSource] = useState('All');
   const [remarkText, setRemarkText] = useState('');
   const [activeRemarkLeadId, setActiveRemarkLeadId] = useState<string | null>(null);
+  const [showAnalytics, setShowAnalytics] = useState(false);
 
   useEffect(() => {
     if (!user || (!orgId && role !== 'superadmin')) return;
@@ -132,6 +136,18 @@ export function LeadTable() {
     return true;
   });
 
+  const todaysLeadsCount = filteredLeads.filter(lead => lead.createdAt && isToday(lead.createdAt.toDate())).length;
+
+  const statusData = STATUSES.map(status => ({
+    name: status,
+    value: filteredLeads.filter(l => l.status === status).length
+  })).filter(d => d.value > 0).sort((a, b) => b.value - a.value);
+
+  const categoryData = CATEGORIES.map(cat => ({
+    name: cat,
+    value: filteredLeads.filter(l => l.category === cat).length
+  })).filter(d => d.value > 0).sort((a, b) => b.value - a.value);
+
   if (loading) {
     return <div className="p-8 text-center text-gray-500">Loading leads...</div>;
   }
@@ -207,8 +223,81 @@ export function LeadTable() {
               ))}
             </select>
           </div>
+
+          <button
+            onClick={() => setShowAnalytics(!showAnalytics)}
+            className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md border transition-colors ${showAnalytics ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}`}
+          >
+            <BarChart3 className="w-4 h-4" />
+            {showAnalytics ? 'Hide Analytics' : 'Show Analytics'}
+          </button>
         </div>
       </div>
+
+      {showAnalytics && (
+        <div className="p-6 bg-gray-50 border-b border-gray-200 animate-in fade-in slide-in-from-top-4 duration-300">
+          <Stats totalLeads={filteredLeads.length} todaysLeads={todaysLeadsCount} />
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+              <h3 className="text-sm font-semibold text-gray-900 mb-6">Leads by Status</h3>
+              <div className="h-64">
+                {statusData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={statusData} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f3f4f6" />
+                      <XAxis type="number" hide />
+                      <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} width={100} />
+                      <Tooltip 
+                        cursor={{ fill: '#f9fafb' }}
+                        contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+                      />
+                      <Bar dataKey="value" fill="#4f46e5" radius={[0, 4, 4, 0]}>
+                        {statusData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-full flex items-center justify-center text-sm text-gray-500">No data available</div>
+                )}
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+              <h3 className="text-sm font-semibold text-gray-900 mb-6">Leads by Category</h3>
+              <div className="h-64">
+                {categoryData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={categoryData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={80}
+                        paddingAngle={5}
+                        dataKey="value"
+                      >
+                        {categoryData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip 
+                        contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+                      />
+                      <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-full flex items-center justify-center text-sm text-gray-500">No data available</div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Table */}
       <div className="overflow-x-auto">

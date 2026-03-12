@@ -3,21 +3,15 @@
 import { useAuth } from '@/components/AuthProvider';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
-import { Stats } from '@/components/Stats';
 import { LeadTable } from '@/components/LeadTable';
 import { ImportLeads } from '@/components/ImportLeads';
 import { CreateLeadModal } from '@/components/CreateLeadModal';
 import { LogIn } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { collection, onSnapshot, query, where } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import { isToday } from 'date-fns';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function Home() {
   const { user, orgId, role, loading, signIn } = useAuth();
-  const [totalLeads, setTotalLeads] = useState(0);
-  const [todaysLeads, setTodaysLeads] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
@@ -25,30 +19,6 @@ export default function Home() {
       router.push('/onboarding');
     }
   }, [user, orgId, role, loading, router]);
-
-  useEffect(() => {
-    if (!user || (!orgId && role !== 'superadmin')) return;
-
-    let q = query(collection(db, 'leads'));
-    if (orgId) {
-      q = query(collection(db, 'leads'), where('orgId', '==', orgId));
-    }
-    
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      setTotalLeads(snapshot.size);
-      
-      let todayCount = 0;
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        if (data.createdAt && isToday(data.createdAt.toDate())) {
-          todayCount++;
-        }
-      });
-      setTodaysLeads(todayCount);
-    });
-
-    return () => unsubscribe();
-  }, [user, orgId, role]);
 
   if (loading) {
     return (
@@ -99,7 +69,6 @@ export default function Home() {
               </div>
             </div>
 
-            <Stats totalLeads={totalLeads} todaysLeads={todaysLeads} />
             <LeadTable />
           </div>
         </main>
