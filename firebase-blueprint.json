@@ -1,0 +1,75 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A user of the CRM (e.g., travel agent, admin).",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "agent"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role", "createdAt"]
+    },
+    "Lead": {
+      "title": "Lead",
+      "description": "A travel agency lead from Meta Ads or other sources.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "source": { "type": "string", "description": "e.g., Meta Form, Google Sheet" },
+        "sourceId": { "type": "string", "description": "External ID from the source" },
+        "pax": { "type": "number", "description": "Number of passengers" },
+        "travelDate": { "type": "string", "description": "Expected travel date or timeframe" },
+        "status": { 
+          "type": "string", 
+          "enum": [
+            "New Enquiry", "Call Not Picked", "Call me later", "Contacted", 
+            "Qualified", "Negotiating", "Awaiting Payment", "Booked", 
+            "Lost & Closed", "Future Prospect", "Just Checking"
+          ] 
+        },
+        "category": { 
+          "type": "string", 
+          "enum": ["Hot", "Warm", "Cold", "Repeating Customer", "Group", "None"] 
+        },
+        "assigneeId": { "type": "string", "description": "UID of the assigned agent" },
+        "latestRemark": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "phone", "status", "createdAt", "updatedAt"]
+    },
+    "Remark": {
+      "title": "Remark",
+      "description": "A note or remark added to a lead.",
+      "type": "object",
+      "properties": {
+        "leadId": { "type": "string" },
+        "text": { "type": "string" },
+        "authorId": { "type": "string" },
+        "authorName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["leadId", "text", "authorId", "createdAt"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Stores user profiles."
+    },
+    "leads/{leadId}": {
+      "schema": { "$ref": "#/entities/Lead" },
+      "description": "Stores all leads."
+    },
+    "remarks/{remarkId}": {
+      "schema": { "$ref": "#/entities/Remark" },
+      "description": "Stores remarks for leads."
+    }
+  }
+}

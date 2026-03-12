@@ -1,0 +1,142 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    // Collection: users
+    // Document ID: {userId}
+    // Fields:
+    //   - uid: string (required)
+    //   - email: string (required)
+    //   - displayName: string (optional)
+    //   - photoURL: string (optional)
+    //   - role: string (required, 'admin' or 'agent')
+    //   - createdAt: timestamp (required)
+    //
+    // Collection: leads
+    // Document ID: {leadId}
+    // Fields:
+    //   - name: string (required)
+    //   - phone: string (required)
+    //   - source: string (optional)
+    //   - sourceId: string (optional)
+    //   - pax: number (optional)
+    //   - travelDate: string (optional)
+    //   - status: string (required)
+    //   - category: string (optional)
+    //   - assigneeId: string (optional)
+    //   - latestRemark: string (optional)
+    //   - createdAt: timestamp (required)
+    //   - updatedAt: timestamp (required)
+    //
+    // Collection: remarks
+    // Document ID: {remarkId}
+    // Fields:
+    //   - leadId: string (required)
+    //   - text: string (required)
+    //   - authorId: string (required)
+    //   - authorName: string (optional)
+    //   - createdAt: timestamp (required)
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+        (request.auth.token.email == "agrawalom711@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    // Domain Validators
+    function isValidUser(data) {
+      return hasOnlyAllowedFields(['uid', 'email', 'displayName', 'photoURL', 'role', 'createdAt']) &&
+             data.uid is string && data.uid.size() > 0 && data.uid.size() < 100 &&
+             data.email is string && isValidEmail(data.email) &&
+             (!('displayName' in data) || (data.displayName is string && data.displayName.size() < 100)) &&
+             (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() < 500)) &&
+             data.role in ['admin', 'agent'] &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidLead(data) {
+      return hasOnlyAllowedFields(['name', 'phone', 'source', 'sourceId', 'pax', 'travelDate', 'status', 'category', 'assigneeId', 'latestRemark', 'createdAt', 'updatedAt']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.phone is string && data.phone.size() > 0 && data.phone.size() < 50 &&
+             (!('source' in data) || (data.source is string && data.source.size() < 100)) &&
+             (!('sourceId' in data) || (data.sourceId is string && data.sourceId.size() < 100)) &&
+             (!('pax' in data) || (data.pax is number && data.pax >= 0)) &&
+             (!('travelDate' in data) || (data.travelDate is string && data.travelDate.size() < 100)) &&
+             data.status in ['New Enquiry', 'Call Not Picked', 'Call me later', 'Contacted', 'Qualified', 'Negotiating', 'Awaiting Payment', 'Booked', 'Lost & Closed', 'Future Prospect', 'Just Checking'] &&
+             (!('category' in data) || (data.category in ['Hot', 'Warm', 'Cold', 'Repeating Customer', 'Group', 'None'])) &&
+             (!('assigneeId' in data) || (data.assigneeId is string && data.assigneeId.size() < 100)) &&
+             (!('latestRemark' in data) || (data.latestRemark is string && data.latestRemark.size() < 1000)) &&
+             data.createdAt is timestamp &&
+             data.updatedAt is timestamp;
+    }
+
+    function isValidRemark(data) {
+      return hasOnlyAllowedFields(['leadId', 'text', 'authorId', 'authorName', 'createdAt']) &&
+             data.leadId is string && data.leadId.size() > 0 && data.leadId.size() < 100 &&
+             data.text is string && data.text.size() > 0 && data.text.size() < 2000 &&
+             data.authorId is string && data.authorId.size() > 0 && data.authorId.size() < 100 &&
+             (!('authorName' in data) || (data.authorName is string && data.authorName.size() < 100)) &&
+             data.createdAt is timestamp;
+    }
+
+    // Rules
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidUser(request.resource.data) && 
+                    ((isOwner(userId) && request.resource.data.role == 'agent') || isAdmin()) &&
+                    request.resource.data.uid == userId;
+      allow update: if isAuthenticated() && isValidUser(request.resource.data) && 
+                    ((isOwner(userId) && request.resource.data.role == resource.data.role) || isAdmin()) &&
+                    request.resource.data.uid == resource.data.uid &&
+                    request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isAdmin();
+    }
+
+    match /leads/{leadId} {
+      // Anyone authenticated can read leads (for a CRM, agents need to see leads)
+      allow read: if isAuthenticated();
+      // Anyone authenticated can create leads
+      allow create: if isAuthenticated() && isValidLead(request.resource.data);
+      // Anyone authenticated can update leads
+      allow update: if isAuthenticated() && isValidLead(request.resource.data) &&
+                    request.resource.data.createdAt == resource.data.createdAt;
+      // Only admins can delete leads
+      allow delete: if isAdmin();
+    }
+
+    match /remarks/{remarkId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidRemark(request.resource.data) && 
+                    request.resource.data.authorId == request.auth.uid;
+      allow update: if isAuthenticated() && isValidRemark(request.resource.data) && 
+                    request.resource.data.authorId == resource.data.authorId &&
+                    request.resource.data.createdAt == resource.data.createdAt &&
+                    (request.resource.data.authorId == request.auth.uid || isAdmin());
+      allow delete: if isAdmin() || (isAuthenticated() && resource.data.authorId == request.auth.uid);
+    }
+  }
+}

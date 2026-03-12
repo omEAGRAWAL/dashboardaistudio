@@ -1,0 +1,5 @@
+{
+  "name": "Travel Agency CRM",
+  "description": "A CRM dashboard for travel agencies to manage leads from Meta Ads via Google Sheets.",
+  "requestFramePermissions": []
+}
