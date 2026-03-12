@@ -8,7 +8,7 @@ import { db } from '@/lib/firebase';
 import { useAuth } from './AuthProvider';
 
 export function ImportLeads() {
-  const { user } = useAuth();
+  const { user, orgId } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -34,20 +34,24 @@ export function ImportLeads() {
           for (const row of leads) {
             if (!row.name || !row.phone) continue; // Skip invalid rows
 
-            await addDoc(collection(db, 'leads'), {
-              name: row.name,
-              phone: row.phone,
-              source: row.source || 'CSV Import',
-              sourceId: row.sourceId || null,
+            const leadData: any = {
+              name: String(row.name).trim(),
+              phone: String(row.phone).trim(),
+              source: row.source ? String(row.source).trim() : 'CSV Import',
               pax: row.pax ? parseInt(row.pax, 10) : 1,
-              travelDate: row.travelDate || null,
               status: row.status || 'New Enquiry',
               category: row.category || 'None',
-              assigneeId: user?.uid || null,
-              latestRemark: row.remark || '',
               createdAt: serverTimestamp(),
               updatedAt: serverTimestamp(),
-            });
+            };
+
+            if (orgId) leadData.orgId = orgId;
+            if (row.sourceId) leadData.sourceId = String(row.sourceId).trim();
+            if (row.travelDate) leadData.travelDate = String(row.travelDate).trim();
+            if (user?.uid) leadData.assigneeId = user.uid;
+            if (row.remark) leadData.latestRemark = String(row.remark).trim();
+
+            await addDoc(collection(db, 'leads'), leadData);
             importedCount++;
           }
 

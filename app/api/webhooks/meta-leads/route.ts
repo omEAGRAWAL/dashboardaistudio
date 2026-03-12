@@ -5,10 +5,16 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 export async function POST(req: Request) {
   try {
     const data = await req.json();
+    const url = new URL(req.url);
+    const orgId = url.searchParams.get('orgId') || data.orgId;
 
     // Basic validation
     if (!data.name || !data.phone) {
       return NextResponse.json({ error: 'Name and phone are required' }, { status: 400 });
+    }
+
+    if (!orgId) {
+      return NextResponse.json({ error: 'orgId is required. Pass it as a query parameter (?orgId=xyz) or in the JSON body.' }, { status: 400 });
     }
 
     // Build the lead data object
@@ -19,6 +25,7 @@ export async function POST(req: Request) {
       pax: data.pax ? Number(data.pax) : 1,
       status: 'New Enquiry',
       category: 'None',
+      orgId: String(orgId).trim(),
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };

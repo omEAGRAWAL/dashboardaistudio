@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, getDocs } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, getDocs, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from './AuthProvider';
 import { format } from 'date-fns';
@@ -16,7 +16,7 @@ const STATUSES = [
 const CATEGORIES = ["Hot", "Warm", "Cold", "Repeating Customer", "Group", "None"];
 
 export function LeadTable() {
-  const { user, role } = useAuth();
+  const { user, role, orgId } = useAuth();
   const [leads, setLeads] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,16 +27,26 @@ export function LeadTable() {
   const [activeRemarkLeadId, setActiveRemarkLeadId] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!user || (!orgId && role !== 'superadmin')) return;
+
     // Fetch users for assignee dropdown
     const fetchUsers = async () => {
-      const usersSnapshot = await getDocs(collection(db, 'users'));
+      let usersQuery = query(collection(db, 'users'));
+      if (orgId) {
+        usersQuery = query(collection(db, 'users'), where('orgId', '==', orgId));
+      }
+      const usersSnapshot = await getDocs(usersQuery);
       const usersData = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setUsers(usersData);
     };
     fetchUsers();
 
     // Listen to leads
-    const q = query(collection(db, 'leads'), orderBy('createdAt', 'desc'));
+    let q = query(collection(db, 'leads'), orderBy('createdAt', 'desc'));
+    if (orgId) {
+      q = query(collection(db, 'leads'), where('orgId', '==', orgId), orderBy('createdAt', 'desc'));
+    }
+    
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const leadsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setLeads(leadsData);
@@ -76,13 +86,16 @@ export function LeadTable() {
 
     try {
       // Add remark to subcollection or separate collection
-      await addDoc(collection(db, 'remarks'), {
+      const remarkData: any = {
         leadId,
         text: remarkText,
         authorId: user.uid,
         authorName: user.displayName || user.email,
         createdAt: serverTimestamp()
-      });
+      };
+      if (orgId) remarkData.orgId = orgId;
+
+      await addDoc(collection(db, 'remarks'), remarkData);
 
       // Update lead's latest remark
       await updateDoc(doc(db, 'leads', leadId), {

@@ -1,5 +1,28 @@
 {
   "entities": {
+    "Organization": {
+      "title": "Organization",
+      "description": "An agency or organization using the CRM.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "ownerId": { "type": "string", "description": "UID of the user who created it" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "ownerId", "createdAt"]
+    },
+    "Invite": {
+      "title": "Invite",
+      "description": "An invitation for a user to join an organization.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email" },
+        "orgId": { "type": "string" },
+        "role": { "type": "string", "enum": ["org_admin", "agent"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "orgId", "role", "createdAt"]
+    },
     "User": {
       "title": "User",
       "description": "A user of the CRM (e.g., travel agent, admin).",
@@ -9,7 +32,8 @@
         "email": { "type": "string", "format": "email" },
         "displayName": { "type": "string" },
         "photoURL": { "type": "string" },
-        "role": { "type": "string", "enum": ["admin", "agent"] },
+        "role": { "type": "string", "enum": ["superadmin", "org_admin", "agent"] },
+        "orgId": { "type": "string", "description": "ID of the organization they belong to" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["uid", "email", "role", "createdAt"]
@@ -19,6 +43,7 @@
       "description": "A travel agency lead from Meta Ads or other sources.",
       "type": "object",
       "properties": {
+        "orgId": { "type": "string", "description": "ID of the organization this lead belongs to" },
         "name": { "type": "string" },
         "phone": { "type": "string" },
         "source": { "type": "string", "description": "e.g., Meta Form, Google Sheet" },
@@ -42,23 +67,32 @@
         "createdAt": { "type": "string", "format": "date-time" },
         "updatedAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["name", "phone", "status", "createdAt", "updatedAt"]
+      "required": ["orgId", "name", "phone", "status", "createdAt", "updatedAt"]
     },
     "Remark": {
       "title": "Remark",
       "description": "A note or remark added to a lead.",
       "type": "object",
       "properties": {
+        "orgId": { "type": "string", "description": "ID of the organization this remark belongs to" },
         "leadId": { "type": "string" },
         "text": { "type": "string" },
         "authorId": { "type": "string" },
         "authorName": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["leadId", "text", "authorId", "createdAt"]
+      "required": ["orgId", "leadId", "text", "authorId", "createdAt"]
     }
   },
   "firestore": {
+    "organizations/{orgId}": {
+      "schema": { "$ref": "#/entities/Organization" },
+      "description": "Stores organizations/agencies."
+    },
+    "invites/{inviteId}": {
+      "schema": { "$ref": "#/entities/Invite" },
+      "description": "Stores pending invites."
+    },
     "users/{userId}": {
       "schema": { "$ref": "#/entities/User" },
       "description": "Stores user profiles."

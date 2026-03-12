@@ -49,9 +49,18 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    function getUserDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function getUserOrgId() {
+      let userDoc = getUserDoc();
+      return (userDoc != null && 'orgId' in userDoc.data) ? userDoc.data.orgId : null;
+    }
+
     function isAdmin() {
       return isAuthenticated() && 
-        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+        (getUserDoc().data.role in ['admin', 'superadmin', 'org_admin'] ||
         (request.auth.token.email == "agrawalom711@gmail.com" && request.auth.token.email_verified == true));
     }
 
@@ -68,18 +77,35 @@ service cloud.firestore {
     }
 
     // Domain Validators
+    function isValidOrganization(data) {
+      return hasOnlyAllowedFields(['name', 'ownerId', 'createdAt']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.ownerId is string && data.ownerId.size() > 0 &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidInvite(data) {
+      return hasOnlyAllowedFields(['email', 'orgId', 'role', 'createdAt']) &&
+             data.email is string && isValidEmail(data.email) &&
+             data.orgId is string && data.orgId.size() > 0 &&
+             data.role in ['org_admin', 'agent'] &&
+             data.createdAt is timestamp;
+    }
+
     function isValidUser(data) {
-      return hasOnlyAllowedFields(['uid', 'email', 'displayName', 'photoURL', 'role', 'createdAt']) &&
+      return hasOnlyAllowedFields(['uid', 'email', 'displayName', 'photoURL', 'role', 'orgId', 'createdAt']) &&
              data.uid is string && data.uid.size() > 0 && data.uid.size() < 100 &&
              data.email is string && isValidEmail(data.email) &&
              (!('displayName' in data) || (data.displayName is string && data.displayName.size() < 100)) &&
              (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() < 500)) &&
-             data.role in ['admin', 'agent'] &&
+             data.role in ['superadmin', 'admin', 'org_admin', 'agent'] &&
+             (!('orgId' in data) || (data.orgId is string && data.orgId.size() < 100)) &&
              data.createdAt is timestamp;
     }
 
     function isValidLead(data) {
-      return hasOnlyAllowedFields(['name', 'phone', 'source', 'sourceId', 'pax', 'travelDate', 'status', 'category', 'assigneeId', 'latestRemark', 'createdAt', 'updatedAt']) &&
+      return hasOnlyAllowedFields(['orgId', 'name', 'phone', 'source', 'sourceId', 'pax', 'travelDate', 'status', 'category', 'assigneeId', 'latestRemark', 'createdAt', 'updatedAt']) &&
+             (!('orgId' in data) || (data.orgId is string && data.orgId.size() < 100)) &&
              data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
              data.phone is string && data.phone.size() > 0 && data.phone.size() < 50 &&
              (!('source' in data) || (data.source is string && data.source.size() < 100)) &&
@@ -95,7 +121,8 @@ service cloud.firestore {
     }
 
     function isValidRemark(data) {
-      return hasOnlyAllowedFields(['leadId', 'text', 'authorId', 'authorName', 'createdAt']) &&
+      return hasOnlyAllowedFields(['orgId', 'leadId', 'text', 'authorId', 'authorName', 'createdAt']) &&
+             (!('orgId' in data) || (data.orgId is string && data.orgId.size() < 100)) &&
              data.leadId is string && data.leadId.size() > 0 && data.leadId.size() < 100 &&
              data.text is string && data.text.size() > 0 && data.text.size() < 2000 &&
              data.authorId is string && data.authorId.size() > 0 && data.authorId.size() < 100 &&
@@ -104,32 +131,44 @@ service cloud.firestore {
     }
 
     // Rules
+    match /organizations/{orgId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidOrganization(request.resource.data) && request.resource.data.ownerId == request.auth.uid;
+      allow update: if isAuthenticated() && isValidOrganization(request.resource.data) && resource.data.ownerId == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+
+    match /invites/{inviteId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidInvite(request.resource.data) && getUserOrgId() == request.resource.data.orgId;
+      allow update, delete: if isAuthenticated() && (getUserOrgId() == resource.data.orgId || request.auth.token.email == resource.data.email);
+    }
+
     match /users/{userId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && isValidUser(request.resource.data) && 
-                    ((isOwner(userId) && request.resource.data.role == 'agent') || isAdmin()) &&
                     request.resource.data.uid == userId;
       allow update: if isAuthenticated() && isValidUser(request.resource.data) && 
-                    ((isOwner(userId) && request.resource.data.role == resource.data.role) || isAdmin()) &&
                     request.resource.data.uid == resource.data.uid &&
                     request.resource.data.createdAt == resource.data.createdAt;
       allow delete: if isAdmin();
     }
 
     match /leads/{leadId} {
-      // Anyone authenticated can read leads (for a CRM, agents need to see leads)
-      allow read: if isAuthenticated();
+      // Anyone authenticated can read leads, but only if they belong to their org (or if the lead has no orgId for legacy support)
+      allow read: if isAuthenticated() && (!('orgId' in resource.data) || resource.data.orgId == getUserOrgId());
       // Allow unauthenticated creates for webhooks (validation still applies)
       allow create: if isValidLead(request.resource.data);
-      // Anyone authenticated can update leads
+      // Anyone authenticated can update leads in their org
       allow update: if isAuthenticated() && isValidLead(request.resource.data) &&
-                    request.resource.data.createdAt == resource.data.createdAt;
+                    request.resource.data.createdAt == resource.data.createdAt &&
+                    (!('orgId' in resource.data) || resource.data.orgId == getUserOrgId());
       // Only admins can delete leads
-      allow delete: if isAdmin();
+      allow delete: if isAdmin() && (!('orgId' in resource.data) || resource.data.orgId == getUserOrgId());
     }
 
     match /remarks/{remarkId} {
-      allow read: if isAuthenticated();
+      allow read: if isAuthenticated() && (!('orgId' in resource.data) || resource.data.orgId == getUserOrgId());
       allow create: if isAuthenticated() && isValidRemark(request.resource.data) && 
                     request.resource.data.authorId == request.auth.uid;
       allow update: if isAuthenticated() && isValidRemark(request.resource.data) && 

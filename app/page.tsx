@@ -9,19 +9,31 @@ import { ImportLeads } from '@/components/ImportLeads';
 import { CreateLeadModal } from '@/components/CreateLeadModal';
 import { LogIn } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { collection, onSnapshot, query } from 'firebase/firestore';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { isToday } from 'date-fns';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
-  const { user, loading, signIn } = useAuth();
+  const { user, orgId, role, loading, signIn } = useAuth();
   const [totalLeads, setTotalLeads] = useState(0);
   const [todaysLeads, setTodaysLeads] = useState(0);
+  const router = useRouter();
 
   useEffect(() => {
-    if (!user) return;
+    if (!loading && user && !orgId && role !== 'superadmin') {
+      router.push('/onboarding');
+    }
+  }, [user, orgId, role, loading, router]);
 
-    const q = query(collection(db, 'leads'));
+  useEffect(() => {
+    if (!user || (!orgId && role !== 'superadmin')) return;
+
+    let q = query(collection(db, 'leads'));
+    if (orgId) {
+      q = query(collection(db, 'leads'), where('orgId', '==', orgId));
+    }
+    
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setTotalLeads(snapshot.size);
       
@@ -36,7 +48,7 @@ export default function Home() {
     });
 
     return () => unsubscribe();
-  }, [user]);
+  }, [user, orgId, role]);
 
   if (loading) {
     return (
@@ -65,6 +77,10 @@ export default function Home() {
         </div>
       </div>
     );
+  }
+
+  if (!orgId && role !== 'superadmin') {
+    return null; // Will redirect in useEffect
   }
 
   return (

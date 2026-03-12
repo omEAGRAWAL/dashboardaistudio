@@ -7,7 +7,7 @@ import { db } from '@/lib/firebase';
 import { useAuth } from './AuthProvider';
 
 export function CreateLeadModal() {
-  const { user } = useAuth();
+  const { user, orgId } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -25,15 +25,18 @@ export function CreateLeadModal() {
 
     setLoading(true);
     try {
-      await addDoc(collection(db, 'leads'), {
+      const leadData: any = {
         ...formData,
         pax: Number(formData.pax),
         status: 'New Enquiry',
-        assigneeId: user?.uid || null,
-        latestRemark: '',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-      });
+      };
+
+      if (orgId) leadData.orgId = orgId;
+      if (user?.uid) leadData.assigneeId = user.uid;
+
+      await addDoc(collection(db, 'leads'), leadData);
       setIsOpen(false);
       setFormData({ name: '', phone: '', source: 'Manual', pax: 1, travelDate: '', category: 'None' });
     } catch (error) {
