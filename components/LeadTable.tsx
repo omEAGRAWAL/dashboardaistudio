@@ -23,6 +23,7 @@ export function LeadTable() {
   const [activeTab, setActiveTab] = useState('All');
   const [activeCategory, setActiveCategory] = useState('All');
   const [activeAssignee, setActiveAssignee] = useState('All');
+  const [activeSource, setActiveSource] = useState('All');
   const [remarkText, setRemarkText] = useState('');
   const [activeRemarkLeadId, setActiveRemarkLeadId] = useState<string | null>(null);
 
@@ -57,7 +58,7 @@ export function LeadTable() {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [orgId, role, user]);
 
   const handleStatusChange = async (leadId: string, newStatus: string) => {
     try {
@@ -110,13 +111,24 @@ export function LeadTable() {
     }
   };
 
+  // Extract unique sources for the filter dropdown
+  const uniqueSources = Array.from(new Set(leads.map(lead => lead.source || 'Manual'))).filter(Boolean);
+
   const filteredLeads = leads.filter(lead => {
     if (activeTab !== 'All' && lead.status !== activeTab) return false;
     if (activeCategory !== 'All' && lead.category !== activeCategory) return false;
+    
     if (activeAssignee !== 'All') {
       if (activeAssignee === 'Unassigned' && lead.assigneeId) return false;
-      if (activeAssignee !== 'Unassigned' && lead.assigneeId !== activeAssignee) return false;
+      if (activeAssignee === 'Me' && lead.assigneeId !== user?.uid) return false;
+      if (activeAssignee !== 'Unassigned' && activeAssignee !== 'Me' && lead.assigneeId !== activeAssignee) return false;
     }
+
+    if (activeSource !== 'All') {
+      const leadSource = lead.source || 'Manual';
+      if (leadSource !== activeSource) return false;
+    }
+
     return true;
   });
 
@@ -165,19 +177,36 @@ export function LeadTable() {
           ))}
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-gray-500">Assignee:</span>
-          <select
-            value={activeAssignee}
-            onChange={(e) => setActiveAssignee(e.target.value)}
-            className="text-xs font-medium bg-white border border-gray-200 text-gray-700 rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            <option value="All">All Assignees</option>
-            <option value="Unassigned">Unassigned</option>
-            {users.map(u => (
-              <option key={u.id} value={u.uid}>{u.displayName || u.email}</option>
-            ))}
-          </select>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-gray-500">Source:</span>
+            <select
+              value={activeSource}
+              onChange={(e) => setActiveSource(e.target.value)}
+              className="text-xs font-medium bg-white border border-gray-200 text-gray-700 rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="All">All Sources</option>
+              {uniqueSources.map(source => (
+                <option key={source as string} value={source as string}>{source as string}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-gray-500">Assignee:</span>
+            <select
+              value={activeAssignee}
+              onChange={(e) => setActiveAssignee(e.target.value)}
+              className="text-xs font-medium bg-white border border-gray-200 text-gray-700 rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="All">All Assignees</option>
+              <option value="Me">Assigned to Me</option>
+              <option value="Unassigned">Unassigned</option>
+              {users.map(u => (
+                <option key={u.id} value={u.uid}>{u.displayName || u.email}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 

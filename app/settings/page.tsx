@@ -54,12 +54,12 @@ export default function SettingsPage() {
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-200 bg-gray-50 flex items-center gap-2">
                   <Webhook className="w-5 h-5 text-indigo-600" />
-                  <h2 className="text-lg font-semibold text-gray-900">Lead Integrations (Zapier / Make)</h2>
+                  <h2 className="text-lg font-semibold text-gray-900">Lead Integrations (Zapier / Make / Google Sheets)</h2>
                 </div>
                 
                 <div className="p-6">
                   <p className="text-sm text-gray-600 mb-4">
-                    Use this Webhook URL to automatically send leads from Meta Ads, Google Ads, or your website directly into Travlyy.
+                    Use this Webhook URL to automatically send leads from Meta Ads, Google Ads, Google Sheets, or your website directly into Travlyy.
                   </p>
                   
                   <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
@@ -78,13 +78,13 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
-                  <div className="text-sm text-gray-600">
+                  <div className="text-sm text-gray-600 mb-6">
                     <p className="font-medium text-gray-900 mb-2">Required JSON Payload:</p>
                     <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-xs">
 {`{
   "name": "John Doe",
   "phone": "+1234567890",
-  "source": "Meta Ads",
+  "source": "Google Sheet 1",
   "pax": 2,
   "travelDate": "Next month"
 }`}
@@ -92,6 +92,77 @@ export default function SettingsPage() {
                     <p className="mt-3 text-xs text-gray-500">
                       Note: <code className="bg-gray-100 px-1 py-0.5 rounded text-gray-700">name</code> and <code className="bg-gray-100 px-1 py-0.5 rounded text-gray-700">phone</code> are required. All other fields are optional.
                     </p>
+                  </div>
+
+                  <div className="border-t border-gray-200 pt-6">
+                    <h3 className="text-md font-semibold text-gray-900 mb-3">How to connect multiple Google Sheets</h3>
+                    <div className="space-y-4 text-sm text-gray-600">
+                      <p>You can aggregate leads from multiple Google Sheets into this single dashboard. There are two ways to do this:</p>
+                      
+                      <div className="bg-indigo-50/50 border border-indigo-100 rounded-lg p-4">
+                        <h4 className="font-medium text-indigo-900 mb-1">Option 1: Using Zapier or Make.com (Recommended)</h4>
+                        <ol className="list-decimal pl-5 space-y-1 text-indigo-800/80">
+                          <li>Create a new Zap/Scenario.</li>
+                          <li>Set the Trigger to <strong>Google Sheets: New Spreadsheet Row</strong>.</li>
+                          <li>Set the Action to <strong>Webhooks: POST</strong>.</li>
+                          <li>Paste your Unique Webhook URL above into the URL field.</li>
+                          <li>Map the columns from your sheet to the JSON payload (name, phone, source). Set the &quot;source&quot; to the name of the specific sheet (e.g., &quot;Facebook Ads Sheet&quot;).</li>
+                          <li>Repeat this process for every Google Sheet you want to connect.</li>
+                        </ol>
+                      </div>
+
+                      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                        <h4 className="font-medium text-gray-900 mb-1">Option 2: Sample Google Apps Script (Free)</h4>
+                        <p className="mb-2">In your Google Sheet, go to <strong>Extensions &gt; Apps Script</strong> and paste this complete sample script. It will automatically send new rows to your CRM.</p>
+                        <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-xs mb-4">
+{`function sendLeadToCRM(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  
+  // Get the row that was just added or edited. 
+  // If no specific range is found, it defaults to the last row.
+  var row = (e && e.range) ? e.range.getRow() : sheet.getLastRow();
+  
+  // Skip the header row
+  if (row === 1) return;
+  
+  // Assuming Name is in Column A (1), Phone is in Column B (2)
+  // Adjust these numbers if your columns are different!
+  var name = sheet.getRange(row, 1).getValue();
+  var phone = sheet.getRange(row, 2).getValue();
+  
+  // Only send if both name and phone are present
+  if (!name || !phone) return;
+
+  var payload = {
+    "name": name,
+    "phone": phone,
+    "source": sheet.getName() // Automatically uses the sheet tab name as the source
+  };
+
+  var options = {
+    "method": "post",
+    "contentType": "application/json",
+    "payload": JSON.stringify(payload)
+  };
+
+  // Send the data to your CRM Webhook
+  UrlFetchApp.fetch("${webhookUrl || 'YOUR_WEBHOOK_URL'}", options);
+}`}
+                        </pre>
+                        <div className="bg-yellow-50 border border-yellow-200 rounded p-3 text-xs text-yellow-800">
+                          <strong className="block mb-1">Important: You must create a Trigger for this to work!</strong>
+                          <ol className="list-decimal pl-4 space-y-1">
+                            <li>Save the script (Ctrl+S / Cmd+S).</li>
+                            <li>Click the <strong>Triggers</strong> icon (looks like an alarm clock) on the left sidebar.</li>
+                            <li>Click <strong>Add Trigger</strong> (bottom right).</li>
+                            <li>Choose which function to run: <strong>sendLeadToCRM</strong></li>
+                            <li>Select event source: <strong>From spreadsheet</strong></li>
+                            <li>Select event type: <strong>On change</strong> (Best for new rows added by forms/integrations)</li>
+                            <li>Click Save and authorize the script with your Google Account.</li>
+                          </ol>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
