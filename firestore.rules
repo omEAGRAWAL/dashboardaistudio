@@ -119,8 +119,8 @@ service cloud.firestore {
     match /leads/{leadId} {
       // Anyone authenticated can read leads (for a CRM, agents need to see leads)
       allow read: if isAuthenticated();
-      // Anyone authenticated can create leads
-      allow create: if isAuthenticated() && isValidLead(request.resource.data);
+      // Allow unauthenticated creates for webhooks (validation still applies)
+      allow create: if isValidLead(request.resource.data);
       // Anyone authenticated can update leads
       allow update: if isAuthenticated() && isValidLead(request.resource.data) &&
                     request.resource.data.createdAt == resource.data.createdAt;

@@ -11,21 +11,25 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Name and phone are required' }, { status: 400 });
     }
 
-    // Add to Firestore
-    const docRef = await addDoc(collection(db, 'leads'), {
+    // Build the lead data object
+    const leadData: any = {
       name: data.name,
       phone: data.phone,
       source: data.source || 'Webhook',
-      sourceId: data.sourceId || null,
       pax: data.pax ? parseInt(data.pax, 10) : 1,
-      travelDate: data.travelDate || null,
       status: 'New Enquiry',
       category: 'None',
-      assigneeId: null,
-      latestRemark: '',
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
-    });
+    };
+
+    // Only add optional fields if they exist and are not null/empty
+    if (data.sourceId) leadData.sourceId = data.sourceId;
+    if (data.travelDate) leadData.travelDate = data.travelDate;
+    if (data.latestRemark) leadData.latestRemark = data.latestRemark;
+
+    // Add to Firestore
+    const docRef = await addDoc(collection(db, 'leads'), leadData);
 
     return NextResponse.json({ success: true, id: docRef.id }, { status: 201 });
   } catch (error) {
