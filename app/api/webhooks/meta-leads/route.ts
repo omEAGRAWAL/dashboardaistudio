@@ -13,10 +13,10 @@ export async function POST(req: Request) {
 
     // Build the lead data object
     const leadData: any = {
-      name: data.name,
-      phone: data.phone,
-      source: data.source || 'Webhook',
-      pax: data.pax ? parseInt(data.pax, 10) : 1,
+      name: String(data.name).trim(),
+      phone: String(data.phone).trim(),
+      source: data.source ? String(data.source).trim() : 'Webhook',
+      pax: data.pax ? Number(data.pax) : 1,
       status: 'New Enquiry',
       category: 'None',
       createdAt: serverTimestamp(),
@@ -24,9 +24,9 @@ export async function POST(req: Request) {
     };
 
     // Only add optional fields if they exist and are not null/empty
-    if (data.sourceId) leadData.sourceId = data.sourceId;
-    if (data.travelDate) leadData.travelDate = data.travelDate;
-    if (data.latestRemark) leadData.latestRemark = data.latestRemark;
+    if (data.sourceId) leadData.sourceId = String(data.sourceId).trim();
+    if (data.travelDate) leadData.travelDate = String(data.travelDate).trim();
+    if (data.latestRemark) leadData.latestRemark = String(data.latestRemark).trim();
 
     // Add to Firestore
     const docRef = await addDoc(collection(db, 'leads'), leadData);
