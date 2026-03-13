@@ -21,10 +21,10 @@ export function Sidebar() {
       </div>
 
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-        <Link 
-          href="/" 
+        <Link
+          href="/home"
           className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
-            pathname === '/' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:bg-gray-50'
+            pathname === '/home' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:bg-gray-50'
           }`}
         >
           <LayoutDashboard className="w-5 h-5" />

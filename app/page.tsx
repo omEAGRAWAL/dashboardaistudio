@@ -1,78 +1,122 @@
-'use client';
+import type { Metadata } from 'next';
+import RootGate from '@/components/RootGate';
 
-import { useAuth } from '@/components/AuthProvider';
-import { Sidebar } from '@/components/Sidebar';
-import { Header } from '@/components/Header';
-import { LeadTable } from '@/components/LeadTable';
-import { ImportLeads } from '@/components/ImportLeads';
-import { CreateLeadModal } from '@/components/CreateLeadModal';
-import { LogIn } from 'lucide-react';
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+export const metadata: Metadata = {
+  title: 'Travlyy — #1 CRM for Travel Agencies in India | Free Trial',
+  description:
+    'Travlyy is the all-in-one CRM built for Indian travel agencies & tour operators. Manage leads, packages, bookings & your website in one dashboard. ₹1,000/month. 1 month free trial + free setup.',
+  keywords: [
+    'travel agency CRM India',
+    'CRM for travel agents India',
+    'travel agency management software India',
+    'tour operator software India',
+    'travel leads management software',
+    'travel agency website builder India',
+    'travel booking management software India',
+    'best CRM for travel agencies India',
+    'travel agency software',
+    'tour operator management software India',
+    'DMC software India',
+    'travel agency software Delhi',
+    'travel agency software Mumbai',
+    'travel agency software Bangalore',
+    'travel CRM India',
+  ].join(', '),
+  openGraph: {
+    title: 'Travlyy — #1 CRM for Travel Agencies in India',
+    description:
+      'Stop losing leads. Start closing more bookings. Travlyy is the all-in-one CRM for Indian travel agencies & DMCs. Try free for 1 month.',
+    type: 'website',
+    locale: 'en_IN',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Travlyy — #1 CRM for Travel Agencies in India',
+    description:
+      'All-in-one travel agency CRM. Leads, packages, bookings & website builder. ₹1,000/month. 1 month free trial.',
+  },
+  alternates: {
+    canonical: 'https://travelycrm.reviu.store',
+  },
+};
 
-export default function Home() {
-  const { user, orgId, role, loading, signIn } = useAuth();
-  const router = useRouter();
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'SoftwareApplication',
+      name: 'Travlyy',
+      applicationCategory: 'BusinessApplication',
+      operatingSystem: 'Web',
+      url: 'https://travelycrm.reviu.store',
+      description:
+        'All-in-one CRM software for travel agencies and tour operators in India. Manage leads, packages, bookings, team, and build your travel website — all in one place.',
+      offers: {
+        '@type': 'Offer',
+        price: '1000',
+        priceCurrency: 'INR',
+        priceValidUntil: '2027-12-31',
+        availability: 'https://schema.org/InStock',
+        description: '1 month free trial included. Free initial setup.',
+      },
+      featureList: [
+        'Lead Management',
+        'Package Management',
+        'Booking Management',
+        'Website Builder',
+        'Team Management',
+        'Meta Ads Integration',
+        'WhatsApp Integration',
+        'Analytics & Reports',
+      ],
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: [
+        {
+          '@type': 'Question',
+          name: 'Is there a free trial for Travlyy?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Yes! Travlyy offers a full 1-month free trial with all features included. No credit card required.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'How much does Travlyy cost?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Travlyy costs ₹1,000 per month after the free trial. This includes all features, free initial setup, and customer support.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'Is Travlyy better than Travefy or Sembark for India?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Travlyy is purpose-built for India. Unlike Travefy (US-based, ~₹4,000/month, no India support), Travlyy offers Indian payment gateways, local support, GST invoices, and a built-in website builder at just ₹1,000/month.',
+          },
+        },
+      ],
+    },
+    {
+      '@type': 'Organization',
+      name: 'Travlyy',
+      url: 'https://travelycrm.reviu.store',
+      description: 'Travel Agency CRM Software built for India',
+      areaServed: 'IN',
+    },
+  ],
+};
 
-  useEffect(() => {
-    if (!loading && user && !orgId && role !== 'superadmin') {
-      router.push('/onboarding');
-    }
-  }, [user, orgId, role, loading, router]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-        <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center">
-          <div className="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <span className="text-indigo-600 font-bold text-3xl">T</span>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome to Travlyy</h1>
-          <p className="text-gray-500 mb-8">Sign in to manage your travel agency leads and boost your conversions.</p>
-          <button 
-            onClick={signIn}
-            className="w-full flex items-center justify-center gap-3 bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-4 rounded-xl font-medium transition-colors shadow-sm"
-          >
-            <LogIn className="w-5 h-5" />
-            Sign in with Google
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!orgId && role !== 'superadmin') {
-    return null; // Will redirect in useEffect
-  }
-
+export default function RootPage() {
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden font-sans">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-        
-        <main className="flex-1 overflow-y-auto p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-between mb-8">
-              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Channel Leads</h1>
-              <div className="flex items-center gap-3">
-                <ImportLeads />
-                <CreateLeadModal />
-              </div>
-            </div>
-
-            <LeadTable />
-          </div>
-        </main>
-      </div>
-    </div>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <RootGate />
+    </>
   );
 }
