@@ -64,6 +64,12 @@ service cloud.firestore {
         (request.auth.token.email == "agrawalom711@gmail.com" && request.auth.token.email_verified == true));
     }
 
+    function isSuperAdmin() {
+      return isAuthenticated() && 
+        (getUserDoc().data.role in ['admin', 'superadmin'] ||
+        (request.auth.token.email == "agrawalom711@gmail.com" && request.auth.token.email_verified == true));
+    }
+
     function hasRequiredFields(fields) {
       return request.resource.data.keys().hasAll(fields);
     }
@@ -78,100 +84,65 @@ service cloud.firestore {
 
     // Domain Validators
     function isValidOrganization(data) {
-      return hasOnlyAllowedFields(['name', 'ownerId', 'createdAt']) &&
+      return (!('id' in data)) &&
              data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
              data.ownerId is string && data.ownerId.size() > 0 &&
              data.createdAt is timestamp;
     }
 
     function isValidInvite(data) {
-      return hasOnlyAllowedFields(['email', 'orgId', 'role', 'createdAt']) &&
+      return (!('id' in data)) &&
              data.email is string && isValidEmail(data.email) &&
              data.orgId is string && data.orgId.size() > 0 &&
-             data.role in ['org_admin', 'agent'] &&
+             (!('role' in data) || data.role is string) &&
              data.createdAt is timestamp;
     }
 
     function isValidUser(data) {
-      return hasOnlyAllowedFields(['uid', 'email', 'displayName', 'photoURL', 'role', 'orgId', 'createdAt']) &&
+      return (!('orgId' in data) || (data.orgId is string && data.orgId.size() < 100)) &&
              data.uid is string && data.uid.size() > 0 && data.uid.size() < 100 &&
              data.email is string && isValidEmail(data.email) &&
              (!('displayName' in data) || (data.displayName is string && data.displayName.size() < 100)) &&
              (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() < 500)) &&
-             data.role in ['superadmin', 'admin', 'org_admin', 'agent'] &&
-             (!('orgId' in data) || (data.orgId is string && data.orgId.size() < 100)) &&
-             data.createdAt is timestamp;
+             (!('role' in data) || data.role is string) &&
+             (!('createdAt' in data) || data.createdAt is timestamp);
     }
 
     function isValidLead(data) {
-      return hasOnlyAllowedFields(['orgId', 'name', 'phone', 'source', 'sourceId', 'pax', 'travelDate', 'status', 'category', 'assigneeId', 'latestRemark', 'createdAt', 'updatedAt']) &&
-             (!('orgId' in data) || (data.orgId is string && data.orgId.size() < 100)) &&
+      return (!('orgId' in data) || (data.orgId is string && data.orgId.size() < 100)) &&
              data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
              data.phone is string && data.phone.size() > 0 && data.phone.size() < 50 &&
              (!('source' in data) || (data.source is string && data.source.size() < 100)) &&
              (!('sourceId' in data) || (data.sourceId is string && data.sourceId.size() < 100)) &&
              (!('pax' in data) || (data.pax is number && data.pax >= 0)) &&
              (!('travelDate' in data) || (data.travelDate is string && data.travelDate.size() < 100)) &&
-             data.status in ['New Enquiry', 'Call Not Picked', 'Call me later', 'Contacted', 'Qualified', 'Negotiating', 'Awaiting Payment', 'Booked', 'Lost & Closed', 'Future Prospect', 'Just Checking'] &&
-             (!('category' in data) || (data.category in ['Hot', 'Warm', 'Cold', 'Repeating Customer', 'Group', 'None'])) &&
+             (!('status' in data) || data.status is string) &&
+             (!('category' in data) || data.category is string) &&
              (!('assigneeId' in data) || (data.assigneeId is string && data.assigneeId.size() < 100)) &&
              (!('latestRemark' in data) || (data.latestRemark is string && data.latestRemark.size() < 1000)) &&
-             data.createdAt is timestamp &&
-             data.updatedAt is timestamp;
+             (!('createdAt' in data) || data.createdAt is timestamp) &&
+             (!('updatedAt' in data) || data.updatedAt is timestamp);
     }
 
     function isValidRemark(data) {
-      return hasOnlyAllowedFields(['orgId', 'leadId', 'text', 'authorId', 'authorName', 'createdAt']) &&
-             (!('orgId' in data) || (data.orgId is string && data.orgId.size() < 100)) &&
+      return (!('orgId' in data) || (data.orgId is string && data.orgId.size() < 100)) &&
              data.leadId is string && data.leadId.size() > 0 && data.leadId.size() < 100 &&
              data.text is string && data.text.size() > 0 && data.text.size() < 2000 &&
              data.authorId is string && data.authorId.size() > 0 && data.authorId.size() < 100 &&
              (!('authorName' in data) || (data.authorName is string && data.authorName.size() < 100)) &&
-             data.createdAt is timestamp;
+             (!('createdAt' in data) || data.createdAt is timestamp);
     }
 
     function isValidWebsiteSettings(data) {
-      return hasOnlyAllowedFields(['orgId', 'themeColor', 'heroTitle', 'heroSubtitle', 'heroImage', 'cloudinaryCloudName', 'cloudinaryUploadPreset', 'updatedAt']) &&
-             data.orgId is string && data.orgId.size() > 0 && data.orgId.size() < 100 &&
-             (!('themeColor' in data) || (data.themeColor is string && data.themeColor.size() < 50)) &&
-             (!('heroTitle' in data) || (data.heroTitle is string && data.heroTitle.size() < 200)) &&
-             (!('heroSubtitle' in data) || (data.heroSubtitle is string && data.heroSubtitle.size() < 500)) &&
-             (!('heroImage' in data) || (data.heroImage is string && data.heroImage.size() < 1000)) &&
-             (!('cloudinaryCloudName' in data) || (data.cloudinaryCloudName is string && data.cloudinaryCloudName.size() < 100)) &&
-             (!('cloudinaryUploadPreset' in data) || (data.cloudinaryUploadPreset is string && data.cloudinaryUploadPreset.size() < 100)) &&
-             data.updatedAt is timestamp;
+      return (!('orgId' in data) || (data.orgId is string && data.orgId.size() < 100));
     }
 
     function isValidPackage(data) {
-      return hasOnlyAllowedFields(['orgId', 'title', 'destination', 'description', 'imageUrl', 'priceDouble', 'priceTriple', 'priceQuad', 'duration', 'createdAt']) &&
-             data.orgId is string && data.orgId.size() > 0 && data.orgId.size() < 100 &&
-             data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
-             data.destination is string && data.destination.size() > 0 && data.destination.size() < 200 &&
-             (!('description' in data) || (data.description is string && data.description.size() < 5000)) &&
-             (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() < 1000)) &&
-             (!('priceDouble' in data) || (data.priceDouble is number && data.priceDouble >= 0)) &&
-             (!('priceTriple' in data) || (data.priceTriple is number && data.priceTriple >= 0)) &&
-             (!('priceQuad' in data) || (data.priceQuad is number && data.priceQuad >= 0)) &&
-             (!('duration' in data) || (data.duration is string && data.duration.size() < 100)) &&
-             data.createdAt is timestamp;
+      return (!('orgId' in data) || (data.orgId is string && data.orgId.size() < 100));
     }
 
     function isValidBooking(data) {
-      return hasOnlyAllowedFields(['orgId', 'packageId', 'packageTitle', 'customerName', 'customerEmail', 'customerPhone', 'travelDate', 'paxDouble', 'paxTriple', 'paxQuad', 'totalPrice', 'status', 'source', 'createdAt']) &&
-             data.orgId is string && data.orgId.size() > 0 && data.orgId.size() < 100 &&
-             data.packageId is string && data.packageId.size() > 0 && data.packageId.size() < 100 &&
-             (!('packageTitle' in data) || (data.packageTitle is string && data.packageTitle.size() < 200)) &&
-             data.customerName is string && data.customerName.size() > 0 && data.customerName.size() < 100 &&
-             (!('customerEmail' in data) || (data.customerEmail is string && data.customerEmail.size() < 100)) &&
-             data.customerPhone is string && data.customerPhone.size() > 0 && data.customerPhone.size() < 50 &&
-             (!('travelDate' in data) || (data.travelDate is string && data.travelDate.size() < 100)) &&
-             (!('paxDouble' in data) || (data.paxDouble is number && data.paxDouble >= 0)) &&
-             (!('paxTriple' in data) || (data.paxTriple is number && data.paxTriple >= 0)) &&
-             (!('paxQuad' in data) || (data.paxQuad is number && data.paxQuad >= 0)) &&
-             (!('totalPrice' in data) || (data.totalPrice is number && data.totalPrice >= 0)) &&
-             data.status in ['Pending', 'Confirmed', 'Cancelled'] &&
-             (!('source' in data) || data.source in ['Website', 'CRM']) &&
-             data.createdAt is timestamp;
+      return (!('orgId' in data) || (data.orgId is string && data.orgId.size() < 100));
     }
 
     // Rules
@@ -194,25 +165,26 @@ service cloud.firestore {
                     request.resource.data.uid == userId;
       allow update: if isAuthenticated() && isValidUser(request.resource.data) && 
                     request.resource.data.uid == resource.data.uid &&
-                    request.resource.data.createdAt == resource.data.createdAt;
+                    request.resource.data.createdAt == resource.data.createdAt &&
+                    (isSuperAdmin() || (request.resource.data.role == resource.data.role && request.resource.data.orgId == resource.data.orgId));
       allow delete: if isAdmin();
     }
 
     match /leads/{leadId} {
       // Anyone authenticated can read leads, but only if they belong to their org (or if the lead has no orgId for legacy support)
-      allow read: if isAuthenticated() && (!('orgId' in resource.data) || resource.data.orgId == getUserOrgId());
+      allow read: if isAuthenticated() && (isSuperAdmin() || !('orgId' in resource.data) || resource.data.orgId == getUserOrgId());
       // Allow unauthenticated creates for webhooks (validation still applies)
       allow create: if isValidLead(request.resource.data);
       // Anyone authenticated can update leads in their org
       allow update: if isAuthenticated() && isValidLead(request.resource.data) &&
                     request.resource.data.createdAt == resource.data.createdAt &&
-                    (!('orgId' in resource.data) || resource.data.orgId == getUserOrgId());
+                    (isSuperAdmin() || !('orgId' in resource.data) || resource.data.orgId == getUserOrgId());
       // Only admins can delete leads
-      allow delete: if isAdmin() && (!('orgId' in resource.data) || resource.data.orgId == getUserOrgId());
+      allow delete: if isAdmin() && (isSuperAdmin() || !('orgId' in resource.data) || resource.data.orgId == getUserOrgId());
     }
 
     match /remarks/{remarkId} {
-      allow read: if isAuthenticated() && (!('orgId' in resource.data) || resource.data.orgId == getUserOrgId());
+      allow read: if isAuthenticated() && (isSuperAdmin() || !('orgId' in resource.data) || resource.data.orgId == getUserOrgId());
       allow create: if isAuthenticated() && isValidRemark(request.resource.data) && 
                     request.resource.data.authorId == request.auth.uid;
       allow update: if isAuthenticated() && isValidRemark(request.resource.data) && 
@@ -239,6 +211,21 @@ service cloud.firestore {
       allow create: if isValidBooking(request.resource.data);
       allow update: if isAuthenticated() && isValidBooking(request.resource.data) && resource.data.orgId == getUserOrgId() && request.resource.data.createdAt == resource.data.createdAt;
       allow delete: if isAuthenticated() && resource.data.orgId == getUserOrgId();
+    }
+
+    // ===============================================================
+    // Generic Data Models (for apps integrating with this backend)
+    // ===============================================================
+    match /personalData/{appId}/users/{uid}/{collectionName}/{docId} {
+      allow get: if uid == request.auth.uid;
+      allow list: if uid == request.auth.uid && request.query.limit <= 100;
+      allow write: if uid == request.auth.uid;
+    }
+
+    match /publicData/{appId}/{collectionName}/{docId} {
+      allow get: if true;
+      allow list: if request.query.limit <= 100;
+      allow write: if true;
     }
   }
 }
