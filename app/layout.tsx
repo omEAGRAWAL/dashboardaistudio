@@ -1,6 +1,7 @@
 import type {Metadata} from 'next';
 import './globals.css'; // Global styles
 import { AuthProvider } from '@/components/AuthProvider';
+import { Analytics } from '@vercel/analytics/next';
 
 export const metadata: Metadata = {
   title: 'Travel Agency CRM',
@@ -14,6 +15,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
         <AuthProvider>
           {children}
         </AuthProvider>
+        <Analytics />
       </body>
     </html>
   );
