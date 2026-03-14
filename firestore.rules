@@ -163,10 +163,12 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && isValidUser(request.resource.data) && 
                     request.resource.data.uid == userId;
-      allow update: if isAuthenticated() && isValidUser(request.resource.data) && 
+      allow update: if isAuthenticated() && isValidUser(request.resource.data) &&
                     request.resource.data.uid == resource.data.uid &&
                     request.resource.data.createdAt == resource.data.createdAt &&
-                    (isSuperAdmin() || (request.resource.data.role == resource.data.role && request.resource.data.orgId == resource.data.orgId));
+                    (isSuperAdmin() ||
+                     (request.resource.data.role == resource.data.role && request.resource.data.orgId == resource.data.orgId) ||
+                     (request.auth.uid == userId && !('orgId' in resource.data) && request.resource.data.role == 'org_admin'));
       allow delete: if isAdmin();
     }
 
