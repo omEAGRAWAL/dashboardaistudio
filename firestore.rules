@@ -215,6 +215,13 @@ service cloud.firestore {
       allow delete: if isAuthenticated() && resource.data.orgId == getUserOrgId();
     }
 
+    match /whatsapp_templates/{templateId} {
+      allow read: if isAuthenticated() && (isSuperAdmin() || resource.data.orgId == getUserOrgId());
+      allow create: if isAuthenticated() && request.resource.data.orgId == getUserOrgId();
+      allow update: if isAuthenticated() && resource.data.orgId == getUserOrgId();
+      allow delete: if isAuthenticated() && resource.data.orgId == getUserOrgId();
+    }
+
     // ===============================================================
     // Generic Data Models (for apps integrating with this backend)
     // ===============================================================
