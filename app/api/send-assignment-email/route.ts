@@ -1,7 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function createTransport() {
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT ?? 587),
+    secure: process.env.SMTP_SECURE === 'true',   // true for port 465, false for 587
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  });
+}
 
 interface LeadInfo {
   name: string;
@@ -157,8 +167,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    if (!process.env.RESEND_API_KEY) {
-      return NextResponse.json({ error: 'RESEND_API_KEY not configured' }, { status: 500 });
+    if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      return NextResponse.json({ error: 'SMTP not configured. Set SMTP_HOST, SMTP_USER, SMTP_PASS in .env.local' }, { status: 500 });
     }
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || 'https://yourapp.com';
@@ -175,19 +185,15 @@ export async function POST(req: NextRequest) {
       appUrl,
     });
 
-    const { data, error } = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || 'Travlyy CRM <onboarding@resend.dev>',
-      to: [assigneeEmail],
+    const transporter = createTransport();
+    const info = await transporter.sendMail({
+      from: process.env.SMTP_FROM || `"${orgName || 'Travlyy CRM'}" <${process.env.SMTP_USER}>`,
+      to: assigneeEmail,
       subject,
       html,
     });
 
-    if (error) {
-      console.error('Resend error:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    return NextResponse.json({ success: true, id: data?.id });
+    return NextResponse.json({ success: true, messageId: info.messageId });
   } catch (err: any) {
     console.error('Email send error:', err);
     return NextResponse.json({ error: err.message ?? 'Unknown error' }, { status: 500 });
