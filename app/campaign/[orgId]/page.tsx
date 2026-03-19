@@ -8,7 +8,7 @@ import {
 import { db } from '@/lib/firebase';
 import {
   Instagram, MessageCircle, FileText, ChevronLeft, Minus, Plus,
-  Luggage, CheckCircle2, X, ChevronRight, Tag,
+  Luggage, CheckCircle2, ChevronRight, Tag,
 } from 'lucide-react';
 
 const INDIA_STATES = [
@@ -19,7 +19,6 @@ const INDIA_STATES = [
   'Uttarakhand','West Bengal','Delhi','Jammu & Kashmir','Ladakh',
 ];
 const LEAD_SOURCES = ['Instagram','Facebook','WhatsApp','Google','Reference','Website','Other'];
-const ISD_CODES = ['+91','+1','+44','+971','+65','+60','+61','+81','+86','+49','+33','+49'];
 
 interface TicketQty { double: number; triple: number; quad: number }
 
@@ -42,7 +41,6 @@ export default function CampaignPage() {
   // Step 1 fields
   const [travelDate, setTravelDate] = useState('');
   const [name, setName] = useState('');
-  const [isdCode, setIsdCode] = useState('+91');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [state, setState] = useState('');
@@ -108,7 +106,7 @@ export default function CampaignPage() {
     setBookingStep(1);
     setBookingSuccess(false);
     setTravelDate(''); setName(''); setPhone(''); setEmail('');
-    setState(''); setCity(''); setSource(''); setIsdCode('+91');
+    setState(''); setCity(''); setSource('');
     setTicketQty({ double: 1, triple: 1, quad: 1 });
     setAcceptSlot(false); setAcceptTnc(false); setCouponCode('');
     setBookingOpen(true);
@@ -131,7 +129,7 @@ export default function CampaignPage() {
         packageTitle: selectedPkg.title,
         customerName: name,
         customerEmail: email,
-        customerPhone: `${isdCode} ${phone}`,
+        customerPhone: phone,
         travelDate,
         state,
         city,
@@ -173,20 +171,28 @@ export default function CampaignPage() {
     minHeight: '100vh',
   };
 
-  // ── Booking Overlay ──────────────────────────────────────────────────────────
-  const BookingOverlay = () => {
-    if (!selectedPkg) return null;
-    const ticketTypes = getTicketTypes(selectedPkg);
-    const total = calcTotal(selectedPkg);
-    const cover = selectedPkg.images?.[0] || selectedPkg.imageUrl;
-    const minPrice = Math.min(...ticketTypes.map(t => t.price));
-    const maxPrice = Math.max(...ticketTypes.map(t => t.price));
-    const hasPrices = ticketTypes.length > 0 && maxPrice > 0;
-    const discountPct = selectedPkg.priceOriginal > maxPrice
-      ? Math.round(((selectedPkg.priceOriginal - minPrice) / selectedPkg.priceOriginal) * 100)
-      : null;
+  // ── Derived overlay values (computed at render, not inside a sub-component) ──
+  const overlayTicketTypes = selectedPkg ? getTicketTypes(selectedPkg) : [];
+  const overlayTotal = selectedPkg ? calcTotal(selectedPkg) : 0;
+  const overlayCover = selectedPkg ? (selectedPkg.images?.[0] || selectedPkg.imageUrl) : '';
+  const overlayMinPrice = overlayTicketTypes.length ? Math.min(...overlayTicketTypes.map(t => t.price)) : 0;
+  const overlayMaxPrice = overlayTicketTypes.length ? Math.max(...overlayTicketTypes.map(t => t.price)) : 0;
+  const overlayHasPrices = overlayTicketTypes.length > 0 && overlayMaxPrice > 0;
+  const overlayDiscountPct = selectedPkg?.priceOriginal > overlayMaxPrice
+    ? Math.round(((selectedPkg.priceOriginal - overlayMinPrice) / selectedPkg.priceOriginal) * 100)
+    : null;
 
-    return (
+  return (
+    <div style={bgStyle}>
+      {/* Success Banner */}
+      {bookingSuccess && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-green-600 text-white px-6 py-3 rounded-2xl shadow-xl flex items-center gap-2 text-sm font-semibold">
+          <CheckCircle2 className="w-4 h-4" /> Booking submitted! We'll reach out soon.
+        </div>
+      )}
+
+      {/* Booking Overlay — inlined to avoid component-inside-component remount issue */}
+      {bookingOpen && selectedPkg && (
       <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
         onClick={() => setBookingOpen(false)}>
         <div
@@ -224,21 +230,21 @@ export default function CampaignPage() {
             <div className="overflow-y-auto flex-1 px-5 py-4 space-y-4">
               {/* Package mini-card */}
               <div className="flex items-center gap-3 bg-gray-50 border border-gray-100 rounded-2xl p-3">
-                {cover && <img src={cover} alt={selectedPkg.title} className="w-14 h-14 rounded-xl object-cover flex-shrink-0" />}
+                {overlayCover && <img src={overlayCover} alt={selectedPkg.title} className="w-14 h-14 rounded-xl object-cover flex-shrink-0" />}
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold text-gray-900 text-sm line-clamp-1">{selectedPkg.title}</p>
-                  {hasPrices && (
+                  {overlayHasPrices && (
                     <p className="text-xs text-gray-500 mt-0.5">
-                      From ₹{minPrice.toLocaleString()}/- {selectedPkg.priceOriginal > maxPrice && (
+                      From ₹{overlayMinPrice.toLocaleString()}/- {selectedPkg.priceOriginal > overlayMaxPrice && (
                         <span className="line-through text-gray-400">₹{selectedPkg.priceOriginal?.toLocaleString()}</span>
                       )}
                     </p>
                   )}
                 </div>
-                {discountPct && (
+                {overlayDiscountPct && (
                   <span className="flex-shrink-0 text-[10px] font-bold px-2 py-1 rounded-lg text-white"
                     style={{ backgroundColor: accentColor }}>
-                    {discountPct}% off
+                    {overlayDiscountPct}% off
                   </span>
                 )}
               </div>
@@ -257,18 +263,6 @@ export default function CampaignPage() {
                 <input type="text" value={name} onChange={e => setName(e.target.value)}
                   placeholder="Full Name" required
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none" />
-              </div>
-
-              {/* ISD Code */}
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">ISD Code</label>
-                <div className="relative">
-                  <select value={isdCode} onChange={e => setIsdCode(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none appearance-none pr-8">
-                    {ISD_CODES.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                  <ChevronRight className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 rotate-90 pointer-events-none" />
-                </div>
               </div>
 
               {/* Phone */}
@@ -351,7 +345,7 @@ export default function CampaignPage() {
                 <div>
                   <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Select Ticket(s)</p>
                   <div className="space-y-2">
-                    {ticketTypes.map(t => (
+                    {overlayTicketTypes.map(t => (
                       <div key={t.type} className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl border border-gray-200">
                         <div className="flex-1 min-w-0">
                           <p className="font-semibold text-sm text-gray-900">{t.label}</p>
@@ -405,7 +399,7 @@ export default function CampaignPage() {
                     <input type="checkbox" checked={acceptSlot} onChange={e => setAcceptSlot(e.target.checked)}
                       className="mt-0.5 flex-shrink-0" style={{ accentColor }} />
                     <span className="text-xs text-gray-600">
-                      Reserve your slot by paying ₹{total.toLocaleString()}/-
+                      Reserve your slot by paying ₹{overlayTotal.toLocaleString()}/-
                     </span>
                   </label>
                   <label className="flex items-start gap-2 cursor-pointer">
@@ -421,12 +415,12 @@ export default function CampaignPage() {
               {/* Footer */}
               <div className="px-5 pb-5 pt-2 flex-shrink-0 border-t border-gray-100 space-y-3">
                 <div className="flex items-center justify-between">
-                  <p className="text-2xl font-black text-gray-900">₹{total.toLocaleString()}</p>
+                  <p className="text-2xl font-black text-gray-900">₹{overlayTotal.toLocaleString()}</p>
                   <button type="button" className="text-xs font-semibold underline text-gray-500">Details</button>
                 </div>
                 <button
                   onClick={handleBookingSubmit}
-                  disabled={submitting || total === 0}
+                  disabled={submitting || overlayTotal === 0}
                   className="w-full py-4 rounded-2xl text-white font-bold text-base shadow-md hover:brightness-110 transition-all disabled:opacity-40"
                   style={{ backgroundColor: accentColor }}>
                   {submitting ? 'Submitting...' : 'Pay Now'}
@@ -439,20 +433,7 @@ export default function CampaignPage() {
           )}
         </div>
       </div>
-    );
-  };
-
-  return (
-    <div style={bgStyle}>
-      {/* Success Banner */}
-      {bookingSuccess && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-green-600 text-white px-6 py-3 rounded-2xl shadow-xl flex items-center gap-2 text-sm font-semibold">
-          <CheckCircle2 className="w-4 h-4" /> Booking submitted! We'll reach out soon.
-        </div>
       )}
-
-      {/* Booking Overlay */}
-      {bookingOpen && <BookingOverlay />}
 
       {/* Page Content — constrained width */}
       <div className="max-w-md mx-auto px-4 pb-12">
