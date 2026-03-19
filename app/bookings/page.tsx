@@ -6,7 +6,7 @@ import { Header } from '@/components/Header';
 import { useEffect, useState } from 'react';
 import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { CalendarCheck, Search, Filter, Trash2, Edit2, Plus } from 'lucide-react';
+import { CalendarCheck, Search, Filter, Trash2, Edit2, Plus, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function BookingsPage() {
@@ -18,6 +18,8 @@ export default function BookingsPage() {
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [viewingBooking, setViewingBooking] = useState<any>(null);
   const [editingBooking, setEditingBooking] = useState<any>(null);
   const [editStatus, setEditStatus] = useState('');
   const [packages, setPackages] = useState<any[]>([]);
@@ -78,6 +80,11 @@ export default function BookingsPage() {
     setEditingBooking(booking);
     setEditStatus(booking.status || 'Pending');
     setIsModalOpen(true);
+  };
+
+  const handleOpenView = (booking: any) => {
+    setViewingBooking(booking);
+    setIsViewModalOpen(true);
   };
 
   const handleSaveStatus = async () => {
@@ -235,7 +242,7 @@ export default function BookingsPage() {
                             <div className="text-sm text-gray-500">{booking.numberOfPersons} Persons</div>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="font-medium text-gray-900">${booking.totalPrice}</div>
+                            <div className="font-medium text-gray-900">₹{booking.totalPrice?.toLocaleString?.() ?? booking.totalPrice}</div>
                           </td>
                           <td className="px-6 py-4">
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -251,14 +258,21 @@ export default function BookingsPage() {
                           </td>
                           <td className="px-6 py-4 text-right">
                             <div className="flex items-center justify-end gap-2">
-                              <button 
+                              <button
+                                onClick={() => handleOpenView(booking)}
+                                className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                                title="View Details"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                              <button
                                 onClick={() => handleOpenEdit(booking)}
                                 className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
                                 title="Edit Status"
                               >
                                 <Edit2 className="w-4 h-4" />
                               </button>
-                              <button 
+                              <button
                                 onClick={() => handleDelete(booking.id)}
                                 className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
                                 title="Delete Booking"
@@ -312,6 +326,85 @@ export default function BookingsPage() {
               <button onClick={handleSaveStatus} className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors">
                 Save Changes
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Booking Details Modal */}
+      {isViewModalOpen && viewingBooking && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
+              <h2 className="text-xl font-bold text-gray-900">Booking Details</h2>
+              <button onClick={() => setIsViewModalOpen(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+            </div>
+            <div className="p-6 space-y-5">
+              {/* Status badge */}
+              <div className="flex items-center gap-3">
+                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
+                  viewingBooking.status === 'Confirmed' ? 'bg-green-100 text-green-800' :
+                  viewingBooking.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
+                  'bg-yellow-100 text-yellow-800'
+                }`}>
+                  {viewingBooking.status || 'Pending'}
+                </span>
+                <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-lg">{viewingBooking.source || 'Website'}</span>
+              </div>
+
+              {/* Package */}
+              <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Package</p>
+                <p className="font-bold text-gray-900">{viewingBooking.packageTitle}</p>
+                <div className="flex gap-4 mt-2 text-sm text-gray-600">
+                  <span className="capitalize">{viewingBooking.sharingType} sharing</span>
+                  <span>·</span>
+                  <span>{viewingBooking.numberOfPersons} {viewingBooking.numberOfPersons === 1 ? 'person' : 'persons'}</span>
+                  <span>·</span>
+                  <span className="font-bold text-gray-900">₹{viewingBooking.totalPrice?.toLocaleString?.() ?? viewingBooking.totalPrice}</span>
+                </div>
+                {viewingBooking.travelDate && (
+                  <p className="text-sm text-gray-500 mt-1">Travel Date: {viewingBooking.travelDate}</p>
+                )}
+              </div>
+
+              {/* Customer */}
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Customer</p>
+                <div className="space-y-1.5">
+                  <p className="font-semibold text-gray-900">{viewingBooking.customerName}</p>
+                  {viewingBooking.customerPhone && <p className="text-sm text-gray-600">{viewingBooking.customerPhone}</p>}
+                  {viewingBooking.customerEmail && <p className="text-sm text-gray-600">{viewingBooking.customerEmail}</p>}
+                  {viewingBooking.state && <p className="text-sm text-gray-600">{viewingBooking.city ? `${viewingBooking.city}, ` : ''}{viewingBooking.state}</p>}
+                  {viewingBooking.leadSource && <p className="text-sm text-gray-500">Source: {viewingBooking.leadSource}</p>}
+                </div>
+              </div>
+
+              {/* Custom fields */}
+              {viewingBooking.customFields && Object.keys(viewingBooking.customFields).length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Additional Info</p>
+                  <div className="space-y-2 bg-gray-50 rounded-xl p-4 border border-gray-100">
+                    {Object.entries(viewingBooking.customFields).map(([key, val]) => (
+                      <div key={key} className="flex justify-between gap-3 text-sm">
+                        <span className="text-gray-500 capitalize">{key.replace(/^cf_\d+_?/, '').replace(/_/g, ' ')}</span>
+                        <span className="font-medium text-gray-900 text-right">{String(val)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {viewingBooking.createdAt && (
+                <p className="text-xs text-gray-400">Submitted on {format(viewingBooking.createdAt.toDate(), 'MMM d, yyyy h:mm a')}</p>
+              )}
+            </div>
+            <div className="p-4 bg-gray-50 rounded-b-2xl flex justify-end gap-3">
+              <button onClick={() => { setIsViewModalOpen(false); handleOpenEdit(viewingBooking); }}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium text-sm transition-colors">
+                Edit Status
+              </button>
+              <button onClick={() => setIsViewModalOpen(false)} className="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-lg font-medium text-sm transition-colors">Close</button>
             </div>
           </div>
         </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { LayoutDashboard, Users, Settings, LogOut, Shield, Package, CalendarCheck, Globe } from 'lucide-react';
+import { LayoutDashboard, Users, Settings, LogOut, Shield, Package, CalendarCheck, Globe, ClipboardList, Smartphone } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -64,14 +64,38 @@ export function Sidebar() {
         )}
 
         {isTeamVisible && (
-          <Link 
-            href="/website-builder" 
+          <Link
+            href="/website-builder"
             className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
               pathname === '/website-builder' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:bg-gray-50'
             }`}
           >
             <Globe className="w-5 h-5" />
             Website Builder
+          </Link>
+        )}
+
+        {isTeamVisible && (
+          <Link
+            href="/booking-form"
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
+              pathname === '/booking-form' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            <ClipboardList className="w-5 h-5" />
+            Booking Form
+          </Link>
+        )}
+
+        {isTeamVisible && (
+          <Link
+            href="/campaign-builder"
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
+              pathname === '/campaign-builder' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            <Smartphone className="w-5 h-5" />
+            Campaign Builder
           </Link>
         )}
         

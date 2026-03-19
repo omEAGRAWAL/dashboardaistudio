@@ -7,7 +7,7 @@ import { db } from '@/lib/firebase';
 import {
   MapPin, Clock, ArrowLeft, CheckCircle2, ChevronLeft, ChevronRight,
   Users, Flag, Zap, CheckCircle, XCircle, ChevronDown, ChevronUp,
-  Star, Calendar, Phone, MessageCircle, AlertCircle, X
+  Star, Calendar, Phone, MessageCircle, AlertCircle, X, Minus, Plus,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -19,6 +19,73 @@ const DIFFICULTY_COLOR: Record<string, string> = {
 };
 
 type Tab = 'overview' | 'highlights' | 'itinerary' | 'inclusions' | 'notes';
+
+interface BookingField {
+  id: string;
+  key?: string;
+  label: string;
+  type: string;
+  placeholder?: string;
+  options?: string[];
+  required: boolean;
+  enabled: boolean;
+  order: number;
+  isDefault: boolean;
+}
+
+const DEFAULT_FIELDS: BookingField[] = [
+  { id: 'f_name', key: 'customerName', label: 'Full Name', type: 'text', placeholder: 'Full Name', required: true, enabled: true, order: 0, isDefault: true },
+  { id: 'f_phone', key: 'customerPhone', label: 'Phone Number (WhatsApp)', type: 'tel', placeholder: 'Phone Number', required: true, enabled: true, order: 1, isDefault: true },
+  { id: 'f_email', key: 'customerEmail', label: 'Email Address', type: 'email', placeholder: 'Email Address', required: false, enabled: true, order: 2, isDefault: true },
+  { id: 'f_date', key: 'travelDate', label: 'Travel Date', type: 'date', required: false, enabled: true, order: 3, isDefault: true },
+  { id: 'f_state', key: 'state', label: 'State', type: 'select', options: [], required: false, enabled: true, order: 4, isDefault: true },
+  { id: 'f_city', key: 'city', label: 'City', type: 'text', placeholder: 'City', required: false, enabled: true, order: 5, isDefault: true },
+  { id: 'f_source', key: 'leadSource', label: 'Source', type: 'select', options: [], required: false, enabled: true, order: 6, isDefault: true },
+];
+
+function DynamicField({ field, value, onChange, color }: {
+  field: BookingField; value: string; onChange: (v: string) => void; color: string;
+}) {
+  const base = "w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none transition-all";
+  const focusStyle = { '--tw-ring-color': color } as React.CSSProperties;
+
+  if (field.type === 'select') {
+    return (
+      <div className="space-y-1.5">
+        <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">
+          {field.label}{field.required && <span className="text-red-500 ml-0.5">*</span>}
+        </label>
+        <select value={value} onChange={e => onChange(e.target.value)} required={field.required}
+          className={base + ' bg-white appearance-none'} style={focusStyle}>
+          <option value="">Select...</option>
+          {(field.options || []).map(opt => <option key={opt} value={opt}>{opt}</option>)}
+        </select>
+      </div>
+    );
+  }
+  if (field.type === 'textarea') {
+    return (
+      <div className="space-y-1.5">
+        <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">
+          {field.label}{field.required && <span className="text-red-500 ml-0.5">*</span>}
+        </label>
+        <textarea value={value} onChange={e => onChange(e.target.value)} required={field.required}
+          placeholder={field.placeholder} rows={3}
+          className={base + ' resize-none'} style={focusStyle} />
+      </div>
+    );
+  }
+  return (
+    <div className="space-y-1.5">
+      <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">
+        {field.label}{field.required && <span className="text-red-500 ml-0.5">*</span>}
+      </label>
+      <input type={field.type} value={value} onChange={e => onChange(e.target.value)}
+        required={field.required} placeholder={field.placeholder}
+        className={base} style={focusStyle} />
+    </div>
+  );
+}
 
 export default function PackageDetailsPage() {
   const params = useParams();
@@ -35,25 +102,38 @@ export default function PackageDetailsPage() {
   const [activeTab, setActiveTab] = useState<Tab>('overview');
   const [expandedDays, setExpandedDays] = useState<Set<number>>(new Set([0]));
 
-  const [form, setForm] = useState({
-    customerName: '', customerEmail: '', customerPhone: '',
-    travelDate: '', sharingType: 'double', numberOfPersons: 2,
-  });
+  // Multi-step booking state
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [bookingStep, setBookingStep] = useState<1 | 2>(1);
+  const [bookingFields, setBookingFields] = useState<BookingField[]>(DEFAULT_FIELDS);
+  const [bookingColor, setBookingColor] = useState('#22c55e');
+
+  const [sharingType, setSharingType] = useState('double');
+  const [numberOfPersons, setNumberOfPersons] = useState(2);
+  const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!orgId || !packageId) return;
-    const fetch = async () => {
+    (async () => {
       try {
         const [sSnap, pSnap] = await Promise.all([
           getDoc(doc(db, 'website_settings', orgId)),
           getDoc(doc(db, 'packages', packageId)),
         ]);
-        if (sSnap.exists()) setSettings(sSnap.data());
+        if (sSnap.exists()) {
+          const data = sSnap.data();
+          setSettings(data);
+          if (data.bookingForm) {
+            setBookingColor(data.bookingForm.bookingColor || '#22c55e');
+            if (data.bookingForm.fields?.length) {
+              setBookingFields(data.bookingForm.fields.sort((a: BookingField, b: BookingField) => a.order - b.order));
+            }
+          }
+        }
         if (pSnap.exists()) setPkg({ id: pSnap.id, ...pSnap.data() });
       } catch (e) { console.error(e); }
       finally { setLoading(false); }
-    };
-    fetch();
+    })();
   }, [orgId, packageId]);
 
   if (loading) return (
@@ -85,33 +165,225 @@ export default function PackageDetailsPage() {
   ] as const).filter(t => t.show);
 
   const prices: Record<string, number> = { double: pkg.priceDouble || 0, triple: pkg.priceTriple || 0, quad: pkg.priceQuad || 0 };
-  const calcTotal = () => prices[form.sharingType] * Number(form.numberOfPersons);
+  const calcTotal = () => prices[sharingType] * numberOfPersons;
+
+  const ticketTypes = [
+    { type: 'double', label: 'Dual Occupancy', price: pkg.priceDouble },
+    { type: 'triple', label: 'Triple Occupancy', price: pkg.priceTriple },
+    { type: 'quad', label: 'Quad Occupancy', price: pkg.priceQuad },
+  ].filter(t => t.price > 0);
+
+  const activeFields = bookingFields.filter(f => f.enabled);
 
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     try {
+      // Build standard fields from mapped keys
+      const standardData: Record<string, any> = {};
+      const customFieldsData: Record<string, string> = {};
+
+      activeFields.forEach(field => {
+        const val = fieldValues[field.id] || '';
+        if (field.key) {
+          standardData[field.key] = val;
+        } else {
+          customFieldsData[field.id] = val;
+        }
+      });
+
       await addDoc(collection(db, 'bookings'), {
-        orgId, packageId: pkg.id, packageTitle: pkg.title,
-        customerName: form.customerName, customerEmail: form.customerEmail,
-        customerPhone: form.customerPhone, travelDate: form.travelDate,
-        sharingType: form.sharingType, numberOfPersons: Number(form.numberOfPersons),
-        totalPrice: calcTotal(), status: 'Pending', source: 'Website',
+        orgId,
+        packageId: pkg.id,
+        packageTitle: pkg.title,
+        customerName: standardData.customerName || '',
+        customerEmail: standardData.customerEmail || '',
+        customerPhone: standardData.customerPhone || '',
+        travelDate: standardData.travelDate || '',
+        state: standardData.state || '',
+        city: standardData.city || '',
+        leadSource: standardData.leadSource || '',
+        sharingType,
+        numberOfPersons,
+        totalPrice: calcTotal(),
+        status: 'Pending',
+        source: 'Website',
+        customFields: customFieldsData,
         createdAt: serverTimestamp(),
       });
       setBookingSuccess(true);
-    } catch (e) { alert('Failed to submit. Please try again.'); }
+      setBookingOpen(false);
+    } catch { alert('Failed to submit. Please try again.'); }
     finally { setSubmitting(false); }
+  };
+
+  const openBooking = () => {
+    setBookingStep(1);
+    setBookingSuccess(false);
+    setFieldValues({});
+    setBookingOpen(true);
   };
 
   const toggleDay = (i: number) => setExpandedDays(prev => { const s = new Set(prev); s.has(i) ? s.delete(i) : s.add(i); return s; });
   const prevImg = () => setCurrentImg(i => (i === 0 ? allImages.length - 1 : i - 1));
   const nextImg = () => setCurrentImg(i => (i === allImages.length - 1 ? 0 : i + 1));
 
-  const inp = "w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:outline-none bg-gray-50 text-sm transition-all";
+  // Booking overlay (2-step)
+  const BookingOverlay = () => (
+    <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
+      onClick={() => setBookingOpen(false)}>
+      <div className="w-full sm:w-[420px] bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col"
+        onClick={e => e.stopPropagation()}>
+
+        {/* Header */}
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 flex-shrink-0">
+          <button onClick={() => bookingStep === 1 ? setBookingOpen(false) : setBookingStep(1)}
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-600">
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <div className="flex-1 text-center">
+            <h2 className="font-bold text-gray-900 text-[15px]">
+              {bookingStep === 1 ? 'Create Tickets & Pay' : 'Who Is Booking?'}
+            </h2>
+            <p className="text-xs text-gray-400 truncate">{pkg.title}</p>
+          </div>
+          {/* Step dots */}
+          <div className="flex items-center gap-1">
+            {[1, 2].map(s => (
+              <div key={s} className={`rounded-full transition-all ${bookingStep === s ? 'w-4 h-2' : 'w-2 h-2'}`}
+                style={{ backgroundColor: s <= bookingStep ? bookingColor : '#e5e7eb' }} />
+            ))}
+          </div>
+        </div>
+
+        {/* Step 1: Ticket Selection */}
+        {bookingStep === 1 && (
+          <div className="overflow-y-auto flex-1 p-5 space-y-5">
+            {/* Travel Date */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Selected Date</label>
+              <input type="date" value={fieldValues['f_date'] || ''}
+                onChange={e => setFieldValues(v => ({ ...v, f_date: e.target.value }))}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none"
+                style={{ accentColor: bookingColor }} />
+            </div>
+
+            {/* Ticket types */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Select Ticket(s)</label>
+              <div className="space-y-2">
+                {ticketTypes.map(t => (
+                  <div key={t.type}
+                    className={`flex items-center gap-3 px-4 py-3.5 rounded-xl border-2 cursor-pointer transition-all`}
+                    style={sharingType === t.type
+                      ? { borderColor: bookingColor, backgroundColor: `${bookingColor}10` }
+                      : { borderColor: '#e5e7eb' }}
+                    onClick={() => setSharingType(t.type)}>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm text-gray-900">{t.label}</p>
+                      <p className="text-xs text-gray-500">₹{t.price?.toLocaleString()} per person</p>
+                    </div>
+                    {sharingType === t.type ? (
+                      <div className="flex items-center gap-1 bg-white rounded-xl border border-gray-200 shadow-sm p-0.5">
+                        <button type="button"
+                          onClick={e => { e.stopPropagation(); setNumberOfPersons(n => Math.max(1, n - 1)); }}
+                          className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-100 transition-colors font-bold text-gray-600">
+                          <Minus className="w-3.5 h-3.5" />
+                        </button>
+                        <span className="w-7 text-center font-bold text-sm text-gray-900">{numberOfPersons}</span>
+                        <button type="button"
+                          onClick={e => { e.stopPropagation(); setNumberOfPersons(n => n + 1); }}
+                          className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-100 transition-colors font-bold text-gray-600">
+                          <Plus className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="w-5 h-5 rounded-full border-2 border-gray-300 flex-shrink-0" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Total */}
+            <div className="flex items-center justify-between bg-gray-50 rounded-2xl px-5 py-4 border border-gray-100">
+              <div>
+                <p className="text-xs text-gray-500">
+                  ₹{prices[sharingType]?.toLocaleString()} × {numberOfPersons} {numberOfPersons === 1 ? 'person' : 'persons'}
+                </p>
+                <p className="text-[10px] text-gray-400 mt-0.5 capitalize">{sharingType} sharing</p>
+              </div>
+              <p className="text-2xl font-black text-gray-900">₹{calcTotal().toLocaleString()}</p>
+            </div>
+
+            <button type="button"
+              onClick={() => setBookingStep(2)}
+              disabled={calcTotal() === 0}
+              className="w-full py-4 rounded-2xl text-white font-bold text-base shadow-md hover:shadow-lg hover:brightness-110 transition-all disabled:opacity-40"
+              style={{ backgroundColor: bookingColor }}>
+              Continue →
+            </button>
+          </div>
+        )}
+
+        {/* Step 2: Customer Info */}
+        {bookingStep === 2 && (
+          <form onSubmit={handleBooking} className="flex-1 flex flex-col overflow-hidden">
+            <div className="overflow-y-auto flex-1 p-5 space-y-4">
+              {/* Package summary */}
+              <div className="flex items-center gap-3 bg-gray-50 rounded-2xl p-3 border border-gray-100">
+                {allImages[0] && (
+                  <img src={allImages[0]} alt={pkg.title} className="w-14 h-14 rounded-xl object-cover flex-shrink-0" />
+                )}
+                <div className="min-w-0">
+                  <p className="font-semibold text-gray-900 text-sm line-clamp-1">{pkg.title}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {numberOfPersons} × {sharingType} · ₹{calcTotal().toLocaleString()}
+                  </p>
+                </div>
+              </div>
+
+              {/* Dynamic fields */}
+              {activeFields
+                .filter(f => f.id !== 'f_date') // date already collected in step 1
+                .map(field => (
+                  <DynamicField
+                    key={field.id}
+                    field={field}
+                    value={fieldValues[field.id] || ''}
+                    onChange={v => setFieldValues(prev => ({ ...prev, [field.id]: v }))}
+                    color={bookingColor}
+                  />
+                ))}
+            </div>
+
+            {/* Sticky footer */}
+            <div className="p-4 border-t border-gray-100 bg-white flex-shrink-0 space-y-2">
+              <button type="submit" disabled={submitting}
+                className="w-full py-4 rounded-2xl text-white font-bold text-base shadow-md hover:shadow-lg hover:brightness-110 transition-all disabled:opacity-50"
+                style={{ backgroundColor: bookingColor }}>
+                {submitting ? 'Submitting...' : 'Confirm Booking'}
+              </button>
+              <p className="text-[10px] text-gray-400 text-center">No payment required now. We'll confirm & collect payment separately.</p>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-white antialiased font-sans" style={{ fontFamily: isSerif ? headingFont : 'inherit' }}>
+
+      {/* Booking Overlay */}
+      {bookingOpen && <BookingOverlay />}
+
+      {/* Booking Success Banner (mobile) */}
+      {bookingSuccess && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-green-600 text-white px-6 py-3 rounded-2xl shadow-xl flex items-center gap-2 text-sm font-semibold lg:hidden">
+          <CheckCircle2 className="w-4 h-4" /> Booking submitted!
+        </div>
+      )}
 
       {/* Lightbox */}
       {lightbox && (
@@ -155,12 +427,9 @@ export default function PackageDetailsPage() {
 
       {/* Hero Gallery */}
       <div className="relative bg-black">
-        {/* Main image */}
         <div className="relative h-[55vh] min-h-[380px] max-h-[600px] overflow-hidden cursor-pointer group" onClick={() => setLightbox(true)}>
           <img src={allImages[currentImg]} alt={pkg.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60" />
-
-          {/* Nav arrows */}
           {allImages.length > 1 && (
             <>
               <button onClick={e => { e.stopPropagation(); prevImg(); }}
@@ -173,8 +442,6 @@ export default function PackageDetailsPage() {
               </button>
             </>
           )}
-
-          {/* Counter + expand hint */}
           <div className="absolute bottom-4 right-4 flex items-center gap-2">
             {allImages.length > 1 && (
               <span className="bg-black/60 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-full">
@@ -186,8 +453,6 @@ export default function PackageDetailsPage() {
             </span>
           </div>
         </div>
-
-        {/* Thumbnails */}
         {allImages.length > 1 && (
           <div className="bg-black px-4 py-3">
             <div className="flex gap-2 overflow-x-auto pb-1 max-w-7xl mx-auto">
@@ -203,12 +468,11 @@ export default function PackageDetailsPage() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-28 lg:pb-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
 
           {/* Left: Package Details */}
           <div className="lg:col-span-2">
-            {/* Title block */}
             <div className="mb-8">
               <div className="flex flex-wrap items-center gap-2 mb-3">
                 <span className="flex items-center gap-1 text-sm font-semibold" style={{ color: tc }}>
@@ -221,12 +485,9 @@ export default function PackageDetailsPage() {
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${DIFFICULTY_COLOR[pkg.difficulty] || 'bg-gray-100 text-gray-700'}`}>{pkg.difficulty}</span>
                 )}
               </div>
-
               <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-4 leading-tight" style={{ fontFamily: headingFont }}>
                 {pkg.title}
               </h1>
-
-              {/* Meta badges */}
               <div className="flex flex-wrap gap-3">
                 <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2">
                   <Clock className="w-4 h-4 text-gray-400" />
@@ -262,16 +523,12 @@ export default function PackageDetailsPage() {
               </div>
             </div>
 
-            {/* Tab Content */}
             <div className="min-h-[300px]">
-              {/* Overview */}
               {activeTab === 'overview' && (
                 <div className="prose prose-gray max-w-none">
                   <p className="text-gray-600 leading-relaxed text-base whitespace-pre-wrap">{pkg.description}</p>
                 </div>
               )}
-
-              {/* Highlights */}
               {activeTab === 'highlights' && highlights.length > 0 && (
                 <div>
                   <p className="text-sm text-gray-500 mb-5">Experiences and attractions that make this package special.</p>
@@ -287,8 +544,6 @@ export default function PackageDetailsPage() {
                   </div>
                 </div>
               )}
-
-              {/* Itinerary */}
               {activeTab === 'itinerary' && itinerary.length > 0 && (
                 <div className="space-y-3">
                   <p className="text-sm text-gray-500 mb-5">A detailed day-by-day plan of your journey.</p>
@@ -316,8 +571,6 @@ export default function PackageDetailsPage() {
                   ))}
                 </div>
               )}
-
-              {/* Inclusions */}
               {activeTab === 'inclusions' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {inclusions.length > 0 && (
@@ -358,8 +611,6 @@ export default function PackageDetailsPage() {
                   )}
                 </div>
               )}
-
-              {/* Notes */}
               {activeTab === 'notes' && pkg.note && (
                 <div>
                   <div className="flex items-center gap-2 mb-4 p-4 bg-amber-50 border border-amber-100 rounded-2xl">
@@ -372,7 +623,7 @@ export default function PackageDetailsPage() {
             </div>
           </div>
 
-          {/* Right: Booking Card */}
+          {/* Right: Booking Card (desktop) */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden sticky top-24">
               {bookingSuccess ? (
@@ -392,67 +643,99 @@ export default function PackageDetailsPage() {
                 <>
                   {/* Price header */}
                   <div className="p-5 border-b border-gray-100">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-bold text-gray-900">Book This Package</h3>
+                      <div className="flex gap-1">
+                        {[1, 2].map(s => (
+                          <div key={s} className={`rounded-full transition-all ${bookingStep === s ? 'w-4 h-2' : 'w-2 h-2'}`}
+                            style={{ backgroundColor: s <= bookingStep ? bookingColor : '#e5e7eb' }} />
+                        ))}
+                      </div>
+                    </div>
                     <div className="grid grid-cols-3 gap-2">
-                      {[{ label: 'Double', price: pkg.priceDouble }, { label: 'Triple', price: pkg.priceTriple }, { label: 'Quad', price: pkg.priceQuad }].map(t => (
-                        <div key={t.label} className={`text-center p-3 rounded-xl border-2 cursor-pointer transition-all ${form.sharingType === t.label.toLowerCase() ? 'border-current bg-gray-50' : 'border-gray-100 hover:border-gray-200'}`}
-                          style={form.sharingType === t.label.toLowerCase() ? { borderColor: tc, backgroundColor: `${tc}10` } : {}}
-                          onClick={() => setForm(f => ({ ...f, sharingType: t.label.toLowerCase() }))}>
-                          <p className="text-[9px] text-gray-400 uppercase font-bold tracking-wider mb-1">{t.label}</p>
-                          <p className="font-black text-gray-900 text-sm">₹{t.price || '—'}</p>
+                      {ticketTypes.map(t => (
+                        <div key={t.type}
+                          className="text-center p-3 rounded-xl border-2 cursor-pointer transition-all"
+                          style={sharingType === t.type ? { borderColor: bookingColor, backgroundColor: `${bookingColor}10` } : { borderColor: '#f3f4f6' }}
+                          onClick={() => setSharingType(t.type)}>
+                          <p className="text-[9px] text-gray-400 uppercase font-bold tracking-wider mb-1 capitalize">{t.label.split(' ')[0]}</p>
+                          <p className="font-black text-gray-900 text-sm">₹{t.price?.toLocaleString()}</p>
                           <p className="text-[8px] text-gray-400 mt-0.5">per person</p>
                         </div>
                       ))}
                     </div>
                   </div>
 
-                  {/* Form */}
-                  <form onSubmit={handleBooking} className="p-5 space-y-4">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Full Name *</label>
-                      <input required type="text" value={form.customerName} onChange={e => setForm(f => ({ ...f, customerName: e.target.value }))}
-                        className={inp} placeholder="Your name" />
+                  {/* Desktop multi-step form */}
+                  {bookingStep === 1 ? (
+                    <div className="p-5 space-y-4">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Persons</label>
+                        <div className="flex items-center gap-3 bg-gray-50 rounded-xl border border-gray-200 p-2 w-fit">
+                          <button type="button" onClick={() => setNumberOfPersons(n => Math.max(1, n - 1))}
+                            className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-100 transition-colors font-bold">
+                            <Minus className="w-3.5 h-3.5" />
+                          </button>
+                          <span className="font-black text-gray-900 text-lg w-8 text-center">{numberOfPersons}</span>
+                          <button type="button" onClick={() => setNumberOfPersons(n => n + 1)}
+                            className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-100 transition-colors font-bold">
+                            <Plus className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-sm text-gray-500">₹{prices[sharingType]?.toLocaleString()} × {numberOfPersons} persons</span>
+                          <span className="text-2xl font-black text-gray-900">₹{calcTotal().toLocaleString()}</span>
+                        </div>
+                        <p className="text-[10px] text-gray-400 capitalize">{sharingType} sharing — per person rate</p>
+                      </div>
+
+                      <button type="button" onClick={() => setBookingStep(2)} disabled={calcTotal() === 0}
+                        className="w-full py-4 rounded-2xl text-white font-black text-lg shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all disabled:opacity-40"
+                        style={{ backgroundColor: bookingColor }}>
+                        Continue →
+                      </button>
                     </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Phone *</label>
-                      <input required type="tel" value={form.customerPhone} onChange={e => setForm(f => ({ ...f, customerPhone: e.target.value }))}
-                        className={inp} placeholder="+91 98765 43210" />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Email</label>
-                      <input type="email" value={form.customerEmail} onChange={e => setForm(f => ({ ...f, customerEmail: e.target.value }))}
-                        className={inp} placeholder="you@email.com" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
+                  ) : (
+                    <form onSubmit={handleBooking} className="p-5 space-y-3 max-h-[60vh] overflow-y-auto">
+                      <div className="flex items-center gap-2 mb-1">
+                        <button type="button" onClick={() => setBookingStep(1)} className="text-xs text-gray-500 hover:text-gray-800 font-medium flex items-center gap-1">
+                          <ChevronLeft className="w-3.5 h-3.5" /> Back
+                        </button>
+                        <span className="text-sm font-bold text-gray-900 flex-1">Your Details</span>
+                        <span className="text-xs text-gray-400 font-semibold">₹{calcTotal().toLocaleString()}</span>
+                      </div>
+
+                      {activeFields
+                        .filter(f => f.id !== 'f_date')
+                        .map(field => (
+                          <DynamicField
+                            key={field.id}
+                            field={field}
+                            value={fieldValues[field.id] || ''}
+                            onChange={v => setFieldValues(prev => ({ ...prev, [field.id]: v }))}
+                            color={bookingColor}
+                          />
+                        ))}
+
                       <div className="space-y-1.5">
                         <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Travel Date</label>
-                        <input type="date" value={form.travelDate} onChange={e => setForm(f => ({ ...f, travelDate: e.target.value }))}
-                          className={inp} />
+                        <input type="date" value={fieldValues['f_date'] || ''}
+                          onChange={e => setFieldValues(v => ({ ...v, f_date: e.target.value }))}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:outline-none" />
                       </div>
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Persons *</label>
-                        <input required type="number" min="1" value={form.numberOfPersons} onChange={e => setForm(f => ({ ...f, numberOfPersons: parseInt(e.target.value) || 1 }))}
-                          className={inp + ' text-center font-bold'} />
-                      </div>
-                    </div>
 
-                    {/* Total */}
-                    <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-sm text-gray-500">₹{prices[form.sharingType]} × {form.numberOfPersons} persons</span>
-                        <span className="text-2xl font-black text-gray-900">₹{calcTotal().toLocaleString()}</span>
-                      </div>
-                      <p className="text-[10px] text-gray-400">{form.sharingType.charAt(0).toUpperCase() + form.sharingType.slice(1)} sharing — per person rate</p>
-                    </div>
+                      <button type="submit" disabled={submitting}
+                        className="w-full py-4 rounded-2xl text-white font-black text-lg shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all disabled:opacity-50"
+                        style={{ backgroundColor: bookingColor }}>
+                        {submitting ? 'Submitting...' : 'Confirm Booking'}
+                      </button>
+                      <p className="text-[10px] text-gray-400 text-center">No payment required now.</p>
+                    </form>
+                  )}
 
-                    <button type="submit" disabled={submitting}
-                      className="w-full py-4 rounded-2xl text-white font-black text-lg shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all disabled:opacity-50 disabled:scale-100"
-                      style={{ backgroundColor: tc }}>
-                      {submitting ? 'Submitting...' : 'Book This Package'}
-                    </button>
-                    <p className="text-[10px] text-gray-400 text-center">No payment required now. We'll confirm & collect payment separately.</p>
-                  </form>
-
-                  {/* Direct contact */}
                   {settings?.contactWhatsApp && (
                     <div className="px-5 pb-5">
                       <div className="border-t border-gray-100 pt-4 flex items-center justify-center gap-2">
@@ -471,10 +754,31 @@ export default function PackageDetailsPage() {
         </div>
       </div>
 
-      {/* WhatsApp FAB (mobile) */}
+      {/* Mobile sticky Book Now bar */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 px-4 py-3 shadow-2xl">
+        <div className="flex items-center gap-3">
+          <div className="flex-1">
+            <p className="text-xs text-gray-500 capitalize">{sharingType} sharing</p>
+            <p className="font-black text-gray-900 text-lg">₹{prices[sharingType]?.toLocaleString()}<span className="text-xs font-medium text-gray-400">/person</span></p>
+          </div>
+          {bookingSuccess ? (
+            <div className="flex items-center gap-2 px-5 py-3 bg-green-100 text-green-700 rounded-2xl font-bold text-sm">
+              <CheckCircle2 className="w-4 h-4" /> Booked!
+            </div>
+          ) : (
+            <button onClick={openBooking}
+              className="px-6 py-3.5 rounded-2xl text-white font-bold text-base shadow-lg hover:shadow-xl transition-all active:scale-95"
+              style={{ backgroundColor: bookingColor }}>
+              Book Now
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* WhatsApp FAB */}
       {settings?.contactWhatsApp && (
         <a href={`https://wa.me/${settings.contactWhatsApp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer"
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-all lg:hidden">
+          className="fixed bottom-20 right-6 z-50 w-14 h-14 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-all lg:hidden">
           <MessageCircle className="w-7 h-7" />
         </a>
       )}

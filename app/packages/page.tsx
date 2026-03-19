@@ -10,7 +10,7 @@ import { db } from '@/lib/firebase';
 import {
   Package, Plus, Trash2, Edit2, Image as ImageIcon, MapPin, Clock,
   X, ChevronDown, ChevronUp, CheckCircle, XCircle, List, Zap,
-  Users, Flag, ExternalLink, Star, AlignLeft, Info
+  Users, Flag, ExternalLink, Star, AlignLeft, Info, FileText
 } from 'lucide-react';
 
 const CATEGORIES = ['Beach', 'Adventure', 'Cultural', 'Wildlife', 'Pilgrimage', 'Honeymoon', 'Family', 'Backpacking', 'Luxury', 'Cruise', 'Hill Station', 'Desert'];
@@ -26,11 +26,12 @@ const EMPTY_FORM = {
   exclusions: [''],
   itinerary: [{ day: 1, title: '', description: '' }] as Array<{ day: number; title: string; description: string }>,
   minGroupSize: '', maxGroupSize: '', note: '',
+  pdfUrl: '', campaignCategory: '',
 };
 
 type FormData = typeof EMPTY_FORM;
 
-type SectionKey = 'basic' | 'pricing' | 'description' | 'highlights' | 'inclusions' | 'itinerary' | 'images' | 'notes';
+type SectionKey = 'basic' | 'pricing' | 'description' | 'highlights' | 'inclusions' | 'itinerary' | 'images' | 'notes' | 'campaign';
 
 const FORM_SECTIONS: { id: SectionKey; label: string; icon: React.ReactNode }[] = [
   { id: 'basic', label: 'Basic Info', icon: <Info className="w-4 h-4" /> },
@@ -41,6 +42,7 @@ const FORM_SECTIONS: { id: SectionKey; label: string; icon: React.ReactNode }[] 
   { id: 'itinerary', label: 'Day-wise Itinerary', icon: <List className="w-4 h-4" /> },
   { id: 'images', label: 'Photos', icon: <ImageIcon className="w-4 h-4" /> },
   { id: 'notes', label: 'Notes & Terms', icon: <Info className="w-4 h-4" /> },
+  { id: 'campaign', label: 'Campaign', icon: <FileText className="w-4 h-4" /> },
 ];
 
 export default function PackagesPage() {
@@ -86,6 +88,8 @@ export default function PackagesPage() {
         minGroupSize: pkg.minGroupSize?.toString() || '',
         maxGroupSize: pkg.maxGroupSize?.toString() || '',
         note: pkg.note || '',
+        pdfUrl: pkg.pdfUrl || '',
+        campaignCategory: pkg.campaignCategory || '',
       });
     } else {
       setEditingPackage(null);
@@ -118,6 +122,8 @@ export default function PackagesPage() {
       minGroupSize: Number(formData.minGroupSize) || null,
       maxGroupSize: Number(formData.maxGroupSize) || null,
       note: formData.note,
+      pdfUrl: formData.pdfUrl || '',
+      campaignCategory: formData.campaignCategory || '',
     };
     try {
       if (editingPackage) {
@@ -515,6 +521,29 @@ export default function PackagesPage() {
                       <p className="text-xs text-gray-400">Cancellation policy, visa requirements, health conditions, booking terms, etc.</p>
                       <textarea value={formData.note} onChange={e => set({ note: e.target.value })} rows={10}
                         className={inp + ' resize-none'} placeholder="e.g. &#10;• 50% advance required at booking&#10;• Cancellation within 7 days — no refund&#10;• Valid passport required (6 months validity)&#10;• Travel insurance recommended" />
+                    </div>
+                  )}
+
+                  {/* Campaign */}
+                  {activeSection === 'campaign' && (
+                    <div className="space-y-5">
+                      <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 text-sm text-amber-800">
+                        These settings appear on your Campaign page (<code>/campaign/&lt;orgId&gt;</code>). You can also manage these in the Campaign Builder.
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-sm font-semibold text-gray-700 flex items-center gap-1.5">
+                          <FileText className="w-4 h-4 text-indigo-500" /> PDF URL (Google Drive / any link)
+                        </label>
+                        <p className="text-xs text-gray-400">Customers can tap the PDF button on the campaign page to download/view the itinerary PDF.</p>
+                        <input type="url" value={formData.pdfUrl} onChange={e => set({ pdfUrl: e.target.value })}
+                          className={inp} placeholder="https://drive.google.com/file/d/..." />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-sm font-semibold text-gray-700">Campaign Category</label>
+                        <p className="text-xs text-gray-400">Used as a filter tab on the campaign page (e.g. "2N3D Weekend Trips"). Overrides the standard website category for campaign display.</p>
+                        <input type="text" value={formData.campaignCategory} onChange={e => set({ campaignCategory: e.target.value })}
+                          className={inp} placeholder="e.g. 2N3D Weekend Trips" />
+                      </div>
                     </div>
                   )}
                 </div>
