@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
-import { doc, getDoc, setDoc, serverTimestamp, collection, query, where, getDocs, deleteDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, query, where, getDocs, deleteDoc } from 'firebase/firestore';
 import { auth, db, googleProvider } from '@/lib/firebase';
 
 interface AuthContextType {
@@ -57,9 +57,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               const inviteData = invite.data();
               newRole = inviteData.role;
               newOrgId = inviteData.orgId;
-              
-              // Delete the invite since it's used
-              await deleteDoc(invite.ref);
+
+              // Delete ALL matching invites (prevents orphaned duplicates)
+              await Promise.all(inviteDocs.docs.map(d => deleteDoc(d.ref)));
             }
           }
 
@@ -88,9 +88,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setStatus('active');
         } else {
           const data = userDoc.data();
-          setRole(data.role);
-          setOrgId(data.orgId || null);
-          setStatus(data.status || 'active');
+          let resolvedRole = data.role;
+          let resolvedOrgId = data.orgId || null;
+          let resolvedStatus = data.status || 'active';
+
+          // If user exists but has no org (e.g. suspended or never joined),
+          // check if there's a pending invite and apply it
+          if (!resolvedOrgId && currentUser.email) {
+            const invitesRef = collection(db, 'invites');
+            const q = query(invitesRef, where('email', '==', currentUser.email));
+            const inviteDocs = await getDocs(q);
+            if (!inviteDocs.empty) {
+              const inviteData = inviteDocs.docs[0].data();
+              resolvedRole = inviteData.role;
+              resolvedOrgId = inviteData.orgId;
+              resolvedStatus = 'active';
+              await Promise.all(inviteDocs.docs.map(d => deleteDoc(d.ref)));
+              await updateDoc(userDocRef, { role: resolvedRole, orgId: resolvedOrgId, status: 'active' });
+            }
+          }
+
+          setRole(resolvedRole);
+          setOrgId(resolvedOrgId);
+          setStatus(resolvedStatus);
         }
       } else {
         setRole(null);
