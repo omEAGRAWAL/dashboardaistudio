@@ -105,6 +105,7 @@ service cloud.firestore {
              (!('displayName' in data) || (data.displayName is string && data.displayName.size() < 100)) &&
              (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() < 500)) &&
              (!('role' in data) || data.role is string) &&
+             (!('status' in data) || data.status is string) &&
              (!('createdAt' in data) || data.createdAt is timestamp);
     }
 
@@ -167,6 +168,8 @@ service cloud.firestore {
                     request.resource.data.uid == resource.data.uid &&
                     request.resource.data.createdAt == resource.data.createdAt &&
                     (isSuperAdmin() ||
+                     // Org admin can change role or remove (suspend) members within their own org
+                     (isAdmin() && resource.data.orgId == getUserOrgId()) ||
                      (request.resource.data.role == resource.data.role && request.resource.data.orgId == resource.data.orgId) ||
                      (request.auth.uid == userId && !('orgId' in resource.data) && request.resource.data.role == 'org_admin'));
       allow delete: if isAdmin();

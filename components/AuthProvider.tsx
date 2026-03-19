@@ -9,6 +9,7 @@ interface AuthContextType {
   user: User | null;
   role: string | null;
   orgId: string | null;
+  status: string | null;
   loading: boolean;
   signIn: () => Promise<void>;
   logOut: () => Promise<void>;
@@ -18,6 +19,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   role: null,
   orgId: null,
+  status: null,
   loading: true,
   signIn: async () => {},
   logOut: async () => {},
@@ -29,6 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const [orgId, setOrgId] = useState<string | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -71,6 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             displayName: currentUser.displayName,
             photoURL: currentUser.photoURL,
             role: newRole,
+            status: 'active',
             createdAt: serverTimestamp(),
           };
 
@@ -81,14 +85,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           await setDoc(userDocRef, userData);
           setRole(newRole);
           setOrgId(newOrgId);
+          setStatus('active');
         } else {
           const data = userDoc.data();
           setRole(data.role);
           setOrgId(data.orgId || null);
+          setStatus(data.status || 'active');
         }
       } else {
         setRole(null);
         setOrgId(null);
+        setStatus(null);
       }
       setLoading(false);
     });
@@ -113,7 +120,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, role, orgId, loading, signIn, logOut }}>
+    <AuthContext.Provider value={{ user, role, orgId, status, loading, signIn, logOut }}>
       {children}
     </AuthContext.Provider>
   );

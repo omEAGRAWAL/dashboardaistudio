@@ -4,7 +4,10 @@ import { useAuth } from '@/components/AuthProvider';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
 import { useState, useEffect } from 'react';
-import { collection, query, where, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
+import {
+  collection, query, where, onSnapshot, addDoc, deleteDoc, updateDoc,
+  doc, getDoc, serverTimestamp, deleteField,
+} from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { UserPlus, Trash2, Mail, Shield, User } from 'lucide-react';
 
@@ -12,6 +15,7 @@ export default function TeamPage() {
   const { user, orgId, role, loading } = useAuth();
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const [invites, setInvites] = useState<any[]>([]);
+  const [orgName, setOrgName] = useState('');
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('agent');
   const [isInviting, setIsInviting] = useState(false);
@@ -21,25 +25,37 @@ export default function TeamPage() {
   useEffect(() => {
     if (!orgId) return;
 
+    // Fetch org name
+    getDoc(doc(db, 'organizations', orgId)).then(snap => {
+      if (snap.exists()) setOrgName(snap.data().name || '');
+    });
+
     // Listen to team members
     const usersQuery = query(collection(db, 'users'), where('orgId', '==', orgId));
     const unsubscribeUsers = onSnapshot(usersQuery, (snapshot) => {
-      const usersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setTeamMembers(usersData);
+      setTeamMembers(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
     });
 
     // Listen to pending invites
     const invitesQuery = query(collection(db, 'invites'), where('orgId', '==', orgId));
     const unsubscribeInvites = onSnapshot(invitesQuery, (snapshot) => {
-      const invitesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setInvites(invitesData);
+      setInvites(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
     });
 
-    return () => {
-      unsubscribeUsers();
-      unsubscribeInvites();
-    };
+    return () => { unsubscribeUsers(); unsubscribeInvites(); };
   }, [orgId]);
+
+  const sendRoleNotification = async (payload: Record<string, any>) => {
+    try {
+      await fetch('/api/send-role-notification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orgName, changedByName: user?.displayName || user?.email || 'Admin', ...payload }),
+      });
+    } catch (e) {
+      console.error('Role notification email failed (non-blocking):', e);
+    }
+  };
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,28 +66,32 @@ export default function TeamPage() {
     setSuccess('');
 
     try {
-      // Check if user is already in the team
       if (teamMembers.some(m => m.email === inviteEmail.trim())) {
         throw new Error('User is already in the team.');
       }
-
-      // Check if invite already exists
       if (invites.some(i => i.email === inviteEmail.trim())) {
         throw new Error('An invite has already been sent to this email.');
       }
 
       await addDoc(collection(db, 'invites'), {
         email: inviteEmail.trim(),
-        orgId: orgId,
+        orgId,
         role: inviteRole,
         createdAt: serverTimestamp(),
+      });
+
+      // Fire-and-forget invite email
+      sendRoleNotification({
+        targetEmail: inviteEmail.trim(),
+        targetName: inviteEmail.split('@')[0],
+        type: 'invited',
+        inviteRole,
       });
 
       setSuccess(`Invite sent to ${inviteEmail}`);
       setInviteEmail('');
       setInviteRole('agent');
     } catch (err: any) {
-      console.error('Error inviting user:', err);
       setError(err.message || 'Failed to send invite.');
     } finally {
       setIsInviting(false);
@@ -83,6 +103,27 @@ export default function TeamPage() {
       await deleteDoc(doc(db, 'invites', inviteId));
     } catch (err) {
       console.error('Error revoking invite:', err);
+    }
+  };
+
+  const handleRoleChange = async (member: any, newRole: string) => {
+    if (member.role === newRole) return;
+    try {
+      await updateDoc(doc(db, 'users', member.id), { role: newRole });
+      sendRoleNotification({ targetEmail: member.email, targetName: member.displayName || member.email, type: 'role_changed', newRole });
+    } catch (err) {
+      console.error('Error changing role:', err);
+    }
+  };
+
+  const handleRemoveMember = async (member: any) => {
+    const name = member.displayName || member.email;
+    if (!window.confirm(`Remove ${name} from the team? They will immediately lose all access.`)) return;
+    try {
+      await updateDoc(doc(db, 'users', member.id), { orgId: deleteField(), status: 'suspended' });
+      sendRoleNotification({ targetEmail: member.email, targetName: member.displayName || member.email, type: 'removed' });
+    } catch (err) {
+      console.error('Error removing member:', err);
     }
   };
 
@@ -117,7 +158,7 @@ export default function TeamPage() {
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
-        
+
         <main className="flex-1 overflow-y-auto p-6 lg:p-8">
           <div className="max-w-5xl mx-auto">
             <div className="mb-8">
@@ -126,7 +167,7 @@ export default function TeamPage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              
+
               {/* Invite Form */}
               <div className="lg:col-span-1">
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
@@ -134,7 +175,7 @@ export default function TeamPage() {
                     <UserPlus className="w-5 h-5 text-indigo-600" />
                     Invite Member
                   </h2>
-                  
+
                   {error && <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm border border-red-100">{error}</div>}
                   {success && <div className="mb-4 p-3 bg-emerald-50 text-emerald-700 rounded-lg text-sm border border-emerald-100">{success}</div>}
 
@@ -174,7 +215,7 @@ export default function TeamPage() {
 
               {/* Team Members List */}
               <div className="lg:col-span-2 space-y-6">
-                
+
                 {/* Active Members */}
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                   <div className="px-6 py-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
@@ -190,30 +231,55 @@ export default function TeamPage() {
                     {teamMembers.length === 0 ? (
                       <div className="p-6 text-center text-gray-500 text-sm">No team members found.</div>
                     ) : (
-                      teamMembers.map((member) => (
-                        <div key={member.id} className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                          <div className="flex items-center gap-3">
-                            {member.photoURL ? (
-                              <img src={member.photoURL} alt={member.displayName} className="w-10 h-10 rounded-full bg-gray-200" />
-                            ) : (
-                              <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
-                                {member.displayName?.charAt(0) || member.email?.charAt(0) || '?'}
+                      teamMembers.map((member) => {
+                        const isSelf = member.id === user.uid;
+                        return (
+                          <div key={member.id} className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                            <div className="flex items-center gap-3 min-w-0">
+                              {member.photoURL ? (
+                                <img src={member.photoURL} alt={member.displayName} className="w-10 h-10 rounded-full bg-gray-200 flex-shrink-0" />
+                              ) : (
+                                <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold flex-shrink-0">
+                                  {member.displayName?.charAt(0) || member.email?.charAt(0) || '?'}
+                                </div>
+                              )}
+                              <div className="min-w-0">
+                                <p className="text-sm font-medium text-gray-900 truncate">
+                                  {member.displayName || 'No name'}
+                                  {isSelf && <span className="ml-1.5 text-xs text-gray-400">(you)</span>}
+                                </p>
+                                <p className="text-xs text-gray-500 truncate">{member.email}</p>
                               </div>
-                            )}
-                            <div>
-                              <p className="text-sm font-medium text-gray-900">{member.displayName || 'No name'}</p>
-                              <p className="text-xs text-gray-500">{member.email}</p>
+                            </div>
+                            <div className="flex items-center gap-2 flex-shrink-0 ml-3">
+                              {/* Role dropdown */}
+                              <select
+                                value={member.role}
+                                disabled={isSelf}
+                                onChange={(e) => handleRoleChange(member, e.target.value)}
+                                className={`text-xs font-medium px-2.5 py-1 rounded-full border transition-colors ${
+                                  member.role === 'org_admin'
+                                    ? 'bg-purple-50 text-purple-700 border-purple-200'
+                                    : 'bg-blue-50 text-blue-700 border-blue-200'
+                                } ${isSelf ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:opacity-80'}`}
+                              >
+                                <option value="agent">Agent</option>
+                                <option value="org_admin">Admin</option>
+                              </select>
+                              {/* Remove button */}
+                              {!isSelf && (
+                                <button
+                                  onClick={() => handleRemoveMember(member)}
+                                  className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                  title="Remove from team"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              )}
                             </div>
                           </div>
-                          <div className="flex items-center gap-3">
-                            <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                              member.role === 'org_admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
-                            }`}>
-                              {member.role === 'org_admin' ? 'Admin' : 'Agent'}
-                            </span>
-                          </div>
-                        </div>
-                      ))
+                        );
+                      })
                     )}
                   </div>
                 </div>
