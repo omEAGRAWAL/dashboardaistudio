@@ -12,9 +12,9 @@ import {
   CheckCircle2, Palette, X,
 } from 'lucide-react';
 
-export type FieldType = 'text' | 'tel' | 'email' | 'date' | 'select' | 'number' | 'textarea';
+type FieldType = 'text' | 'tel' | 'email' | 'date' | 'select' | 'number' | 'textarea';
 
-export interface BookingField {
+interface BookingField {
   id: string;
   key?: string;
   label: string;
@@ -39,7 +39,7 @@ const INDIAN_STATES = [
 
 const SOURCE_OPTIONS = ['Google','Instagram','Facebook','YouTube','WhatsApp','Friend Referral','Walk-in','Other'];
 
-export const DEFAULT_BOOKING_FIELDS: BookingField[] = [
+const DEFAULT_BOOKING_FIELDS: BookingField[] = [
   { id: 'f_name', key: 'customerName', label: 'Full Name', type: 'text', placeholder: 'Full Name', required: true, enabled: true, order: 0, isDefault: true },
   { id: 'f_phone', key: 'customerPhone', label: 'Phone Number (WhatsApp)', type: 'tel', placeholder: 'Phone Number', required: true, enabled: true, order: 1, isDefault: true },
   { id: 'f_email', key: 'customerEmail', label: 'Email Address', type: 'email', placeholder: 'Email Address', required: false, enabled: true, order: 2, isDefault: true },
