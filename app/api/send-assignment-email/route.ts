@@ -147,6 +147,7 @@ function buildEmailHtml(params: {
 }
 
 export async function POST(req: NextRequest) {
+  console.log('[email] POST /api/send-assignment-email');
   try {
     const body = await req.json();
     const {
@@ -164,11 +165,22 @@ export async function POST(req: NextRequest) {
     } = body;
 
     if (!assigneeEmail || !leads?.length) {
+      console.log('[email] Missing required fields — assigneeEmail:', assigneeEmail, 'leads:', leads?.length);
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
+    const smtpConfig = {
+      SMTP_HOST: process.env.SMTP_HOST ?? '(not set)',
+      SMTP_PORT: process.env.SMTP_PORT ?? '(not set)',
+      SMTP_SECURE: process.env.SMTP_SECURE ?? '(not set)',
+      SMTP_USER: process.env.SMTP_USER ? '✓ set' : '(not set)',
+      SMTP_PASS: process.env.SMTP_PASS ? '✓ set' : '(not set)',
+      SMTP_FROM: process.env.SMTP_FROM ?? '(not set)',
+    };
+    console.log('[email] SMTP env check:', smtpConfig);
+
     if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
-      return NextResponse.json({ error: 'SMTP not configured. Set SMTP_HOST, SMTP_USER, SMTP_PASS in .env.local' }, { status: 500 });
+      return NextResponse.json({ error: 'SMTP not configured', detail: smtpConfig }, { status: 500 });
     }
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || 'https://yourapp.com';
@@ -185,7 +197,14 @@ export async function POST(req: NextRequest) {
       appUrl,
     });
 
+    console.log('[email] Creating transporter — host:', process.env.SMTP_HOST, 'port:', process.env.SMTP_PORT);
     const transporter = createTransport();
+
+    console.log('[email] Verifying transporter...');
+    await transporter.verify();
+    console.log('[email] Transporter verified OK');
+
+    console.log('[email] Sending to:', assigneeEmail, '| subject:', subject);
     const info = await transporter.sendMail({
       from: process.env.SMTP_FROM || `"${orgName || 'Travlyy CRM'}" <${process.env.SMTP_USER}>`,
       to: assigneeEmail,
@@ -193,9 +212,11 @@ export async function POST(req: NextRequest) {
       html,
     });
 
+    console.log('[email] Sent — messageId:', info.messageId);
     return NextResponse.json({ success: true, messageId: info.messageId });
   } catch (err: any) {
-    console.error('Email send error:', err);
-    return NextResponse.json({ error: err.message ?? 'Unknown error' }, { status: 500 });
+    console.error('[email] FAILED —', err.code ?? '', err.message ?? 'Unknown error');
+    console.error('[email] Full error:', JSON.stringify(err, Object.getOwnPropertyNames(err)));
+    return NextResponse.json({ error: err.message ?? 'Unknown error', code: err.code }, { status: 500 });
   }
 }
