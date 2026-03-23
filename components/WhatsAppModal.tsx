@@ -210,7 +210,7 @@ export function WhatsAppModal({ lead, onClose }: { lead: Lead; onClose: () => vo
                         <p className="font-semibold text-sm text-gray-800">{tmpl.name}</p>
                         <p className="text-xs text-gray-400 mt-0.5 line-clamp-2 whitespace-pre-wrap font-mono">{tmpl.message}</p>
                       </div>
-                      <div className="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-1 flex-shrink-0 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => openCompose(tmpl)}
                           className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"
