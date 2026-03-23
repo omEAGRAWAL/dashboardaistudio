@@ -1,6 +1,7 @@
 import type {Metadata} from 'next';
 import './globals.css'; // Global styles
 import { AuthProvider } from '@/components/AuthProvider';
+import { SidebarProvider } from '@/components/SidebarContext';
 import { Analytics } from '@vercel/analytics/next';
 
 export const metadata: Metadata = {
@@ -13,7 +14,9 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
     <html lang="en">
       <body suppressHydrationWarning>
         <AuthProvider>
-          {children}
+          <SidebarProvider>
+            {children}
+          </SidebarProvider>
         </AuthProvider>
         <Analytics />
       </body>

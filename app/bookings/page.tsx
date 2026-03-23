@@ -155,44 +155,44 @@ export default function BookingsPage() {
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
         
-        <main className="flex-1 overflow-y-auto p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-6 md:mb-8">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Bookings</h1>
+                <h1 className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight">Bookings</h1>
                 <p className="text-gray-500 text-sm mt-1">Manage customer package bookings.</p>
               </div>
-              <div className="flex items-center gap-3">
-                <button 
-                  onClick={() => setIsCreateModalOpen(true)}
-                  className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              <button
+                onClick={() => setIsCreateModalOpen(true)}
+                className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition-colors text-sm"
+              >
+                <Plus className="w-4 h-4" />
+                Create Booking
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-2 mb-4">
+              <div className="relative flex-1 min-w-[160px]">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search bookings..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-full text-sm"
+                />
+              </div>
+              <div className="relative">
+                <Filter className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="pl-9 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none bg-white text-sm"
                 >
-                  <Plus className="w-4 h-4" />
-                  Create Booking
-                </button>
-                <div className="relative">
-                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input 
-                    type="text" 
-                    placeholder="Search bookings..." 
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-full md:w-64 text-sm"
-                  />
-                </div>
-                <div className="relative">
-                  <Filter className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <select 
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="pl-9 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none bg-white text-sm"
-                  >
-                    <option value="All">All Statuses</option>
-                    <option value="Pending">Pending</option>
-                    <option value="Confirmed">Confirmed</option>
-                    <option value="Cancelled">Cancelled</option>
-                  </select>
-                </div>
+                  <option value="All">All Statuses</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Confirmed">Confirmed</option>
+                  <option value="Cancelled">Cancelled</option>
+                </select>
               </div>
             </div>
 
@@ -208,7 +208,40 @@ export default function BookingsPage() {
               </div>
             ) : (
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
+                {/* Mobile card view */}
+                <div className="block md:hidden divide-y divide-gray-100">
+                  {filteredBookings.map((booking) => (
+                    <div key={booking.id} className="p-4 space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="font-semibold text-gray-900 truncate">{booking.customerName}</p>
+                          <p className="text-xs text-gray-500 truncate">{booking.customerPhone}</p>
+                        </div>
+                        <span className={`flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                          booking.status === 'Confirmed' ? 'bg-green-100 text-green-800' :
+                          booking.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>{booking.status || 'Pending'}</span>
+                      </div>
+                      <p className="text-sm font-medium text-gray-700 line-clamp-1">{booking.packageTitle}</p>
+                      <div className="flex items-center justify-between">
+                        <div className="text-xs text-gray-500 space-x-2">
+                          <span className="capitalize">{booking.sharingType} · {booking.numberOfPersons}p</span>
+                          <span>· {booking.createdAt ? format(booking.createdAt.toDate(), 'MMM d') : 'N/A'}</span>
+                        </div>
+                        <span className="font-semibold text-gray-900 text-sm">₹{booking.totalPrice?.toLocaleString?.() ?? booking.totalPrice}</span>
+                      </div>
+                      <div className="flex items-center gap-2 pt-1">
+                        <button onClick={() => handleOpenView(booking)} className="flex-1 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-center">View</button>
+                        <button onClick={() => handleOpenEdit(booking)} className="flex-1 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors text-center">Edit Status</button>
+                        <button onClick={() => handleDelete(booking.id)} className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Desktop table */}
+                <div className="hidden md:block overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
                       <tr className="bg-gray-50 border-b border-gray-200">
@@ -258,27 +291,9 @@ export default function BookingsPage() {
                           </td>
                           <td className="px-6 py-4 text-right">
                             <div className="flex items-center justify-end gap-2">
-                              <button
-                                onClick={() => handleOpenView(booking)}
-                                className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                                title="View Details"
-                              >
-                                <Eye className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => handleOpenEdit(booking)}
-                                className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
-                                title="Edit Status"
-                              >
-                                <Edit2 className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => handleDelete(booking.id)}
-                                className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
-                                title="Delete Booking"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
+                              <button onClick={() => handleOpenView(booking)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" title="View Details"><Eye className="w-4 h-4" /></button>
+                              <button onClick={() => handleOpenEdit(booking)} className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors" title="Edit Status"><Edit2 className="w-4 h-4" /></button>
+                              <button onClick={() => handleDelete(booking.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors" title="Delete Booking"><Trash2 className="w-4 h-4" /></button>
                             </div>
                           </td>
                         </tr>
