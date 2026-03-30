@@ -232,14 +232,13 @@ service cloud.firestore {
 
     // WhatsApp number assignments (orgId is document ID)
     match /whatsapp_numbers/{orgId} {
-      allow read: if isAuthenticated() && (isSuperAdmin() || getUserOrgId() == orgId);
+      allow read: if true; // webhook reads this without auth to look up orgId by phone number
       allow create, update, delete: if isSuperAdmin();
     }
 
     // Chatbot flow per org (orgId is document ID)
     match /chatbot_flows/{orgId} {
-      allow read: if isAuthenticated() && (isSuperAdmin() || getUserOrgId() == orgId);
-      // Unauthenticated read allowed for webhook handler (server-side uses Admin SDK anyway)
+      allow read: if true; // webhook reads this without auth to load the flow
       allow create, update: if isAuthenticated() && (isSuperAdmin() || getUserOrgId() == orgId);
       allow delete: if isAuthenticated() && (isSuperAdmin() || getUserOrgId() == orgId);
     }
