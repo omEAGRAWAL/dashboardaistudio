@@ -1,6 +1,6 @@
 'use client';
 
-import { LayoutDashboard, Users, Settings, LogOut, Shield, Package, CalendarCheck, Globe, ClipboardList, Smartphone, X } from 'lucide-react';
+import { LayoutDashboard, Users, Settings, LogOut, Shield, Package, CalendarCheck, Globe, ClipboardList, Smartphone, X, MessageSquare, Bot } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import { useSidebar } from './SidebarContext';
 import Link from 'next/link';
@@ -95,6 +95,18 @@ export function Sidebar() {
             <Link href="/campaign-builder" onClick={handleNav} className={linkClass('/campaign-builder')}>
               <Smartphone className="w-5 h-5 flex-shrink-0" />
               Campaign Builder
+            </Link>
+          )}
+
+          <Link href="/whatsapp" onClick={handleNav} className={linkClass('/whatsapp')}>
+            <MessageSquare className="w-5 h-5 flex-shrink-0" />
+            WhatsApp Inbox
+          </Link>
+
+          {isTeamVisible && (
+            <Link href="/chatbot" onClick={handleNav} className={linkClass('/chatbot')}>
+              <Bot className="w-5 h-5 flex-shrink-0" />
+              Chatbot Builder
             </Link>
           )}
 

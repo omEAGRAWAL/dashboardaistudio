@@ -230,6 +230,35 @@ service cloud.firestore {
       allow delete: if isAuthenticated() && resource.data.orgId == getUserOrgId();
     }
 
+    // WhatsApp number assignments (orgId is document ID)
+    match /whatsapp_numbers/{orgId} {
+      allow read: if isAuthenticated() && (isSuperAdmin() || getUserOrgId() == orgId);
+      allow create, update, delete: if isSuperAdmin();
+    }
+
+    // Chatbot flow per org (orgId is document ID)
+    match /chatbot_flows/{orgId} {
+      allow read: if isAuthenticated() && (isSuperAdmin() || getUserOrgId() == orgId);
+      // Unauthenticated read allowed for webhook handler (server-side uses Admin SDK anyway)
+      allow create, update: if isAuthenticated() && (isSuperAdmin() || getUserOrgId() == orgId);
+      allow delete: if isAuthenticated() && (isSuperAdmin() || getUserOrgId() == orgId);
+    }
+
+    // Conversations (created by webhook, read by org members)
+    match /conversations/{conversationId} {
+      allow read: if isAuthenticated() && (isSuperAdmin() || resource.data.orgId == getUserOrgId());
+      // Unauthenticated create/update for webhook handler
+      allow create, update: if true;
+      allow delete: if isAuthenticated() && (isSuperAdmin() || resource.data.orgId == getUserOrgId());
+    }
+
+    // WhatsApp message log
+    match /whatsapp_messages/{messageId} {
+      allow read: if isAuthenticated() && (isSuperAdmin() || resource.data.orgId == getUserOrgId());
+      allow create: if true; // webhook + authenticated agents both create messages
+      allow update, delete: if isAuthenticated() && (isSuperAdmin() || resource.data.orgId == getUserOrgId());
+    }
+
     // ===============================================================
     // Generic Data Models (for apps integrating with this backend)
     // ===============================================================

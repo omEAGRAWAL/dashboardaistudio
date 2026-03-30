@@ -3,15 +3,25 @@
 import { useAuth } from '@/components/AuthProvider';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
-import { Settings as SettingsIcon, Webhook, Copy, CheckCircle2 } from 'lucide-react';
+import { Settings as SettingsIcon, Webhook, Copy, CheckCircle2, MessageSquare, Phone } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { db } from '@/lib/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 export default function SettingsPage() {
   const { user, orgId, role, loading } = useAuth();
   const [copied, setCopied] = useState(false);
-  
+  const [waNumber, setWaNumber] = useState<string | null>(null);
+
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
   const webhookUrl = orgId && origin ? `${origin}/api/webhooks/meta-leads?orgId=${orgId}` : '';
+
+  useEffect(() => {
+    if (!orgId) return;
+    getDoc(doc(db, 'whatsapp_numbers', orgId)).then((snap) => {
+      if (snap.exists()) setWaNumber(snap.data().phoneNumber);
+    });
+  }, [orgId]);
 
   const copyToClipboard = () => {
     if (!webhookUrl) return;
@@ -164,6 +174,48 @@ export default function SettingsPage() {
                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
+
+              {/* WhatsApp Number Section */}
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-200 bg-gray-50 flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5 text-green-600" />
+                  <h2 className="text-lg font-semibold text-gray-900">WhatsApp Integration</h2>
+                </div>
+                <div className="p-6">
+                  {waNumber ? (
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                        <Phone className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">{waNumber}</p>
+                        <p className="text-xs text-green-600">WhatsApp number active — chatbot and inbox are ready</p>
+                      </div>
+                      <div className="ml-auto">
+                        <span className="text-xs bg-green-100 text-green-700 font-semibold px-2.5 py-1 rounded-full">Connected</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-3 text-gray-500">
+                      <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                        <Phone className="w-5 h-5 text-gray-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-700">No WhatsApp number assigned</p>
+                        <p className="text-xs text-gray-400">
+                          Contact your admin to get a Twilio WhatsApp number assigned to your agency.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  <p className="mt-4 text-xs text-gray-400">
+                    Webhook URL for Twilio:{' '}
+                    <code className="bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">
+                      {origin}/api/webhooks/whatsapp
+                    </code>
+                  </p>
                 </div>
               </div>
 
