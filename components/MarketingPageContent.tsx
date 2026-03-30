@@ -61,11 +61,11 @@ const steps = [
 
 const faqs = [
   {
-    q: 'Is there a free trial for Travlyy?',
+    q: 'Is there a free trial for Yatrik?',
     a: 'Yes! You get 1 full month free — all features, no restrictions. No credit card needed to start.',
   },
   {
-    q: 'How much does Travlyy cost after the trial?',
+    q: 'How much does Yatrik cost after the trial?',
     a: 'Just ₹1,000 per month. That includes unlimited leads, packages, bookings, your travel website, team access, and priority Indian support.',
   },
   {
@@ -73,24 +73,24 @@ const faqs = [
     a: 'Our team will import your existing leads/data, set up your branding, configure your travel website, and do a live onboarding call — all at no extra cost. Estimated value: ₹5,000.',
   },
   {
-    q: 'Is Travlyy better than Travefy or Sembark for India?',
-    a: 'Travlyy is built specifically for Indian travel agencies. Travefy is US-based (~₹4,000/month, no India-specific support, no INR pricing). Sembark has opaque custom pricing. Travlyy gives you more features at ₹1,000/month with an Indian support team that understands your business.',
+    q: 'Is Yatrik better than Travefy or Sembark for India?',
+    a: 'Yatrik is built specifically for Indian travel agencies. Travefy is US-based (~₹4,000/month, no India-specific support, no INR pricing). Sembark has opaque custom pricing. Yatrik gives you more features at ₹1,000/month with an Indian support team that understands your business.',
   },
   {
-    q: 'Does Travlyy integrate with Meta (Facebook/Instagram) Ads?',
-    a: 'Yes. Leads from your Meta Ads campaigns are automatically captured into Travlyy so you never miss a hot enquiry.',
+    q: 'Does Yatrik integrate with Meta (Facebook/Instagram) Ads?',
+    a: 'Yes. Leads from your Meta Ads campaigns are automatically captured into Yatrik so you never miss a hot enquiry.',
   },
   {
-    q: 'Can I build my travel agency website with Travlyy?',
+    q: 'Can I build my travel agency website with Yatrik?',
     a: 'Absolutely. The built-in website builder gives you a fully branded, SEO-ready travel website — with packages, gallery, testimonials, contact form, and Google Maps — live in minutes.',
   },
   {
-    q: 'How is Travlyy different from generic CRMs like Zoho or Salesforce?',
-    a: "Travlyy is built exclusively for travel agencies. It speaks your language — packages, itineraries, enquiries, bookings, and WhatsApp. Generic CRMs make you adapt to them; Travlyy works out of the box for a travel business.",
+    q: 'How is Yatrik different from generic CRMs like Zoho or Salesforce?',
+    a: "Yatrik is built exclusively for travel agencies. It speaks your language — packages, itineraries, enquiries, bookings, and WhatsApp. Generic CRMs make you adapt to them; Yatrik works out of the box for a travel business.",
   },
   {
     q: 'Is it suitable for small travel agencies or solo agents?',
-    a: "Perfectly suited. Whether you're a solo travel agent or a team of 20+, Travlyy scales with you. Start free, upgrade when you're ready.",
+    a: "Perfectly suited. Whether you're a solo travel agent or a team of 20+, Yatrik scales with you. Start free, upgrade when you're ready.",
   },
 ];
 
@@ -146,16 +146,16 @@ const RedX = () => (
 );
 
 const compareRows = [
-  { feature: 'Built for travel agencies', travlyy: true, travefy: true, sembark: true, zoho: false },
-  { feature: 'India-first design & support', travlyy: true, travefy: false, sembark: true, zoho: false },
-  { feature: 'Website builder included', travlyy: true, travefy: true, sembark: false, zoho: false },
-  { feature: 'Meta Ads lead auto-capture', travlyy: true, travefy: false, sembark: false, zoho: 'Add-on' },
-  { feature: 'WhatsApp integration', travlyy: true, travefy: false, sembark: false, zoho: 'Paid extra' },
-  { feature: 'Package management', travlyy: true, travefy: true, sembark: true, zoho: false },
-  { feature: 'GST invoice', travlyy: true, travefy: false, sembark: true, zoho: true },
-  { feature: 'Transparent pricing', travlyy: true, travefy: true, sembark: false, zoho: true },
-  { feature: 'Free setup included', travlyy: true, travefy: false, sembark: false, zoho: false },
-  { feature: '1 month free trial', travlyy: true, travefy: '10 days only', sembark: false, zoho: '15 days only' },
+  { feature: 'Built for travel agencies', yatrik: true, travefy: true, sembark: true, zoho: false },
+  { feature: 'India-first design & support', yatrik: true, travefy: false, sembark: true, zoho: false },
+  { feature: 'Website builder included', yatrik: true, travefy: true, sembark: false, zoho: false },
+  { feature: 'Meta Ads lead auto-capture', yatrik: true, travefy: false, sembark: false, zoho: 'Add-on' },
+  { feature: 'WhatsApp integration', yatrik: true, travefy: false, sembark: false, zoho: 'Paid extra' },
+  { feature: 'Package management', yatrik: true, travefy: true, sembark: true, zoho: false },
+  { feature: 'GST invoice', yatrik: true, travefy: false, sembark: true, zoho: true },
+  { feature: 'Transparent pricing', yatrik: true, travefy: true, sembark: false, zoho: true },
+  { feature: 'Free setup included', yatrik: true, travefy: false, sembark: false, zoho: false },
+  { feature: '1 month free trial', yatrik: true, travefy: '10 days only', sembark: false, zoho: '15 days only' },
 ];
 
 export default function MarketingPageContent() {
@@ -175,7 +175,7 @@ export default function MarketingPageContent() {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center">
               <span className="text-white text-sm font-bold">T</span>
             </div>
-            <span className="text-xl font-bold text-gray-900">Travlyy</span>
+            <span className="text-xl font-bold text-gray-900">Yatrik</span>
             <span className="hidden sm:inline-flex ml-2 text-xs font-medium bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full">
               Travel Agency CRM
             </span>
@@ -222,7 +222,7 @@ export default function MarketingPageContent() {
             </span>
           </h1>
           <p className="max-w-2xl mx-auto text-lg sm:text-xl text-gray-600 leading-relaxed mb-4">
-            Travlyy is the all-in-one travel agency CRM built for India — manage{' '}
+            Yatrik is the all-in-one travel agency CRM built for India — manage{' '}
             <strong>leads, packages, bookings, team, and your website</strong> from one beautiful dashboard.
           </p>
           <p className="max-w-xl mx-auto text-base text-gray-500 mb-8">
@@ -285,7 +285,7 @@ export default function MarketingPageContent() {
           </div>
           <div className="mt-10 p-6 bg-indigo-50 rounded-2xl border border-indigo-100">
             <p className="text-lg font-semibold text-indigo-900">
-              There&apos;s a better way. Travlyy was built specifically to solve every one of these problems — for Indian travel agencies.
+              There&apos;s a better way. Yatrik was built specifically to solve every one of these problems — for Indian travel agencies.
             </p>
           </div>
         </div>
@@ -302,7 +302,7 @@ export default function MarketingPageContent() {
               Everything your travel agency needs — in one place
             </h2>
             <p className="max-w-2xl mx-auto text-gray-500 text-lg">
-              Unlike generic CRMs, every Travlyy feature is designed around how Indian travel agencies actually work.
+              Unlike generic CRMs, every Yatrik feature is designed around how Indian travel agencies actually work.
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -336,7 +336,7 @@ export default function MarketingPageContent() {
               Built for every type of travel business in India
             </h2>
             <p className="max-w-2xl mx-auto text-gray-500 text-lg">
-              Whether you run a solo practice or manage a team of 20 agents, Travlyy fits your workflow.
+              Whether you run a solo practice or manage a team of 20 agents, Yatrik fits your workflow.
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
@@ -395,13 +395,13 @@ export default function MarketingPageContent() {
               Customer Stories
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              Travel agencies across India love Travlyy
+              Travel agencies across India love Yatrik
             </h2>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {[
               {
-                quote: 'Before Travlyy, we were losing at least 30% of our Meta Ads leads because there was no system. Now every lead is tracked and followed up automatically. Our conversion rate has doubled in 3 months.',
+                quote: 'Before Yatrik, we were losing at least 30% of our Meta Ads leads because there was no system. Now every lead is tracked and followed up automatically. Our conversion rate has doubled in 3 months.',
                 name: 'Rajesh Sharma',
                 role: 'Owner, Sharma Travels',
                 city: 'Delhi',
@@ -415,7 +415,7 @@ export default function MarketingPageContent() {
                 rating: 5,
               },
               {
-                quote: "We have a team of 8 agents. Managing who follows up on what was a nightmare. Travlyy solved that completely — and their setup team handled everything. I didn't have to lift a finger.",
+                quote: "We have a team of 8 agents. Managing who follows up on what was a nightmare. Yatrik solved that completely — and their setup team handled everything. I didn't have to lift a finger.",
                 name: 'Arjun Nair',
                 role: 'Director, Horizon Travel',
                 city: 'Bangalore',
@@ -529,7 +529,7 @@ export default function MarketingPageContent() {
               Compare
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              Travlyy vs the alternatives
+              Yatrik vs the alternatives
             </h2>
             <p className="text-gray-500 text-lg">Why pay more for software not built for India?</p>
           </div>
@@ -539,7 +539,7 @@ export default function MarketingPageContent() {
                 <tr className="bg-gray-900 text-white">
                   <th className="text-left px-5 py-4 font-semibold">Feature</th>
                   <th className="text-center px-5 py-4 font-bold text-indigo-300 bg-indigo-900/30">
-                    Travlyy<div className="text-xs font-normal text-indigo-400">₹1,000/mo</div>
+                    Yatrik<div className="text-xs font-normal text-indigo-400">₹1,000/mo</div>
                   </th>
                   <th className="text-center px-5 py-4 font-medium text-gray-400">
                     Travefy<div className="text-xs text-gray-500">~₹4,000/mo</div>
@@ -556,16 +556,16 @@ export default function MarketingPageContent() {
                 {compareRows.map((row) => (
                   <tr key={row.feature} className="hover:bg-gray-50">
                     <td className="px-5 py-3.5 font-medium text-gray-700">{row.feature}</td>
-                    {(['travlyy', 'travefy', 'sembark', 'zoho'] as const).map((col) => {
+                    {(['yatrik', 'travefy', 'sembark', 'zoho'] as const).map((col) => {
                       const val = row[col];
                       return (
-                        <td key={col} className={`px-5 py-3.5 text-center ${col === 'travlyy' ? 'bg-indigo-50/40' : ''}`}>
+                        <td key={col} className={`px-5 py-3.5 text-center ${col === 'yatrik' ? 'bg-indigo-50/40' : ''}`}>
                           {val === true ? (
-                            col === 'travlyy' ? <GreenCheck /> : <GrayCheck />
+                            col === 'yatrik' ? <GreenCheck /> : <GrayCheck />
                           ) : val === false ? (
                             <RedX />
                           ) : (
-                            <span className={`text-xs font-medium ${col === 'travlyy' ? 'text-indigo-600' : 'text-gray-500'}`}>{val}</span>
+                            <span className={`text-xs font-medium ${col === 'yatrik' ? 'text-indigo-600' : 'text-gray-500'}`}>{val}</span>
                           )}
                         </td>
                       );
@@ -619,7 +619,7 @@ export default function MarketingPageContent() {
             Ready to grow your travel agency?
           </h2>
           <p className="text-indigo-200 text-lg sm:text-xl mb-10 max-w-2xl mx-auto">
-            Join travel agencies across India already using Travlyy. Start completely free — your first month is on us, and our team sets everything up for you.
+            Join travel agencies across India already using Yatrik. Start completely free — your first month is on us, and our team sets everything up for you.
           </p>
           <Link
             href="/login"
@@ -645,7 +645,7 @@ export default function MarketingPageContent() {
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center">
                   <span className="text-white text-sm font-bold">T</span>
                 </div>
-                <span className="text-xl font-bold text-white">Travlyy</span>
+                <span className="text-xl font-bold text-white">Yatrik</span>
               </div>
               <p className="text-sm text-gray-500 leading-relaxed max-w-xs mb-4">
                 The all-in-one CRM software built for Indian travel agencies. Manage leads, packages, bookings, team, and your website — in one place.
@@ -672,7 +672,7 @@ export default function MarketingPageContent() {
             </div>
           </div>
           <div className="border-t border-gray-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
-            <p>© {new Date().getFullYear()} Travlyy. All rights reserved. Made with ❤️ in India.</p>
+            <p>© {new Date().getFullYear()} Yatrik. All rights reserved. Made with ❤️ in India.</p>
             <p>The #1 Travel Agency CRM Software built for India</p>
           </div>
         </div>

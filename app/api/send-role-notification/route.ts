@@ -97,7 +97,7 @@ function buildEmailHtml(params: {
             <td style="background:#f9fafb; border:1px solid #e5e7eb; border-top:none; border-radius:0 0 16px 16px; padding:20px 32px; text-align:center;">
               <div style="font-size:12px; color:#9ca3af; line-height:1.6;">
                 This is an automated notification from <strong>${orgName}</strong> CRM.<br/>
-                Powered by <strong style="color:#4f46e5;">Travlyy</strong>
+                Powered by <strong style="color:#4f46e5;">Yatrik</strong>
               </div>
             </td>
           </tr>
@@ -145,7 +145,7 @@ export async function POST(req: NextRequest) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://travelycrm.reviu.store';
     const { subject, html } = buildEmailHtml({
       targetName: targetName || targetEmail.split('@')[0],
-      orgName: orgName || 'Travlyy CRM',
+      orgName: orgName || 'Yatrik CRM',
       type,
       newRole,
       inviteRole,
@@ -155,7 +155,7 @@ export async function POST(req: NextRequest) {
 
     const transporter = createTransport();
     const info = await transporter.sendMail({
-      from: process.env.SMTP_FROM || `"${orgName || 'Travlyy CRM'}" <${process.env.SMTP_USER}>`,
+      from: process.env.SMTP_FROM || `"${orgName || 'Yatrik CRM'}" <${process.env.SMTP_USER}>`,
       to: targetEmail,
       subject,
       html,

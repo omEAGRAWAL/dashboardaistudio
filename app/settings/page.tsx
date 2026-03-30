@@ -59,7 +59,7 @@ export default function SettingsPage() {
                 
                 <div className="p-6">
                   <p className="text-sm text-gray-600 mb-4">
-                    Use this Webhook URL to automatically send leads from Meta Ads, Google Ads, Google Sheets, or your website directly into Travlyy.
+                    Use this Webhook URL to automatically send leads from Meta Ads, Google Ads, Google Sheets, or your website directly into Yatrik.
                   </p>
                   
                   <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">

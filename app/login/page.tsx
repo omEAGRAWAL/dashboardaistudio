@@ -27,9 +27,9 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-indigo-50 to-white p-4">
       <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center border border-gray-100">
         <div className="w-14 h-14 bg-gradient-to-br from-indigo-600 to-violet-600 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-indigo-200">
-          <span className="text-white font-bold text-2xl">T</span>
+          <span className="text-white font-bold text-2xl">Y</span>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome to Travlyy</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome to Yatrik</h1>
         <p className="text-gray-500 mb-8 text-sm leading-relaxed">
           Sign in to manage your travel agency — leads, packages, bookings, and website in one place.
         </p>

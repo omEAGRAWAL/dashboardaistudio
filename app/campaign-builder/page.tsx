@@ -235,7 +235,7 @@ export default function CampaignBuilderPage() {
                         <div className="space-y-1.5">
                           <label className="text-sm font-semibold text-gray-700">Agency Name</label>
                           <input value={agencyName} onChange={e => setAgencyName(e.target.value)}
-                            className={inp} placeholder="e.g. Travlyy" />
+                            className={inp} placeholder="e.g. Yatrik" />
                         </div>
                         <div className="space-y-1.5">
                           <label className="text-sm font-semibold text-gray-700">Logo URL</label>

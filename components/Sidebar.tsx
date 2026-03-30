@@ -42,9 +42,9 @@ export function Sidebar() {
         <div className="p-6 flex items-center justify-between border-b border-gray-200">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">T</span>
+              <span className="text-white font-bold text-xl">Y</span>
             </div>
-            <span className="font-bold text-xl text-gray-800 tracking-tight">Travlyy</span>
+            <span className="font-bold text-xl text-gray-800 tracking-tight">Yatrik</span>
           </div>
           <button
             onClick={() => setIsOpen(false)}

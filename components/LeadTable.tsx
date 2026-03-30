@@ -79,7 +79,7 @@ export function LeadTable() {
   const { user, role, orgId } = useAuth();
   const [leads, setLeads] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
-  const [orgName, setOrgName] = useState('Travlyy CRM');
+  const [orgName, setOrgName] = useState('Yatrik CRM');
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('All');
   const [activeCategory, setActiveCategory] = useState('All');
@@ -112,7 +112,7 @@ export function LeadTable() {
     // Fetch org name for email notifications
     if (orgId) {
       getDocs(query(collection(db, 'organizations'), where('__name__', '==', orgId)))
-        .then(snap => { if (!snap.empty) setOrgName(snap.docs[0].data().name || 'Travlyy CRM'); })
+        .then(snap => { if (!snap.empty) setOrgName(snap.docs[0].data().name || 'Yatrik CRM'); })
         .catch(() => {});
     }
 

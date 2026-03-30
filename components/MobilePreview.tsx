@@ -264,7 +264,7 @@ export function MobilePreview({ settings, packages = [], viewMode = 'mobile' }: 
               <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
             </div>
             <div className="flex-1 bg-white rounded-md px-2 py-1 text-[10px] text-gray-400 truncate">
-              travlyy.com/site/{(settings.agencyName || 'your-agency').toLowerCase().replace(/\s+/g, '-')}
+              yatrik.com/site/{(settings.agencyName || 'your-agency').toLowerCase().replace(/\s+/g, '-')}
             </div>
           </div>
           {/* Scaled content */}

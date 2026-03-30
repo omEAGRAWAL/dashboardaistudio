@@ -496,7 +496,7 @@ export default function PublicSitePage() {
           </div>
           <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-gray-600">&copy; {new Date().getFullYear()} {agencyName}. All rights reserved.</p>
-            <p className="text-xs text-gray-700">Powered by Travlyy</p>
+            <p className="text-xs text-gray-700">Powered by Yatrik</p>
           </div>
         </div>
       </footer>

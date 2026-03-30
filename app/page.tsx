@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import RootGate from '@/components/RootGate';
 
 export const metadata: Metadata = {
-  title: 'Travlyy — #1 CRM for Travel Agencies in India | Free Trial',
+  title: 'Yatrik — #1 CRM for Travel Agencies in India | Free Trial',
   description:
-    'Travlyy is the all-in-one CRM built for Indian travel agencies & tour operators. Manage leads, packages, bookings & your website in one dashboard. ₹1,000/month. 1 month free trial + free setup.',
+    'Yatrik is the all-in-one CRM built for Indian travel agencies & tour operators. Manage leads, packages, bookings & your website in one dashboard. ₹1,000/month. 1 month free trial + free setup.',
   keywords: [
     'travel agency CRM India',
     'CRM for travel agents India',
@@ -23,15 +23,15 @@ export const metadata: Metadata = {
     'travel CRM India',
   ].join(', '),
   openGraph: {
-    title: 'Travlyy — #1 CRM for Travel Agencies in India',
+    title: 'Yatrik — #1 CRM for Travel Agencies in India',
     description:
-      'Stop losing leads. Start closing more bookings. Travlyy is the all-in-one CRM for Indian travel agencies & DMCs. Try free for 1 month.',
+      'Stop losing leads. Start closing more bookings. Yatrik is the all-in-one CRM for Indian travel agencies & DMCs. Try free for 1 month.',
     type: 'website',
     locale: 'en_IN',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Travlyy — #1 CRM for Travel Agencies in India',
+    title: 'Yatrik — #1 CRM for Travel Agencies in India',
     description:
       'All-in-one travel agency CRM. Leads, packages, bookings & website builder. ₹1,000/month. 1 month free trial.',
   },
@@ -45,7 +45,7 @@ const jsonLd = {
   '@graph': [
     {
       '@type': 'SoftwareApplication',
-      name: 'Travlyy',
+      name: 'Yatrik',
       applicationCategory: 'BusinessApplication',
       operatingSystem: 'Web',
       url: 'https://travelycrm.reviu.store',
@@ -75,33 +75,33 @@ const jsonLd = {
       mainEntity: [
         {
           '@type': 'Question',
-          name: 'Is there a free trial for Travlyy?',
+          name: 'Is there a free trial for Yatrik?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Yes! Travlyy offers a full 1-month free trial with all features included. No credit card required.',
+            text: 'Yes! Yatrik offers a full 1-month free trial with all features included. No credit card required.',
           },
         },
         {
           '@type': 'Question',
-          name: 'How much does Travlyy cost?',
+          name: 'How much does Yatrik cost?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Travlyy costs ₹1,000 per month after the free trial. This includes all features, free initial setup, and customer support.',
+            text: 'Yatrik costs ₹1,000 per month after the free trial. This includes all features, free initial setup, and customer support.',
           },
         },
         {
           '@type': 'Question',
-          name: 'Is Travlyy better than Travefy or Sembark for India?',
+          name: 'Is Yatrik better than Travefy or Sembark for India?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Travlyy is purpose-built for India. Unlike Travefy (US-based, ~₹4,000/month, no India support), Travlyy offers Indian payment gateways, local support, GST invoices, and a built-in website builder at just ₹1,000/month.',
+            text: 'Yatrik is purpose-built for India. Unlike Travefy (US-based, ~₹4,000/month, no India support), Yatrik offers Indian payment gateways, local support, GST invoices, and a built-in website builder at just ₹1,000/month.',
           },
         },
       ],
     },
     {
       '@type': 'Organization',
-      name: 'Travlyy',
+      name: 'Yatrik',
       url: 'https://travelycrm.reviu.store',
       description: 'Travel Agency CRM Software built for India',
       areaServed: 'IN',
