@@ -56,8 +56,6 @@ export function WhatsAppModal({ lead, onClose }: { lead: Lead; onClose: () => vo
   const [message, setMessage] = useState('');
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
-  const [sending, setSending] = useState(false);
-  const [sendError, setSendError] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -125,29 +123,13 @@ export function WhatsAppModal({ lead, onClose }: { lead: Lead; onClose: () => vo
     await deleteDoc(doc(db, 'whatsapp_templates', id));
   };
 
-  const handleSend = async () => {
-    if (!message.trim() || !orgId) return;
+  const handleSend = () => {
+    if (!message.trim()) return;
     const resolved = resolveVars(message);
-    const phone = lead.phone.startsWith('+') ? lead.phone : `+${lead.phone.replace(/[^0-9]/g, '')}`;
-    setSending(true);
-    setSendError('');
-    try {
-      const res = await fetch('/api/whatsapp/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orgId, to: phone, body: resolved }),
-      });
-      if (!res.ok) {
-        const err = await res.json();
-        setSendError(err.error || 'Failed to send message');
-        return;
-      }
-      onClose();
-    } catch {
-      setSendError('Network error. Please try again.');
-    } finally {
-      setSending(false);
-    }
+    const phone = lead.phone.replace(/[^0-9]/g, '');
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(resolved)}`;
+    window.open(url, '_blank');
+    onClose();
   };
 
   const openCompose = (tmpl?: Template) => {
@@ -384,20 +366,13 @@ export function WhatsAppModal({ lead, onClose }: { lead: Lead; onClose: () => vo
 
             {/* Footer */}
             <div className="flex items-center justify-end gap-3 px-4 py-3 border-t border-gray-100 bg-gray-50 flex-shrink-0">
-              {sendError && (
-                <span className="text-xs text-red-600 font-medium">{sendError}</span>
-              )}
               <button
                 onClick={handleSend}
-                disabled={!message.trim() || sending}
+                disabled={!message.trim()}
                 className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold bg-green-600 text-white rounded-xl hover:bg-green-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm"
               >
-                {sending ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <Send className="w-4 h-4" />
-                )}
-                {sending ? 'Sending…' : 'Send via WhatsApp'}
+                <Send className="w-4 h-4" />
+                Open in WhatsApp
               </button>
             </div>
           </div>
