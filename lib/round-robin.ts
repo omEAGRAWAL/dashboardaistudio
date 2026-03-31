@@ -6,10 +6,13 @@ import { adminDb } from './firebase-admin';
  * Uses a Firestore transaction to atomically advance the round-robin index.
  */
 export async function getNextAssignee(orgId: string): Promise<string | null> {
-  const usersSnap = await adminDb
-    .collection('users')
-    .where('orgId', '==', orgId)
-    .get();
+  let usersSnap;
+  try {
+    usersSnap = await adminDb.collection('users').where('orgId', '==', orgId).get();
+  } catch (err) {
+    console.error('[round-robin] users query failed:', err);
+    return null;
+  }
 
   // Eligible: not suspended, not excluded from assignment, stable sort by uid
   const eligible = usersSnap.docs
@@ -23,6 +26,7 @@ export async function getNextAssignee(orgId: string): Promise<string | null> {
 
   const orgRef = adminDb.doc(`organizations/${orgId}`);
   return adminDb.runTransaction(async (tx) => {
+    console.log('[round-robin] starting transaction for org:', orgId);
     const orgDoc = await tx.get(orgRef);
     const rawIndex: number = orgDoc.exists ? (orgDoc.data()?.rrIndex ?? 0) : 0;
     const nextIndex = rawIndex % eligible.length;

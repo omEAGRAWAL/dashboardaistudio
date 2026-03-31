@@ -40,7 +40,13 @@ export async function POST(req: Request) {
     if (assigneeId) leadData.assigneeId = assigneeId;
 
     // Add to Firestore
-    const docRef = await adminDb.collection('leads').add(leadData);
+    let docRef;
+    try {
+      docRef = await adminDb.collection('leads').add(leadData);
+    } catch (err) {
+      console.error('Webhook error [leads.add]:', err);
+      throw err;
+    }
 
     return NextResponse.json({ success: true, id: docRef.id }, { status: 201 });
   } catch (error) {
