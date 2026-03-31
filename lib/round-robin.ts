@@ -27,7 +27,7 @@ export async function getNextAssignee(orgId: string): Promise<string | null> {
     const rawIndex: number = orgDoc.exists ? (orgDoc.data()?.rrIndex ?? 0) : 0;
     const nextIndex = rawIndex % eligible.length;
     const assigneeId = eligible[nextIndex].id;
-    tx.update(orgRef, { rrIndex: nextIndex + 1 });
+    tx.set(orgRef, { rrIndex: nextIndex + 1 }, { merge: true });
     return assigneeId;
   });
 }
