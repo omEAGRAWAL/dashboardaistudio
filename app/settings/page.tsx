@@ -3,7 +3,7 @@
 import { useAuth } from '@/components/AuthProvider';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
-import { Settings as SettingsIcon, Webhook, Copy, CheckCircle2, MessageSquare, Phone } from 'lucide-react';
+import { Settings as SettingsIcon, Webhook, Copy, CheckCircle2, MessageSquare, Phone, AlertCircle, Loader2, ExternalLink } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
@@ -12,6 +12,15 @@ export default function SettingsPage() {
   const { user, orgId, role, loading } = useAuth();
   const [copied, setCopied] = useState(false);
   const [waNumber, setWaNumber] = useState<string | null>(null);
+  const [waSource, setWaSource] = useState<string | null>(null);
+
+  // Self-serve WhatsApp connection form
+  const [selfPhoneNumber, setSelfPhoneNumber] = useState('');
+  const [selfAccountSid, setSelfAccountSid] = useState('');
+  const [selfAuthToken, setSelfAuthToken] = useState('');
+  const [connecting, setConnecting] = useState(false);
+  const [connectError, setConnectError] = useState('');
+  const [connectSuccess, setConnectSuccess] = useState('');
 
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
   const webhookUrl = orgId && origin ? `${origin}/api/webhooks/meta-leads?orgId=${orgId}` : '';
@@ -19,9 +28,41 @@ export default function SettingsPage() {
   useEffect(() => {
     if (!orgId) return;
     getDoc(doc(db, 'whatsapp_numbers', orgId)).then((snap) => {
-      if (snap.exists()) setWaNumber(snap.data().phoneNumber);
+      if (snap.exists()) {
+        setWaNumber(snap.data().phoneNumber);
+        setWaSource(snap.data().source || 'om');
+      }
     });
   }, [orgId]);
+
+  const handleConnectOwnNumber = async () => {
+    if (!orgId || !selfPhoneNumber || !selfAccountSid || !selfAuthToken) return;
+    setConnecting(true);
+    setConnectError('');
+    setConnectSuccess('');
+    try {
+      const res = await fetch('/api/whatsapp/connect-own-number', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orgId,
+          phoneNumber: selfPhoneNumber,
+          ownAccountSid: selfAccountSid,
+          ownAuthToken: selfAuthToken,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setWaNumber(data.phoneNumber);
+      setWaSource('agency');
+      setConnectSuccess('WhatsApp number connected successfully!');
+      setSelfPhoneNumber(''); setSelfAccountSid(''); setSelfAuthToken('');
+    } catch (e: any) {
+      setConnectError(e.message);
+    } finally {
+      setConnecting(false);
+    }
+  };
 
   const copyToClipboard = () => {
     if (!webhookUrl) return;
@@ -183,35 +224,92 @@ export default function SettingsPage() {
                   <MessageSquare className="w-5 h-5 text-green-600" />
                   <h2 className="text-lg font-semibold text-gray-900">WhatsApp Integration</h2>
                 </div>
-                <div className="p-6">
+                <div className="p-6 space-y-5">
+                  {/* Current status */}
                   {waNumber ? (
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                    <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl">
+                      <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center shrink-0">
                         <Phone className="w-5 h-5 text-green-600" />
                       </div>
-                      <div>
+                      <div className="flex-1">
                         <p className="text-sm font-semibold text-gray-900">{waNumber}</p>
-                        <p className="text-xs text-green-600">WhatsApp number active — chatbot and inbox are ready</p>
+                        <p className="text-xs text-green-600">
+                          {waSource === 'agency' ? 'Connected via your own Twilio account' : 'Connected via admin-assigned number'}
+                          {' — chatbot and inbox are active'}
+                        </p>
                       </div>
-                      <div className="ml-auto">
-                        <span className="text-xs bg-green-100 text-green-700 font-semibold px-2.5 py-1 rounded-full">Connected</span>
-                      </div>
+                      <span className="text-xs bg-green-100 text-green-700 font-semibold px-2.5 py-1 rounded-full shrink-0">Connected</span>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-3 text-gray-500">
-                      <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                    <div className="flex items-center gap-3 p-4 bg-gray-50 border border-gray-200 rounded-xl">
+                      <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
                         <Phone className="w-5 h-5 text-gray-400" />
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-700">No WhatsApp number assigned</p>
-                        <p className="text-xs text-gray-400">
-                          Contact your admin to get a Twilio WhatsApp number assigned to your agency.
-                        </p>
+                        <p className="text-xs text-gray-400">Contact your admin or connect your own number below.</p>
                       </div>
                     </div>
                   )}
-                  <p className="mt-4 text-xs text-gray-400">
-                    Webhook URL for Twilio:{' '}
+
+                  {/* Self-serve: connect own Twilio number */}
+                  <div className="border border-gray-200 rounded-xl overflow-hidden">
+                    <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
+                      <p className="text-sm font-semibold text-gray-800">Connect Your Own WhatsApp Number</p>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Have your own Twilio account with a WhatsApp-enabled number?{' '}
+                        <a href="https://console.twilio.com" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline inline-flex items-center gap-0.5">
+                          Twilio Console <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </p>
+                    </div>
+                    <div className="p-4 space-y-3">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Your WhatsApp Phone Number</label>
+                        <input type="text" placeholder="+919xxxxxxxxx" value={selfPhoneNumber}
+                          onChange={(e) => setSelfPhoneNumber(e.target.value)}
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">Twilio Account SID</label>
+                          <input type="text" placeholder="ACxxxxxxxx" value={selfAccountSid}
+                            onChange={(e) => setSelfAccountSid(e.target.value)}
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-green-500" />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">Auth Token</label>
+                          <input type="password" placeholder="••••••••" value={selfAuthToken}
+                            onChange={(e) => setSelfAuthToken(e.target.value)}
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-green-500" />
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-400">Your credentials are stored securely server-side and never exposed to clients.</p>
+
+                      {connectError && (
+                        <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                          <AlertCircle className="w-4 h-4 shrink-0" /> {connectError}
+                        </div>
+                      )}
+                      {connectSuccess && (
+                        <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+                          <CheckCircle2 className="w-4 h-4 shrink-0" /> {connectSuccess}
+                        </div>
+                      )}
+
+                      <button
+                        onClick={handleConnectOwnNumber}
+                        disabled={connecting || !selfPhoneNumber || !selfAccountSid || !selfAuthToken}
+                        className="flex items-center gap-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+                      >
+                        {connecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Phone className="w-4 h-4" />}
+                        {connecting ? 'Connecting…' : 'Connect Number'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-gray-400">
+                    Twilio webhook URL (set this in your Twilio console):{' '}
                     <code className="bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">
                       {origin}/api/webhooks/whatsapp
                     </code>

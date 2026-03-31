@@ -9,7 +9,7 @@ import {
   doc, getDoc, serverTimestamp, deleteField,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { UserPlus, Trash2, Mail, Shield, User } from 'lucide-react';
+import { UserPlus, Trash2, Mail, Shield, User, ToggleLeft, ToggleRight } from 'lucide-react';
 
 export default function TeamPage() {
   const { user, orgId, role, loading } = useAuth();
@@ -113,6 +113,15 @@ export default function TeamPage() {
       sendRoleNotification({ targetEmail: member.email, targetName: member.displayName || member.email, type: 'role_changed', newRole });
     } catch (err) {
       console.error('Error changing role:', err);
+    }
+  };
+
+  const handleToggleAssignment = async (member: any) => {
+    const newValue = member.assignmentActive === false ? true : false;
+    try {
+      await updateDoc(doc(db, 'users', member.id), { assignmentActive: newValue });
+    } catch (err) {
+      console.error('Error toggling assignment status:', err);
     }
   };
 
@@ -252,6 +261,23 @@ export default function TeamPage() {
                               </div>
                             </div>
                             <div className="flex items-center gap-2 flex-shrink-0 ml-3">
+                              {/* Assignment active/inactive toggle */}
+                              {!isSelf && (
+                                <button
+                                  onClick={() => handleToggleAssignment(member)}
+                                  title={member.assignmentActive === false ? 'Inactive for lead assignment — click to activate' : 'Active for lead assignment — click to deactivate'}
+                                  className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full border transition-colors ${
+                                    member.assignmentActive === false
+                                      ? 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-amber-50 hover:text-amber-700 hover:border-amber-200'
+                                      : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-gray-100 hover:text-gray-500 hover:border-gray-200'
+                                  }`}
+                                >
+                                  {member.assignmentActive === false
+                                    ? <><ToggleLeft className="w-3.5 h-3.5" /> Inactive</>
+                                    : <><ToggleRight className="w-3.5 h-3.5" /> Active</>
+                                  }
+                                </button>
+                              )}
                               {/* Role dropdown */}
                               <select
                                 value={member.role}

@@ -3,12 +3,10 @@
 import { useState, useRef } from 'react';
 import { Upload, X, FileSpreadsheet } from 'lucide-react';
 import Papa from 'papaparse';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 import { useAuth } from './AuthProvider';
 
 export function ImportLeads() {
-  const { user, orgId } = useAuth();
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -28,31 +26,36 @@ export function ImportLeads() {
       skipEmptyLines: true,
       complete: async (results) => {
         try {
+          if (!user) throw new Error('Not authenticated');
+          const idToken = await user.getIdToken();
           const leads = results.data as any[];
           let importedCount = 0;
 
           for (const row of leads) {
-            if (!row.name || !row.phone) continue; // Skip invalid rows
+            if (!row.name || !row.phone) continue;
 
-            const leadData: any = {
+            const payload: Record<string, any> = {
               name: String(row.name).trim(),
               phone: String(row.phone).trim(),
               source: row.source ? String(row.source).trim() : 'CSV Import',
               pax: row.pax ? parseInt(row.pax, 10) : 1,
-              status: row.status || 'New Enquiry',
               category: row.category || 'None',
-              createdAt: serverTimestamp(),
-              updatedAt: serverTimestamp(),
             };
 
-            if (orgId) leadData.orgId = orgId;
-            if (row.sourceId) leadData.sourceId = String(row.sourceId).trim();
-            if (row.travelDate) leadData.travelDate = String(row.travelDate).trim();
-            if (user?.uid) leadData.assigneeId = user.uid;
-            if (row.remark) leadData.latestRemark = String(row.remark).trim();
+            if (row.sourceId) payload.sourceId = String(row.sourceId).trim();
+            if (row.travelDate) payload.travelDate = String(row.travelDate).trim();
+            if (row.remark) payload.latestRemark = String(row.remark).trim();
 
-            await addDoc(collection(db, 'leads'), leadData);
-            importedCount++;
+            const res = await fetch('/api/leads/create', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`,
+              },
+              body: JSON.stringify(payload),
+            });
+
+            if (res.ok) importedCount++;
           }
 
           setSuccess(`Successfully imported ${importedCount} leads.`);
@@ -75,7 +78,7 @@ export function ImportLeads() {
 
   return (
     <>
-      <button 
+      <button
         onClick={() => setIsOpen(true)}
         className="flex items-center gap-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
       >
@@ -95,22 +98,22 @@ export function ImportLeads() {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
+
             <div className="p-6">
               <p className="text-sm text-gray-600 mb-4">
                 Upload a CSV file exported from Google Sheets or Meta Ads. The file must include <code className="bg-gray-100 px-1 py-0.5 rounded">name</code> and <code className="bg-gray-100 px-1 py-0.5 rounded">phone</code> columns.
               </p>
-              
+
               <div className="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => fileInputRef.current?.click()}>
                 <Upload className="w-8 h-8 text-gray-400 mx-auto mb-3" />
                 <p className="text-sm font-medium text-gray-700">Click to upload CSV file</p>
                 <p className="text-xs text-gray-500 mt-1">.csv files only</p>
               </div>
-              
-              <input 
-                type="file" 
-                accept=".csv" 
-                className="hidden" 
+
+              <input
+                type="file"
+                accept=".csv"
+                className="hidden"
                 ref={fileInputRef}
                 onChange={handleFileUpload}
               />

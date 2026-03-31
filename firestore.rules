@@ -148,7 +148,7 @@ service cloud.firestore {
 
     // Rules
     match /organizations/{orgId} {
-      allow read: if isAuthenticated();
+      allow read: if true; // webhook reads org name for greeting message
       allow create: if isAuthenticated() && isValidOrganization(request.resource.data) && request.resource.data.ownerId == request.auth.uid;
       allow update: if isAuthenticated() && isValidOrganization(request.resource.data) && resource.data.ownerId == request.auth.uid;
       allow delete: if isAdmin();
@@ -176,14 +176,21 @@ service cloud.firestore {
     }
 
     match /leads/{leadId} {
-      // Anyone authenticated can read leads, but only if they belong to their org (or if the lead has no orgId for legacy support)
-      allow read: if isAuthenticated() && (isSuperAdmin() || !('orgId' in resource.data) || resource.data.orgId == getUserOrgId());
+      // Superadmin sees all; org_admin sees all leads in their org;
+      // agents see only leads assigned to them in their org.
+      allow read: if isAuthenticated() && (
+        isSuperAdmin() ||
+        (isAdmin() && (!('orgId' in resource.data) || resource.data.orgId == getUserOrgId())) ||
+        (!isAdmin() && resource.data.orgId == getUserOrgId() && resource.data.assigneeId == request.auth.uid)
+      );
       // Allow unauthenticated creates for webhooks (validation still applies)
       allow create: if isValidLead(request.resource.data);
-      // Anyone authenticated can update leads in their org
+      // Admins can update any lead in their org; agents can update only their assigned leads
       allow update: if isAuthenticated() && isValidLead(request.resource.data) &&
                     request.resource.data.createdAt == resource.data.createdAt &&
-                    (isSuperAdmin() || !('orgId' in resource.data) || resource.data.orgId == getUserOrgId());
+                    (isSuperAdmin() ||
+                     (isAdmin() && (!('orgId' in resource.data) || resource.data.orgId == getUserOrgId())) ||
+                     (!isAdmin() && resource.data.orgId == getUserOrgId() && resource.data.assigneeId == request.auth.uid));
       // Only admins can delete leads
       allow delete: if isAdmin() && (isSuperAdmin() || !('orgId' in resource.data) || resource.data.orgId == getUserOrgId());
     }
@@ -245,10 +252,14 @@ service cloud.firestore {
 
     // Conversations (created by webhook, read by org members)
     match /conversations/{conversationId} {
-      allow read: if isAuthenticated() && (isSuperAdmin() || resource.data.orgId == getUserOrgId());
-      // Unauthenticated create/update for webhook handler
+      allow read: if true; // webhook reads conversation state to track current step
       allow create, update: if true;
       allow delete: if isAuthenticated() && (isSuperAdmin() || resource.data.orgId == getUserOrgId());
+    }
+
+    // Agency Twilio credentials — NEVER readable from client, admin SDK only
+    match /whatsapp_credentials/{orgId} {
+      allow read, write: if false;
     }
 
     // WhatsApp message log

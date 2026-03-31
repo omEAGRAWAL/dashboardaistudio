@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { adminDb } from '@/lib/firebase-admin';
+import { FieldValue } from 'firebase-admin/firestore';
+import { getNextAssignee } from '@/lib/round-robin';
 
 export async function POST(req: Request) {
   try {
@@ -18,6 +19,8 @@ export async function POST(req: Request) {
     }
 
     // Build the lead data object
+    const assigneeId = await getNextAssignee(String(orgId).trim());
+
     const leadData: any = {
       name: String(data.name).trim(),
       phone: String(data.phone).trim(),
@@ -26,17 +29,18 @@ export async function POST(req: Request) {
       status: 'New Enquiry',
       category: 'None',
       orgId: String(orgId).trim(),
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
     };
 
     // Only add optional fields if they exist and are not null/empty
     if (data.sourceId) leadData.sourceId = String(data.sourceId).trim();
     if (data.travelDate) leadData.travelDate = String(data.travelDate).trim();
     if (data.latestRemark) leadData.latestRemark = String(data.latestRemark).trim();
+    if (assigneeId) leadData.assigneeId = assigneeId;
 
     // Add to Firestore
-    const docRef = await addDoc(collection(db, 'leads'), leadData);
+    const docRef = await adminDb.collection('leads').add(leadData);
 
     return NextResponse.json({ success: true, id: docRef.id }, { status: 201 });
   } catch (error) {

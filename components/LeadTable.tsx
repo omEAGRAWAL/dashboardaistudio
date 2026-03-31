@@ -117,7 +117,12 @@ export function LeadTable() {
     }
 
     let q = query(collection(db, 'leads'), orderBy('createdAt', 'desc'));
-    if (orgId) q = query(collection(db, 'leads'), where('orgId', '==', orgId), orderBy('createdAt', 'desc'));
+    if (orgId && role === 'agent') {
+      // Agents only see leads assigned to them
+      q = query(collection(db, 'leads'), where('orgId', '==', orgId), where('assigneeId', '==', user.uid), orderBy('createdAt', 'desc'));
+    } else if (orgId) {
+      q = query(collection(db, 'leads'), where('orgId', '==', orgId), orderBy('createdAt', 'desc'));
+    }
 
     const unsub = onSnapshot(q, snap => {
       setLeads(snap.docs.map(d => ({ id: d.id, ...d.data() })));

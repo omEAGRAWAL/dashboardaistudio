@@ -1,7 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import twilio from 'twilio';
-import { db } from '@/lib/firebase';
-import { doc, getDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { adminDb } from '@/lib/firebase-admin';
+import { FieldValue } from 'firebase-admin/firestore';
+
+/** Resolve which Twilio credentials to use for an org */
+async function getTwilioClient(orgId: string): Promise<{ client: ReturnType<typeof twilio>; from: string } | null> {
+  const numDoc = await adminDb.doc(`whatsapp_numbers/${orgId}`).get();
+  if (!numDoc.exists) return null;
+  const { phoneNumber, source } = numDoc.data()!;
+
+  if (source === 'agency') {
+    // Agency has their own Twilio account
+    const credDoc = await adminDb.doc(`whatsapp_credentials/${orgId}`).get();
+    if (!credDoc.exists) return null;
+    const { accountSid, authToken } = credDoc.data()!;
+    return { client: twilio(accountSid, authToken), from: phoneNumber };
+  }
+
+  // Use Om's master Twilio account
+  const accountSid = process.env.TWILIO_ACCOUNT_SID!;
+  const authToken = process.env.TWILIO_AUTH_TOKEN!;
+  return { client: twilio(accountSid, authToken), from: phoneNumber };
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,42 +31,32 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'orgId, to, and body are required' }, { status: 400 });
     }
 
-    const accountSid = process.env.TWILIO_ACCOUNT_SID;
-    const authToken = process.env.TWILIO_AUTH_TOKEN;
-    if (!accountSid || !authToken) {
-      return NextResponse.json(
-        { error: 'Twilio not configured. Set TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN in .env.local' },
-        { status: 500 }
-      );
-    }
-
-    // Get org's assigned WhatsApp number
-    const numDoc = await getDoc(doc(db, 'whatsapp_numbers', orgId));
-    if (!numDoc.exists()) {
+    const resolved = await getTwilioClient(orgId);
+    if (!resolved) {
       return NextResponse.json(
         { error: 'No WhatsApp number assigned to this org. Contact your admin.' },
         { status: 404 }
       );
     }
-    const { phoneNumber } = numDoc.data();
+    const { client, from } = resolved;
 
-    const client = twilio(accountSid, authToken);
+    const toFormatted = to.startsWith('whatsapp:') ? to : `whatsapp:${to}`;
     const message = await client.messages.create({
-      from: `whatsapp:${phoneNumber}`,
-      to: `whatsapp:${to}`,
+      from: `whatsapp:${from}`,
+      to: toFormatted,
       body,
     });
 
     const customerPhone = to.replace(/^whatsapp:/, '');
     const convId = conversationId || `${orgId}_${customerPhone.replace('+', '')}`;
 
-    await addDoc(collection(db, 'whatsapp_messages'), {
+    await adminDb.collection('whatsapp_messages').add({
       orgId,
       conversationId: convId,
       direction: 'outbound',
       body,
       customerPhone,
-      sentAt: serverTimestamp(),
+      sentAt: FieldValue.serverTimestamp(),
       twilioSid: message.sid,
     });
 

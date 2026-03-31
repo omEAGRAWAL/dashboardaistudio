@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import twilio from 'twilio';
-import { db } from '@/lib/firebase';
-import {
-  doc, getDoc, setDoc, addDoc, collection,
-  query, where, getDocs, serverTimestamp,
-} from 'firebase/firestore';
+import { adminDb } from '@/lib/firebase-admin';
+import { FieldValue } from 'firebase-admin/firestore';
+import { getNextAssignee } from '@/lib/round-robin';
 
 type Question = {
   id: string;
@@ -16,29 +14,44 @@ type Question = {
   customKey?: string;
 };
 
+/** Get Twilio client + from number for an org (supports om and agency modes) */
+async function getTwilioClient(orgId: string) {
+  const numDoc = await adminDb.doc(`whatsapp_numbers/${orgId}`).get();
+  if (!numDoc.exists) return null;
+  const { phoneNumber, source } = numDoc.data()!;
+
+  if (source === 'agency') {
+    const credDoc = await adminDb.doc(`whatsapp_credentials/${orgId}`).get();
+    if (!credDoc.exists) return null;
+    const { accountSid, authToken } = credDoc.data()!;
+    return { client: twilio(accountSid, authToken), from: phoneNumber };
+  }
+
+  return {
+    client: twilio(process.env.TWILIO_ACCOUNT_SID!, process.env.TWILIO_AUTH_TOKEN!),
+    from: phoneNumber,
+  };
+}
+
 async function sendMessage(orgId: string, customerPhone: string, body: string, conversationId: string) {
-  const accountSid = process.env.TWILIO_ACCOUNT_SID!;
-  const authToken = process.env.TWILIO_AUTH_TOKEN!;
-  const client = twilio(accountSid, authToken);
+  const resolved = await getTwilioClient(orgId);
+  if (!resolved) return;
+  const { client, from } = resolved;
 
-  const numDoc = await getDoc(doc(db, 'whatsapp_numbers', orgId));
-  if (!numDoc.exists()) return;
-  const { phoneNumber } = numDoc.data();
-
-  const message = await client.messages.create({
-    from: `whatsapp:${phoneNumber}`,
+  const msg = await client.messages.create({
+    from: `whatsapp:${from}`,
     to: `whatsapp:${customerPhone}`,
     body,
   });
 
-  await addDoc(collection(db, 'whatsapp_messages'), {
+  await adminDb.collection('whatsapp_messages').add({
     orgId,
     conversationId,
     direction: 'outbound',
     body,
     customerPhone,
-    sentAt: serverTimestamp(),
-    twilioSid: message.sid,
+    sentAt: FieldValue.serverTimestamp(),
+    twilioSid: msg.sid,
   });
 }
 
@@ -58,71 +71,69 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    // Twilio sends form-encoded body
     const formData = await req.formData();
-    const from = formData.get('From') as string; // whatsapp:+91xxxxxxxxxx
-    const to = formData.get('To') as string;     // whatsapp:+91xxxxxxxxxx (agency number)
+    const from = formData.get('From') as string;
+    const to = formData.get('To') as string;
     const body = ((formData.get('Body') as string) || '').trim();
 
-    if (!from || !to) {
-      return new NextResponse('', { status: 200 });
-    }
+    if (!from || !to) return new NextResponse('', { status: 200 });
 
     const customerPhone = from.replace('whatsapp:', '');
     const agencyPhone = to.replace('whatsapp:', '');
 
     // Find orgId by agency phone number
-    const q = query(collection(db, 'whatsapp_numbers'), where('phoneNumber', '==', agencyPhone));
-    const snap = await getDocs(q);
-    if (snap.empty) {
+    const numbersSnap = await adminDb
+      .collection('whatsapp_numbers')
+      .where('phoneNumber', '==', agencyPhone)
+      .limit(1)
+      .get();
+
+    if (numbersSnap.empty) {
       console.error('[WA Webhook] No org found for phone:', agencyPhone);
       return new NextResponse('', { status: 200 });
     }
-    const orgId = snap.docs[0].id;
-
+    const orgId = numbersSnap.docs[0].id;
     const conversationId = `${orgId}_${customerPhone.replace('+', '')}`;
 
     // Log inbound message
-    await addDoc(collection(db, 'whatsapp_messages'), {
+    await adminDb.collection('whatsapp_messages').add({
       orgId,
       conversationId,
       direction: 'inbound',
       body,
       customerPhone,
-      sentAt: serverTimestamp(),
+      sentAt: FieldValue.serverTimestamp(),
     });
 
     // Load chatbot flow
-    const flowDoc = await getDoc(doc(db, 'chatbot_flows', orgId));
-    if (!flowDoc.exists()) {
-      // No flow configured — messages visible in inbox for manual replies
-      return new NextResponse('', { status: 200 });
-    }
-    const flow = flowDoc.data();
+    const flowDoc = await adminDb.doc(`chatbot_flows/${orgId}`).get();
+    if (!flowDoc.exists) return new NextResponse('', { status: 200 });
+
+    const flow = flowDoc.data()!;
     const questions: Question[] = (flow.questions || []).sort(
       (a: Question, b: Question) => a.order - b.order
     );
 
     // Load or create conversation
-    const convRef = doc(db, 'conversations', conversationId);
-    const convDoc = await getDoc(convRef);
-    const existingConv = convDoc.exists() ? convDoc.data() : null;
+    const convRef = adminDb.doc(`conversations/${conversationId}`);
+    const convDoc = await convRef.get();
+    const existingConv = convDoc.exists ? convDoc.data()! : null;
 
-    // Start fresh if no conversation or previous one is completed
     if (!existingConv || existingConv.status === 'completed') {
-      const orgDoc = await getDoc(doc(db, 'organizations', orgId));
-      const orgName = orgDoc.exists() ? orgDoc.data().name : 'us';
+      // Start fresh conversation
+      const orgDoc = await adminDb.doc(`organizations/${orgId}`).get();
+      const orgName = orgDoc.exists ? orgDoc.data()!.name : 'us';
       const greeting = (flow.greetingMessage || `Hi! Welcome to ${orgName}. I have a few quick questions to help you better.`)
         .replace('{orgName}', orgName);
 
-      await setDoc(convRef, {
+      await convRef.set({
         orgId,
         customerPhone,
         currentStep: 0,
         responses: {},
         status: 'active',
-        startedAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
+        startedAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
       });
 
       await sendMessage(orgId, customerPhone, greeting, conversationId);
@@ -135,20 +146,15 @@ export async function POST(req: NextRequest) {
           conversationId
         );
       } else {
-        // No questions — mark completed immediately
-        await setDoc(convRef, { status: 'completed', updatedAt: serverTimestamp() }, { merge: true });
+        await convRef.update({ status: 'completed', updatedAt: FieldValue.serverTimestamp() });
       }
       return new NextResponse('', { status: 200 });
     }
 
-    if (existingConv.status !== 'active') {
-      return new NextResponse('', { status: 200 });
-    }
+    if (existingConv.status !== 'active') return new NextResponse('', { status: 200 });
 
     const currentStep: number = existingConv.currentStep ?? 0;
-    if (currentStep >= questions.length) {
-      return new NextResponse('', { status: 200 });
-    }
+    if (currentStep >= questions.length) return new NextResponse('', { status: 200 });
 
     const currentQuestion = questions[currentStep];
     const responses: Record<string, string> = { ...(existingConv.responses || {}) };
@@ -179,7 +185,8 @@ export async function POST(req: NextRequest) {
     const nextStep = currentStep + 1;
 
     if (nextStep >= questions.length) {
-      // All questions done — create lead
+      // All done — create lead
+      const assigneeId = await getNextAssignee(orgId);
       const leadData: Record<string, any> = {
         orgId,
         name: responses.name || `Customer ${customerPhone}`,
@@ -188,13 +195,12 @@ export async function POST(req: NextRequest) {
         status: 'New Enquiry',
         category: 'None',
         pax: responses.pax ? Number(responses.pax) : 1,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
+        createdAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
       };
-
+      if (assigneeId) leadData.assigneeId = assigneeId;
       if (responses.travelDate) leadData.travelDate = responses.travelDate;
 
-      // Build remark from destination + any custom fields
       const remarkParts: string[] = [];
       if (responses.destination) remarkParts.push(`Destination: ${responses.destination}`);
       const customKeys = Object.keys(responses).filter(
@@ -203,40 +209,35 @@ export async function POST(req: NextRequest) {
       customKeys.forEach((k) => remarkParts.push(`${k}: ${responses[k]}`));
       if (remarkParts.length > 0) leadData.latestRemark = remarkParts.join(' | ');
 
-      const leadRef = await addDoc(collection(db, 'leads'), leadData);
+      const leadRef = await adminDb.collection('leads').add(leadData);
 
       const completionMsg = flow.completionMessage || 'Thank you! Our team will reach out to you shortly.';
       await sendMessage(orgId, customerPhone, completionMsg, conversationId);
 
-      await setDoc(convRef, {
-        ...existingConv,
+      await convRef.update({
         currentStep: nextStep,
         responses,
         status: 'completed',
         leadId: leadRef.id,
-        updatedAt: serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
       });
     } else {
-      // Send next question
       const nextQuestion = questions[nextStep];
       await sendMessage(
         orgId, customerPhone,
         nextQuestion.type === 'choice' ? buildChoiceMessage(nextQuestion) : nextQuestion.text,
         conversationId
       );
-
-      await setDoc(convRef, {
-        ...existingConv,
+      await convRef.update({
         currentStep: nextStep,
         responses,
-        updatedAt: serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
       });
     }
 
     return new NextResponse('', { status: 200 });
   } catch (err: any) {
     console.error('[WA Webhook] Error:', err);
-    // Always return 200 to Twilio so it doesn't retry
     return new NextResponse('', { status: 200 });
   }
 }
