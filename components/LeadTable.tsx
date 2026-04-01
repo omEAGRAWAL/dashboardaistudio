@@ -92,10 +92,40 @@ export function LeadTable() {
   const [activeAssigneeDropdownId, setActiveAssigneeDropdownId] = useState<string | null>(null);
   const [whatsappLead, setWhatsappLead] = useState<any | null>(null);
   const [showAnalytics, setShowAnalytics] = useState(false);
+  // Fixed-position dropdown coordinates
+  const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number; direction: 'down' | 'up' }>({ top: 0, left: 0, direction: 'down' });
   // Batch selection
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [batchAssignOpen, setBatchAssignOpen] = useState(false);
   const selectAllRef = useRef<HTMLInputElement>(null);
+
+  // Compute fixed position for a dropdown relative to the trigger button
+  const calcDropdownPos = (el: HTMLElement, dropdownHeight = 320, align: 'left' | 'right' = 'left', dropdownWidth = 208) => {
+    const rect = el.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const direction: 'down' | 'up' = spaceBelow < dropdownHeight ? 'up' : 'down';
+    const top = direction === 'down' ? rect.bottom + 4 : rect.top - dropdownHeight - 4;
+    const left = align === 'right' ? Math.max(4, rect.right - dropdownWidth) : rect.left;
+    return { top, left, direction };
+  };
+
+  const openStatusDropdown = (leadId: string, e: React.MouseEvent) => {
+    if (activeStatusDropdownId === leadId) { setActiveStatusDropdownId(null); return; }
+    setDropdownPos(calcDropdownPos(e.currentTarget as HTMLElement, 380));
+    setActiveStatusDropdownId(leadId);
+  };
+
+  const openAssigneeDropdown = (leadId: string, e: React.MouseEvent) => {
+    if (activeAssigneeDropdownId === leadId) { setActiveAssigneeDropdownId(null); return; }
+    setDropdownPos(calcDropdownPos(e.currentTarget as HTMLElement, 250, 'right'));
+    setActiveAssigneeDropdownId(leadId);
+  };
+
+  const openActionDropdown = (leadId: string, e: React.MouseEvent) => {
+    if (activeActionLeadId === leadId) { setActiveActionLeadId(null); return; }
+    setDropdownPos(calcDropdownPos(e.currentTarget as HTMLElement, 50, 'right', 144));
+    setActiveActionLeadId(leadId);
+  };
 
   // Clear selections on filter change
   useEffect(() => { setSelectedIds(new Set()); }, [activeTab, activeCategory, activeAssignee, activeSource]);
@@ -426,7 +456,7 @@ export function LeadTable() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-semibold text-gray-900 text-sm truncate">{lead.name}</span>
-                    <button onClick={() => setActiveActionLeadId(activeActionLeadId === lead.id ? null : lead.id)}
+                    <button onClick={(e) => openActionDropdown(lead.id, e)}
                       className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md flex-shrink-0">
                       <MoreHorizontal className="w-4 h-4" />
                     </button>
@@ -445,7 +475,7 @@ export function LeadTable() {
               {activeActionLeadId === lead.id && (
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setActiveActionLeadId(null)} />
-                  <div className="absolute right-4 z-20 w-36 bg-white border border-gray-200 rounded-xl shadow-lg py-1">
+                  <div className="fixed z-[9999] w-36 bg-white border border-gray-200 rounded-xl shadow-lg py-1" style={{ top: dropdownPos.top, left: dropdownPos.left }}>
                     <button onClick={() => handleDeleteLead(lead.id)}
                       className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors">
                       <Trash2 className="w-3.5 h-3.5" />Delete Lead
@@ -467,7 +497,7 @@ export function LeadTable() {
               <div className="flex items-center gap-2 mt-2.5 pl-7 relative">
                 {s && (
                   <div className="relative flex-1">
-                    <button onClick={() => setActiveStatusDropdownId(isStatusOpen ? null : lead.id)}
+                    <button onClick={(e) => openStatusDropdown(lead.id, e)}
                       className={`flex items-center justify-between gap-1.5 px-2.5 py-1.5 rounded-lg border-2 font-bold text-xs w-full ${s.bg} ${s.text} ${s.border}`}>
                       <span className="flex items-center gap-1.5">
                         <span className={`w-2 h-2 rounded-full flex-shrink-0 ${s.dot}`} />
@@ -478,7 +508,7 @@ export function LeadTable() {
                     {isStatusOpen && (
                       <>
                         <div className="fixed inset-0 z-10" onClick={() => setActiveStatusDropdownId(null)} />
-                        <div className="absolute left-0 top-full mt-1 z-20 w-52 bg-white border border-gray-200 rounded-xl shadow-xl py-1 overflow-hidden">
+                        <div className="fixed z-[9999] w-52 bg-white border border-gray-200 rounded-xl shadow-xl py-1 max-h-[60vh] overflow-y-auto" style={{ top: dropdownPos.top, left: dropdownPos.left }}>
                           {STATUSES.map(status => {
                             const opt = STATUS_STYLES[status];
                             const isCurrent = lead.status === status;
@@ -498,7 +528,7 @@ export function LeadTable() {
                 )}
 
                 <div className="relative">
-                  <button onClick={() => setActiveAssigneeDropdownId(isAssigneeOpen ? null : lead.id)}
+                  <button onClick={(e) => openAssigneeDropdown(lead.id, e)}
                     className="flex items-center gap-1.5 hover:bg-gray-100 rounded-lg px-2 py-1.5 transition-colors">
                     {assignee ? (
                       <div className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] font-bold"
@@ -514,7 +544,7 @@ export function LeadTable() {
                   {isAssigneeOpen && (
                     <>
                       <div className="fixed inset-0 z-10" onClick={() => setActiveAssigneeDropdownId(null)} />
-                      <div className="absolute right-0 top-full mt-1 z-20 w-52 bg-white border border-gray-200 rounded-xl shadow-xl py-1.5 overflow-hidden">
+                      <div className="fixed z-[9999] w-52 bg-white border border-gray-200 rounded-xl shadow-xl py-1.5 max-h-[60vh] overflow-y-auto" style={{ top: dropdownPos.top, left: dropdownPos.left }}>
                         <div className="px-3 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wide border-b border-gray-100">Assign to</div>
                         <button onClick={() => { handleAssigneeChange(lead.id, ''); setActiveAssigneeDropdownId(null); }}
                           className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-gray-600 hover:bg-gray-50 transition-colors">
@@ -683,7 +713,7 @@ export function LeadTable() {
                   <td className="px-3 py-3 w-44 relative">
                     {s ? (
                       <>
-                        <button onClick={() => setActiveStatusDropdownId(isStatusOpen ? null : lead.id)}
+                        <button onClick={(e) => openStatusDropdown(lead.id, e)}
                           className={`w-full flex items-center justify-between gap-1.5 px-2.5 py-1.5 rounded-lg border-2 font-bold text-xs transition-all ${s.bg} ${s.text} ${s.border}`}>
                           <span className="flex items-center gap-1.5">
                             <span className={`w-2 h-2 rounded-full flex-shrink-0 ${s.dot}`} />
@@ -694,7 +724,7 @@ export function LeadTable() {
                         {isStatusOpen && (
                           <>
                             <div className="fixed inset-0 z-10" onClick={() => setActiveStatusDropdownId(null)} />
-                            <div className="absolute left-0 top-full mt-1 z-20 w-52 bg-white border border-gray-200 rounded-xl shadow-xl py-1 overflow-hidden">
+                            <div className="fixed z-[9999] w-52 bg-white border border-gray-200 rounded-xl shadow-xl py-1 max-h-[60vh] overflow-y-auto" style={{ top: dropdownPos.top, left: dropdownPos.left }}>
                               {STATUSES.map(status => {
                                 const opt = STATUS_STYLES[status];
                                 const isCurrent = lead.status === status;
@@ -717,7 +747,7 @@ export function LeadTable() {
 
                   {/* Assignee avatar */}
                   <td className="px-3 py-3 w-36 relative">
-                    <button onClick={() => setActiveAssigneeDropdownId(isAssigneeOpen ? null : lead.id)}
+                    <button onClick={(e) => openAssigneeDropdown(lead.id, e)}
                       className="flex items-center gap-2 hover:bg-gray-100 rounded-lg px-1.5 py-1 transition-colors w-full">
                       {assignee ? (
                         <>
@@ -739,7 +769,7 @@ export function LeadTable() {
                     {isAssigneeOpen && (
                       <>
                         <div className="fixed inset-0 z-10" onClick={() => setActiveAssigneeDropdownId(null)} />
-                        <div className="absolute left-0 top-full mt-1 z-20 w-52 bg-white border border-gray-200 rounded-xl shadow-xl py-1.5 overflow-hidden">
+                        <div className="fixed z-[9999] w-52 bg-white border border-gray-200 rounded-xl shadow-xl py-1.5 max-h-[60vh] overflow-y-auto" style={{ top: dropdownPos.top, left: dropdownPos.left }}>
                           <div className="px-3 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wide border-b border-gray-100">Assign to</div>
                           <button onClick={() => { handleAssigneeChange(lead.id, ''); setActiveAssigneeDropdownId(null); }}
                             className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-gray-600 hover:bg-gray-50 transition-colors">
@@ -767,14 +797,14 @@ export function LeadTable() {
 
                   {/* Actions ⋯ */}
                   <td className="px-2 py-3 w-10 relative">
-                    <button onClick={() => setActiveActionLeadId(isActionOpen ? null : lead.id)}
+                    <button onClick={(e) => openActionDropdown(lead.id, e)}
                       className="p-1.5 text-gray-300 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors opacity-0 group-hover:opacity-100">
                       <MoreHorizontal className="w-4 h-4" />
                     </button>
                     {isActionOpen && (
                       <>
                         <div className="fixed inset-0 z-10" onClick={() => setActiveActionLeadId(null)} />
-                        <div className="absolute right-2 top-8 z-20 w-36 bg-white border border-gray-200 rounded-xl shadow-lg py-1">
+                        <div className="fixed z-[9999] w-36 bg-white border border-gray-200 rounded-xl shadow-lg py-1" style={{ top: dropdownPos.top, left: dropdownPos.left }}>
                           <button onClick={() => handleDeleteLead(lead.id)}
                             className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors">
                             <Trash2 className="w-3.5 h-3.5" />
