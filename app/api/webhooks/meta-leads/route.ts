@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { getNextAssignee } from '@/lib/round-robin';
+import { sendLeadNotification } from '@/lib/send-push-notification';
 
 export async function POST(req: Request) {
   try {
@@ -43,6 +44,11 @@ export async function POST(req: Request) {
     let docRef;
     try {
       docRef = await adminDb.collection('leads').add(leadData);
+
+      // Send push notification to assigned agent (fire-and-forget)
+      if (assigneeId) {
+        sendLeadNotification(assigneeId, { name: leadData.name, phone: leadData.phone, source: leadData.source, pax: leadData.pax, travelDate: leadData.travelDate }, docRef.id).catch(() => {});
+      }
     } catch (err) {
       console.error('Webhook error [leads.add]:', err);
       throw err;

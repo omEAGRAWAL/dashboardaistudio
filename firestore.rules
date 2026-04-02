@@ -173,6 +173,11 @@ service cloud.firestore {
                      (request.resource.data.role == resource.data.role && request.resource.data.orgId == resource.data.orgId) ||
                      (request.auth.uid == userId && !('orgId' in resource.data) && request.resource.data.role == 'org_admin'));
       allow delete: if isAdmin();
+
+      // FCM push notification tokens — each user manages their own tokens
+      match /fcmTokens/{tokenId} {
+        allow read, write: if isOwner(userId);
+      }
     }
 
     match /leads/{leadId} {

@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { User, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, query, where, getDocs, deleteDoc } from 'firebase/firestore';
 import { auth, db, googleProvider } from '@/lib/firebase';
+import { silentTokenRefresh } from '@/lib/firebase-messaging';
 
 interface AuthContextType {
   user: User | null;
@@ -118,6 +119,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setStatus(null);
       }
       setLoading(false);
+
+      // Silently refresh FCM token if notification permission is already granted
+      if (currentUser) {
+        silentTokenRefresh(currentUser.uid);
+      }
     });
 
     return () => unsubscribe();

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { adminDb, adminAuth } from '@/lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { getNextAssignee } from '@/lib/round-robin';
+import { sendLeadNotification } from '@/lib/send-push-notification';
 
 export async function POST(req: NextRequest) {
   try {
@@ -58,6 +59,11 @@ export async function POST(req: NextRequest) {
     if (assigneeId) leadData.assigneeId = assigneeId;
 
     const docRef = await adminDb.collection('leads').add(leadData);
+
+    // Send push notification to assigned agent (fire-and-forget)
+    if (assigneeId) {
+      sendLeadNotification(assigneeId, { name: leadData.name, phone: leadData.phone, source: leadData.source, category: leadData.category, pax: leadData.pax, travelDate: leadData.travelDate }, docRef.id).catch(() => {});
+    }
 
     return NextResponse.json({ success: true, id: docRef.id, assigneeId }, { status: 201 });
   } catch (err) {

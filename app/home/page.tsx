@@ -6,6 +6,7 @@ import { Header } from '@/components/Header';
 import { LeadTable } from '@/components/LeadTable';
 import { ImportLeads } from '@/components/ImportLeads';
 import { CreateLeadModal } from '@/components/CreateLeadModal';
+import { NotificationBanner } from '@/components/NotificationBanner';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -64,6 +65,7 @@ export default function HomePage() {
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
+        <NotificationBanner />
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-wrap items-center justify-between gap-3 mb-6 md:mb-8">
