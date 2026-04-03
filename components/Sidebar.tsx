@@ -1,6 +1,6 @@
 'use client';
 
-import { LayoutDashboard, Users, Settings, LogOut, Shield, Package, CalendarCheck, Globe, ClipboardList, Smartphone, X, MessageSquare, Bot, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, Users, Settings, LogOut, Shield, Package, CalendarCheck, Globe, ClipboardList, Smartphone, X, MessageSquare, Bot, ShieldCheck, Building2 } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import { useSidebar } from './SidebarContext';
 import Link from 'next/link';
@@ -107,6 +107,13 @@ export function Sidebar() {
             <Link href="/chatbot" onClick={handleNav} className={linkClass('/chatbot')}>
               <Bot className="w-5 h-5 flex-shrink-0" />
               Chatbot Builder
+            </Link>
+          )}
+
+          {isTeamVisible && (
+            <Link href="/business-profile" onClick={handleNav} className={linkClass('/business-profile')}>
+              <Building2 className="w-5 h-5 flex-shrink-0" />
+              Business Profile
             </Link>
           )}
 
