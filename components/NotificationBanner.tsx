@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Bell, X } from 'lucide-react';
+import { Bell, X, Share } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import { requestNotificationPermission, setupForegroundHandler } from '@/lib/firebase-messaging';
 
@@ -12,9 +12,40 @@ export function NotificationBanner() {
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{ title: string; body: string } | null>(null);
+  const [needsPWA, setNeedsPWA] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+
+    // Helper functions
+    const isIOS = () => {
+      return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+             (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    };
+
+    const isStandalone = () => {
+      return window.matchMedia('(display-mode: standalone)').matches ||
+             (window.navigator as any).standalone === true;
+    };
+
+    const ios = isIOS();
+    const standalone = isStandalone();
+
+    // Don't show if user dismissed it recently
+    const dismissed = localStorage.getItem(DISMISS_KEY);
+    if (dismissed) {
+      const dismissedAt = parseInt(dismissed, 10);
+      // Show again after 7 days
+      if (Date.now() - dismissedAt < 7 * 24 * 60 * 60 * 1000) return;
+    }
+
+    if (ios && !standalone) {
+      // iOS requires PWA for push notifications
+      setNeedsPWA(true);
+      setVisible(true);
+      return;
+    }
+
     if (!('Notification' in window)) return;
 
     // Don't show if already granted or denied permanently
@@ -25,14 +56,6 @@ export function NotificationBanner() {
         setTimeout(() => setToast(null), 6000);
       });
       return;
-    }
-
-    // Don't show if user dismissed it recently
-    const dismissed = localStorage.getItem(DISMISS_KEY);
-    if (dismissed) {
-      const dismissedAt = parseInt(dismissed, 10);
-      // Show again after 7 days
-      if (Date.now() - dismissedAt < 7 * 24 * 60 * 60 * 1000) return;
     }
 
     if (Notification.permission === 'default') {
@@ -66,7 +89,7 @@ export function NotificationBanner() {
   return (
     <>
       {/* Permission Banner */}
-      {visible && (
+      {visible && !needsPWA && (
         <div className="mx-4 mt-3 mb-1 flex items-center gap-3 rounded-xl border border-indigo-200 bg-gradient-to-r from-indigo-50 to-violet-50 px-4 py-3 shadow-sm animate-in fade-in slide-in-from-top-2">
           <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-indigo-100">
             <Bell className="h-4.5 w-4.5 text-indigo-600" />
@@ -87,6 +110,27 @@ export function NotificationBanner() {
           <button
             onClick={handleDismiss}
             className="flex-shrink-0 rounded-md p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
+      {/* iOS PWA Instruction Banner */}
+      {visible && needsPWA && (
+        <div className="mx-4 mt-3 mb-1 flex items-center gap-3 rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 to-sky-50 px-4 py-3 shadow-sm animate-in fade-in slide-in-from-top-2">
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-blue-100">
+            <Share className="h-4.5 w-4.5 text-blue-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-gray-900">Get iPhone Notifications</p>
+            <p className="text-xs text-gray-500 mt-0.5">
+              Tap the Share button below and select <strong>&quot;Add to Home Screen&quot;</strong> to enable alerts.
+            </p>
+          </div>
+          <button
+            onClick={handleDismiss}
+            className="flex-shrink-0 rounded-md p-1 right text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
           >
             <X className="h-4 w-4" />
           </button>

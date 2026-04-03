@@ -38,8 +38,9 @@ export async function requestNotificationPermission(uid: string): Promise<string
       return null;
     }
 
-    // Register service worker
-    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+    // Register the service worker and wait until it's fully activated
+    await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+    const registration = await navigator.serviceWorker.ready;
 
     const token = await getToken(messaging, {
       vapidKey,
