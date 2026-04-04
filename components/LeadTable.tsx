@@ -252,8 +252,7 @@ export function LeadTable() {
 
   const uniqueSources = Array.from(new Set(leads.map(l => l.source || 'Manual'))).filter(Boolean);
 
-  const filteredLeads = leads.filter(lead => {
-    if (activeTab !== 'All' && lead.status !== activeTab) return false;
+  const baseFilteredLeads = leads.filter(lead => {
     if (activeCategory !== 'All' && lead.category !== activeCategory) return false;
     if (activeAssignee !== 'All') {
       if (activeAssignee === 'Unassigned' && lead.assigneeId) return false;
@@ -264,9 +263,14 @@ export function LeadTable() {
     return true;
   });
 
-  const todaysLeadsCount = filteredLeads.filter(l => l.createdAt && isToday(l.createdAt.toDate())).length;
-  const statusData = STATUSES.map(s => ({ name: s, value: filteredLeads.filter(l => l.status === s).length })).filter(d => d.value > 0).sort((a, b) => b.value - a.value);
-  const categoryData = CATEGORIES.map(c => ({ name: c, value: filteredLeads.filter(l => l.category === c).length })).filter(d => d.value > 0).sort((a, b) => b.value - a.value);
+  const filteredLeads = baseFilteredLeads.filter(lead => {
+    if (activeTab !== 'All' && lead.status !== activeTab) return false;
+    return true;
+  });
+
+  const todaysLeadsCount = baseFilteredLeads.filter(l => l.createdAt && isToday(l.createdAt.toDate())).length;
+  const statusData = STATUSES.map(s => ({ name: s, value: baseFilteredLeads.filter(l => l.status === s).length })).filter(d => d.value > 0).sort((a, b) => b.value - a.value);
+  const categoryData = CATEGORIES.map(c => ({ name: c, value: baseFilteredLeads.filter(l => l.category === c).length })).filter(d => d.value > 0).sort((a, b) => b.value - a.value);
 
   if (loading) return <div className="p-8 text-center text-gray-500">Loading leads...</div>;
 
@@ -283,11 +287,11 @@ export function LeadTable() {
           className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold whitespace-nowrap rounded-full transition-all border ${activeTab === 'All' ? 'bg-gray-900 text-white border-transparent shadow-sm' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-100'}`}
         >
           All Leads
-          <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${activeTab === 'All' ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'}`}>{leads.length}</span>
+          <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${activeTab === 'All' ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'}`}>{baseFilteredLeads.length}</span>
         </button>
         {STATUSES.map(status => {
           const s = STATUS_STYLES[status];
-          const count = leads.filter(l => l.status === status).length;
+          const count = baseFilteredLeads.filter(l => l.status === status).length;
           const isActive = activeTab === status;
           return (
             <button key={status} onClick={() => setActiveTab(status)}
@@ -334,7 +338,7 @@ export function LeadTable() {
       {/* ── Analytics ── */}
       {showAnalytics && (
         <div className="p-6 bg-gray-50 border-b border-gray-200">
-          <Stats totalLeads={filteredLeads.length} todaysLeads={todaysLeadsCount} />
+          <Stats totalLeads={baseFilteredLeads.length} todaysLeads={todaysLeadsCount} />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
             <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
               <h3 className="text-sm font-semibold text-gray-900 mb-4">Leads by Status</h3>
