@@ -3,7 +3,7 @@
 import { useAuth } from '@/components/AuthProvider';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
-import { Settings as SettingsIcon, Webhook, Copy, CheckCircle2, MessageSquare, Phone, AlertCircle, Loader2, ExternalLink } from 'lucide-react';
+import { Settings as SettingsIcon, Webhook, Copy, CheckCircle2, MessageSquare, Phone, AlertCircle, Loader2, ExternalLink, Globe, Link2, RefreshCw, Trash2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
@@ -13,6 +13,24 @@ export default function SettingsPage() {
   const [copied, setCopied] = useState(false);
   const [waNumber, setWaNumber] = useState<string | null>(null);
   const [waSource, setWaSource] = useState<string | null>(null);
+
+  // Domain state
+  const [domainTab, setDomainTab] = useState<'subdomain' | 'custom'>('subdomain');
+  const [subdomainSlug, setSubdomainSlug] = useState('');
+  const [customDomain, setCustomDomain] = useState('');
+  const [savedSubdomain, setSavedSubdomain] = useState<string | null>(null);
+  const [savedCustomDomain, setSavedCustomDomain] = useState<string | null>(null);
+  const [domainLoading, setDomainLoading] = useState(false);
+  const [domainError, setDomainError] = useState('');
+  const [domainSuccess, setDomainSuccess] = useState('');
+  const [domainVerification, setDomainVerification] = useState<{
+    verified: boolean;
+    configuredBy: string | null;
+    verification: { type: string; domain: string; value: string; reason: string }[];
+  } | null>(null);
+  const [checkingVerification, setCheckingVerification] = useState(false);
+
+  const platformHost = process.env.NEXT_PUBLIC_PLATFORM_HOST ?? 'yourapp.vercel.app';
 
   // Self-serve WhatsApp connection form
   const [selfPhoneNumber, setSelfPhoneNumber] = useState('');
@@ -33,7 +51,83 @@ export default function SettingsPage() {
         setWaSource(snap.data().source || 'om');
       }
     });
+    // Load existing domain config
+    getDoc(doc(db, 'organizations', orgId)).then((snap) => {
+      if (snap.exists()) {
+        const data = snap.data();
+        if (data.subdomain) setSavedSubdomain(data.subdomain);
+        if (data.customDomain) setSavedCustomDomain(data.customDomain);
+      }
+    });
   }, [orgId]);
+
+  const handleSaveDomain = async (type: 'subdomain' | 'custom') => {
+    if (!orgId) return;
+    setDomainLoading(true);
+    setDomainError('');
+    setDomainSuccess('');
+    setDomainVerification(null);
+
+    const rawValue = type === 'subdomain' ? subdomainSlug.trim().toLowerCase() : customDomain.trim().toLowerCase();
+    if (!rawValue) { setDomainLoading(false); return; }
+
+    const hostname = type === 'subdomain' ? `${rawValue}.${platformHost}` : rawValue;
+
+    try {
+      const res = await fetch('/api/admin/add-domain', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orgId, hostname, type }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      if (type === 'subdomain') setSavedSubdomain(hostname);
+      else setSavedCustomDomain(hostname);
+      setDomainSuccess(type === 'subdomain' ? 'Subdomain saved!' : 'Custom domain added! Add the DNS record below.');
+    } catch (e: any) {
+      setDomainError(e.message);
+    } finally {
+      setDomainLoading(false);
+    }
+  };
+
+  const handleRemoveDomain = async (type: 'subdomain' | 'custom') => {
+    if (!orgId) return;
+    const hostname = type === 'subdomain' ? savedSubdomain : savedCustomDomain;
+    if (!hostname) return;
+    setDomainLoading(true);
+    setDomainError('');
+    setDomainSuccess('');
+    try {
+      const res = await fetch('/api/admin/add-domain', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orgId, hostname, type }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      if (type === 'subdomain') { setSavedSubdomain(null); setSubdomainSlug(''); }
+      else { setSavedCustomDomain(null); setCustomDomain(''); setDomainVerification(null); }
+    } catch (e: any) {
+      setDomainError(e.message);
+    } finally {
+      setDomainLoading(false);
+    }
+  };
+
+  const handleCheckVerification = async () => {
+    if (!savedCustomDomain) return;
+    setCheckingVerification(true);
+    try {
+      const res = await fetch(`/api/admin/check-domain?domain=${encodeURIComponent(savedCustomDomain)}`);
+      const data = await res.json();
+      setDomainVerification(data);
+    } catch {
+      setDomainError('Failed to check verification status');
+    } finally {
+      setCheckingVerification(false);
+    }
+  };
 
   const handleConnectOwnNumber = async () => {
     if (!orgId || !selfPhoneNumber || !selfAccountSid || !selfAuthToken) return;
@@ -314,6 +408,203 @@ export default function SettingsPage() {
                       {origin}/api/webhooks/whatsapp
                     </code>
                   </p>
+                </div>
+              </div>
+
+              {/* Custom Domain Section */}
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-200 bg-gray-50 flex items-center gap-2">
+                  <Globe className="w-5 h-5 text-indigo-600" />
+                  <h2 className="text-lg font-semibold text-gray-900">Custom Domain</h2>
+                </div>
+                <div className="p-6 space-y-5">
+                  <p className="text-sm text-gray-600">
+                    Give your agency a branded web presence. Choose a free subdomain or connect your own domain.
+                  </p>
+
+                  {/* Tabs */}
+                  <div className="flex gap-1 p-1 bg-gray-100 rounded-lg w-fit">
+                    {(['subdomain', 'custom'] as const).map((t) => (
+                      <button
+                        key={t}
+                        onClick={() => { setDomainTab(t); setDomainError(''); setDomainSuccess(''); }}
+                        className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                          domainTab === t ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'
+                        }`}
+                      >
+                        {t === 'subdomain' ? 'Free Subdomain' : 'Custom Domain'}
+                      </button>
+                    ))}
+                  </div>
+
+                  {domainTab === 'subdomain' && (
+                    <div className="space-y-4">
+                      {savedSubdomain ? (
+                        <div className="flex items-center gap-3 p-4 bg-indigo-50 border border-indigo-200 rounded-xl">
+                          <div className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
+                            <Link2 className="w-4 h-4 text-indigo-600" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-gray-900 truncate">{savedSubdomain}</p>
+                            <p className="text-xs text-indigo-600">Active — your public landing page</p>
+                          </div>
+                          <a
+                            href={`https://${savedSubdomain}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-indigo-600 hover:text-indigo-800 shrink-0"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                          </a>
+                          <button
+                            onClick={() => handleRemoveDomain('subdomain')}
+                            disabled={domainLoading}
+                            className="text-red-400 hover:text-red-600 shrink-0 disabled:opacity-50"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex gap-2 items-center">
+                          <div className="flex flex-1 border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500">
+                            <input
+                              type="text"
+                              placeholder="yourslug"
+                              value={subdomainSlug}
+                              onChange={(e) => setSubdomainSlug(e.target.value.replace(/[^a-z0-9-]/g, ''))}
+                              className="flex-1 px-3 py-2 text-sm focus:outline-none"
+                            />
+                            <span className="bg-gray-50 border-l border-gray-300 px-3 py-2 text-sm text-gray-500 whitespace-nowrap">
+                              .{platformHost}
+                            </span>
+                          </div>
+                          <button
+                            onClick={() => handleSaveDomain('subdomain')}
+                            disabled={domainLoading || !subdomainSlug}
+                            className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+                          >
+                            {domainLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
+                          </button>
+                        </div>
+                      )}
+                      <p className="text-xs text-gray-400">
+                        Requires a wildcard DNS record <code className="bg-gray-100 px-1.5 py-0.5 rounded">*.{platformHost} CNAME cname.vercel-dns.com</code> (one-time setup by admin).
+                      </p>
+                    </div>
+                  )}
+
+                  {domainTab === 'custom' && (
+                    <div className="space-y-4">
+                      {savedCustomDomain ? (
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-3 p-4 bg-indigo-50 border border-indigo-200 rounded-xl">
+                            <div className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
+                              <Globe className="w-4 h-4 text-indigo-600" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-semibold text-gray-900 truncate">{savedCustomDomain}</p>
+                              <p className="text-xs text-gray-500">Added to Vercel — add the DNS record below</p>
+                            </div>
+                            <button
+                              onClick={handleCheckVerification}
+                              disabled={checkingVerification}
+                              className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 font-medium shrink-0"
+                            >
+                              <RefreshCw className={`w-3 h-3 ${checkingVerification ? 'animate-spin' : ''}`} />
+                              Check
+                            </button>
+                            <button
+                              onClick={() => handleRemoveDomain('custom')}
+                              disabled={domainLoading}
+                              className="text-red-400 hover:text-red-600 shrink-0 disabled:opacity-50"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+
+                          {domainVerification && (
+                            <div className={`rounded-lg border p-3 text-sm ${
+                              domainVerification.verified
+                                ? 'bg-green-50 border-green-200 text-green-800'
+                                : 'bg-yellow-50 border-yellow-200 text-yellow-800'
+                            }`}>
+                              {domainVerification.verified ? (
+                                <div className="flex items-center gap-2">
+                                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                                  <span className="font-medium">Domain verified and active!</span>
+                                </div>
+                              ) : (
+                                <div className="space-y-2">
+                                  <div className="flex items-center gap-2">
+                                    <AlertCircle className="w-4 h-4 shrink-0" />
+                                    <span className="font-medium">DNS not verified yet</span>
+                                  </div>
+                                  {domainVerification.verification?.map((v, i) => (
+                                    <div key={i} className="bg-white/60 rounded p-2 text-xs font-mono space-y-1">
+                                      <p><span className="font-semibold">Type:</span> {v.type}</p>
+                                      <p><span className="font-semibold">Name:</span> {v.domain}</p>
+                                      <p><span className="font-semibold">Value:</span> {v.value}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* DNS instructions */}
+                          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm">
+                            <p className="font-semibold text-gray-800 mb-2">DNS Setup (add to your domain registrar)</p>
+                            <div className="space-y-1 font-mono text-xs text-gray-700">
+                              <div className="grid grid-cols-3 gap-2 bg-white border border-gray-200 rounded p-2">
+                                <span className="text-gray-500">Type</span>
+                                <span className="text-gray-500">Name</span>
+                                <span className="text-gray-500">Value</span>
+                              </div>
+                              <div className="grid grid-cols-3 gap-2 bg-white border border-gray-200 rounded p-2">
+                                <span>CNAME</span>
+                                <span>{savedCustomDomain.startsWith('www.') ? 'www' : '@'}</span>
+                                <span>cname.vercel-dns.com</span>
+                              </div>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-2">DNS changes can take up to 48 hours to propagate.</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              placeholder="www.youragency.com"
+                              value={customDomain}
+                              onChange={(e) => setCustomDomain(e.target.value.toLowerCase().trim())}
+                              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            />
+                            <button
+                              onClick={() => handleSaveDomain('custom')}
+                              disabled={domainLoading || !customDomain}
+                              className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+                            >
+                              {domainLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Add Domain'}
+                            </button>
+                          </div>
+                          <p className="text-xs text-gray-400">
+                            We&#39;ll add this to Vercel and show you the CNAME record to add to your DNS.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {domainError && (
+                    <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                      <AlertCircle className="w-4 h-4 shrink-0" /> {domainError}
+                    </div>
+                  )}
+                  {domainSuccess && (
+                    <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+                      <CheckCircle2 className="w-4 h-4 shrink-0" /> {domainSuccess}
+                    </div>
+                  )}
                 </div>
               </div>
 

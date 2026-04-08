@@ -30,6 +30,7 @@ export interface InvoiceBooking {
   participants?: string[];
   remarks?: string;
   amountPaid?: number;
+  ticketBreakdown?: { type: string; label: string; quantity: number; pricePerPerson: number }[];
   priceDouble?: number;
   priceTriple?: number;
   priceQuad?: number;
@@ -190,9 +191,29 @@ export function generateInvoiceHTML(
         </tr>` : ''}
       </thead>
       <tbody>
-        ${occupancyRows.map(row => `
+        ${booking.ticketBreakdown && booking.ticketBreakdown.length > 0 ? booking.ticketBreakdown.map(t => {
+          const itemSubtotal = t.pricePerPerson * t.quantity;
+          const itemGst = Math.round((itemSubtotal * gstRate) / 100 * 100) / 100;
+          const itemIgst = isIGST ? itemGst : 0;
+          const itemSgst = isIGST ? 0 : Math.round(itemGst / 2 * 100) / 100;
+          const itemCgst = isIGST ? 0 : Math.round(itemGst / 2 * 100) / 100;
+
+          return `
+            <tr style="background:#fafafa;">
+              <td style="text-align:left;font-weight:600;">${t.label} &mdash; INR ${t.pricePerPerson.toLocaleString('en-IN')}.0 x ${t.quantity}</td>
+              <td class="text-center">Ticket(s)- ${t.quantity}<br/>Add On(s)- 0</td>
+              <td class="text-right">${itemSubtotal.toLocaleString('en-IN')}.0</td>
+              <td class="text-center">0.0</td>
+              ${isIGST
+                ? `<td class="text-right">${itemIgst.toLocaleString('en-IN')}</td>`
+                : `<td class="text-right">${itemSgst.toLocaleString('en-IN')}</td><td class="text-right">${itemCgst.toLocaleString('en-IN')}</td>`
+              }
+              <td class="text-right" style="font-weight:600;">${itemSubtotal.toLocaleString('en-IN')}.0</td>
+            </tr>
+          `;
+        }).join('') : occupancyRows.map(row => `
         <tr style="${row.selected ? 'background:#fafafa;' : ''}">
-          <td style="text-align:left;${row.selected ? 'font-weight:600;' : ''}">${row.type} — INR ${row.price.toLocaleString('en-IN')}.0 x ${row.selected ? booking.numberOfPersons : 0}</td>
+          <td style="text-align:left;${row.selected ? 'font-weight:600;' : ''}">${row.type} &mdash; INR ${row.price.toLocaleString('en-IN')}.0 x ${row.selected ? booking.numberOfPersons : 0}</td>
           ${row.selected ? `
             <td class="text-center">Ticket(s)- ${booking.numberOfPersons}<br/>Add On(s)- 0</td>
             <td class="text-right">${subtotal.toLocaleString('en-IN')}.0</td>

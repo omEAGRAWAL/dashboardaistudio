@@ -6,7 +6,7 @@ import { Header } from '@/components/Header';
 import { useEffect, useState, useCallback } from 'react';
 import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc, addDoc, serverTimestamp, getDoc, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { CalendarCheck, Search, Filter, Trash2, Edit2, Plus, Eye, FileText, Mail, Download, Loader2, X, History } from 'lucide-react';
+import { CalendarCheck, Search, Filter, Trash2, Edit2, Plus, Minus, Eye, FileText, Mail, Download, Loader2, X, History } from 'lucide-react';
 import { format } from 'date-fns';
 import { generateInvoiceHTML, type BusinessProfile, type InvoiceBooking } from '@/lib/invoice-template';
 
@@ -66,7 +66,6 @@ export default function BookingsPage() {
   const [invoiceParticipants, setInvoiceParticipants] = useState<string[]>(['']);
   const [invoiceRemarks, setInvoiceRemarks] = useState('');
 
-  const emptyOccupancyGroup = { sharingType: 'double' as string, persons: 1 };
   const [createFormData, setCreateFormData] = useState({
     packageId: '',
     customerName: '',
@@ -77,7 +76,7 @@ export default function BookingsPage() {
     customerState: '',
     travelDate: '',
     notes: '',
-    occupancyGroups: [{ ...emptyOccupancyGroup }] as { sharingType: string; persons: number }[],
+    ticketQty: {} as Record<string, number>,
   });
 
   useEffect(() => {
@@ -160,26 +159,26 @@ export default function BookingsPage() {
     }
   };
 
-  // Calculate total persons across all occupancy groups
-  const getTotalPersons = (groups: { sharingType: string; persons: number }[]) =>
-    groups.reduce((sum, g) => sum + g.persons, 0);
+  // Calculate total persons
+  const getTotalPersons = (ticketQty: Record<string, number>) =>
+    Object.values(ticketQty).reduce((sum, q) => sum + (q || 0), 0);
 
-  // Calculate total price from all occupancy groups
-  const calcTotalPrice = (groups: { sharingType: string; persons: number }[], pkg: any) => {
+  // Calculate total price
+  const calcTotalPrice = (ticketQty: Record<string, number>, pkg: any) => {
     if (!pkg) return 0;
-    return groups.reduce((sum, g) => {
-      const rate = g.sharingType === 'double' ? (pkg.priceDouble || 0)
-        : g.sharingType === 'triple' ? (pkg.priceTriple || 0)
-        : (pkg.priceQuad || 0);
-      return sum + rate * g.persons;
-    }, 0);
+    return (ticketQty['double'] || 0) * (pkg.priceDouble || 0) +
+           (ticketQty['triple'] || 0) * (pkg.priceTriple || 0) +
+           (ticketQty['quad'] || 0) * (pkg.priceQuad || 0);
   };
 
-  // Dominant sharing type (the one with most persons)
-  const getDominantSharing = (groups: { sharingType: string; persons: number }[]) => {
-    const map: Record<string, number> = {};
-    groups.forEach(g => { map[g.sharingType] = (map[g.sharingType] || 0) + g.persons; });
-    return Object.entries(map).sort((a, b) => b[1] - a[1])[0]?.[0] || 'double';
+  // Dominant sharing type
+  const getDominantSharing = (ticketQty: Record<string, number>) => {
+    let dominant = 'double';
+    let max = -1;
+    ['double', 'triple', 'quad'].forEach(t => {
+      if ((ticketQty[t] || 0) > max) { max = ticketQty[t] || 0; dominant = t; }
+    });
+    return dominant;
   };
 
   const handleCreateBooking = async (e: React.FormEvent) => {
@@ -187,10 +186,16 @@ export default function BookingsPage() {
     if (!orgId) return;
     const selectedPkg = packages.find(p => p.id === createFormData.packageId);
     if (!selectedPkg) return;
-    const totalPersons = getTotalPersons(createFormData.occupancyGroups);
-    const totalPrice = calcTotalPrice(createFormData.occupancyGroups, selectedPkg);
+    const totalPersons = getTotalPersons(createFormData.ticketQty);
+    const totalPrice = calcTotalPrice(createFormData.ticketQty, selectedPkg);
     if (totalPersons < 1) { alert('Add at least 1 person'); return; }
     try {
+      const ticketBreakdown = [
+        { type: 'double', label: 'Dual Occupancy', quantity: createFormData.ticketQty['double'] || 0, pricePerPerson: selectedPkg.priceDouble || 0 },
+        { type: 'triple', label: 'Triple Occupancy', quantity: createFormData.ticketQty['triple'] || 0, pricePerPerson: selectedPkg.priceTriple || 0 },
+        { type: 'quad', label: 'Quad Occupancy', quantity: createFormData.ticketQty['quad'] || 0, pricePerPerson: selectedPkg.priceQuad || 0 },
+      ].filter(t => t.pricePerPerson > 0);
+
       await addDoc(collection(db, 'bookings'), {
         orgId,
         packageId: selectedPkg.id,
@@ -203,8 +208,8 @@ export default function BookingsPage() {
         customerState: createFormData.customerState,
         travelDate: createFormData.travelDate,
         notes: createFormData.notes,
-        sharingType: getDominantSharing(createFormData.occupancyGroups),
-        occupancyGroups: createFormData.occupancyGroups,
+        sharingType: getDominantSharing(createFormData.ticketQty),
+        ticketBreakdown,
         numberOfPersons: totalPersons,
         totalPrice,
         status: 'Confirmed',
@@ -215,7 +220,7 @@ export default function BookingsPage() {
       setCreateFormData({
         packageId: '', customerName: '', customerEmail: '', customerPhone: '',
         customerAddress: '', customerCity: '', customerState: '', travelDate: '', notes: '',
-        occupancyGroups: [{ ...emptyOccupancyGroup }],
+        ticketQty: {},
       });
     } catch (error) {
       console.error("Error creating booking:", error);
@@ -241,6 +246,7 @@ export default function BookingsPage() {
       customerPhone: booking.customerPhone || '',
       packageTitle: booking.packageTitle,
       sharingType: booking.sharingType,
+      ticketBreakdown: booking.ticketBreakdown,
       numberOfPersons: booking.numberOfPersons,
       totalPrice: booking.totalPrice,
       status: booking.status || 'Pending',
@@ -829,83 +835,65 @@ export default function BookingsPage() {
                 </div>
               </div>
 
-              {/* Occupancy Groups — Multiple sharing options */}
-              <div className="border border-gray-200 rounded-xl overflow-hidden">
-                <div className="px-4 py-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-gray-800">Occupancy / Sharing</p>
-                    <p className="text-xs text-gray-400">Add different sharing types for the group</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setCreateFormData(prev => ({ ...prev, occupancyGroups: [...prev.occupancyGroups, { sharingType: 'double', persons: 1 }] }))}
-                    className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
-                  >
-                    <Plus className="w-3.5 h-3.5" /> Add Type
-                  </button>
-                </div>
-                <div className="p-4 space-y-3">
-                  {createFormData.occupancyGroups.map((group, idx) => {
-                    const pkg = packages.find(p => p.id === createFormData.packageId);
-                    const rate = pkg ? (group.sharingType === 'double' ? pkg.priceDouble : group.sharingType === 'triple' ? pkg.priceTriple : pkg.priceQuad) || 0 : 0;
-                    const groupTotal = rate * group.persons;
-                    return (
-                      <div key={idx} className="flex items-center gap-3 bg-gray-50 rounded-lg p-3 border border-gray-100">
-                        <span className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold flex-shrink-0">{idx + 1}</span>
-                        <select
-                          value={group.sharingType}
-                          onChange={e => {
-                            const arr = [...createFormData.occupancyGroups];
-                            arr[idx] = { ...arr[idx], sharingType: e.target.value };
-                            setCreateFormData(prev => ({ ...prev, occupancyGroups: arr }));
-                          }}
-                          className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 flex-1"
-                        >
-                          <option value="double">Double Sharing</option>
-                          <option value="triple">Triple Sharing</option>
-                          <option value="quad">Quad Sharing</option>
-                        </select>
-                        <div className="flex items-center gap-1.5">
-                          <label className="text-xs text-gray-500">Persons:</label>
-                          <input
-                            type="number"
-                            min="1"
-                            value={group.persons}
-                            onChange={e => {
-                              const arr = [...createFormData.occupancyGroups];
-                              arr[idx] = { ...arr[idx], persons: Math.max(1, parseInt(e.target.value) || 1) };
-                              setCreateFormData(prev => ({ ...prev, occupancyGroups: arr }));
-                            }}
-                            className="w-16 border border-gray-300 rounded-lg px-2 py-2 text-sm text-center focus:ring-2 focus:ring-indigo-500"
-                          />
-                        </div>
-                        {pkg && <span className="text-xs text-gray-500 flex-shrink-0 min-w-[80px] text-right">₹{groupTotal.toLocaleString('en-IN')}</span>}
-                        {createFormData.occupancyGroups.length > 1 && (
-                          <button type="button" onClick={() => {
-                            setCreateFormData(prev => ({ ...prev, occupancyGroups: prev.occupancyGroups.filter((_, i) => i !== idx) }));
-                          }} className="text-gray-300 hover:text-red-500 p-1 flex-shrink-0">
-                            <X className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+              {/* Select Ticket(s) */}
+              {createFormData.packageId && (() => {
+                const pkg = packages.find(p => p.id === createFormData.packageId);
+                if (!pkg) return null;
+                const availableTicketTypes = [
+                  { type: 'double', label: 'Dual Occupancy', price: pkg.priceDouble || 0 },
+                  { type: 'triple', label: 'Triple Occupancy', price: pkg.priceTriple || 0 },
+                  { type: 'quad', label: 'Quad Occupancy', price: pkg.priceQuad || 0 },
+                ].filter(t => t.price > 0);
 
-                {/* Totals */}
-                {createFormData.packageId && (() => {
-                  const pkg = packages.find(p => p.id === createFormData.packageId);
-                  if (!pkg) return null;
-                  const tp = getTotalPersons(createFormData.occupancyGroups);
-                  const total = calcTotalPrice(createFormData.occupancyGroups, pkg);
-                  return (
+                const tp = getTotalPersons(createFormData.ticketQty);
+                const total = calcTotalPrice(createFormData.ticketQty, pkg);
+
+                return (
+                  <div className="border border-gray-200 rounded-xl overflow-hidden mb-6">
+                    <div className="px-4 py-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-semibold text-gray-800">Select Ticket(s)</p>
+                        <p className="text-xs text-gray-400">Choose quantity for each sharing type</p>
+                      </div>
+                    </div>
+                    <div className="p-4 space-y-2">
+                      {availableTicketTypes.map(t => (
+                        <div key={t.type} className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl border border-gray-200">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-sm text-gray-900">{t.label}</p>
+                            <p className="text-xs text-gray-500">₹{t.price?.toLocaleString('en-IN')} per person</p>
+                          </div>
+                          <div className="flex items-center gap-1 bg-white rounded-xl border border-gray-200 shadow-sm p-0.5">
+                            <button type="button"
+                              onClick={() => setCreateFormData(prev => ({
+                                ...prev, 
+                                ticketQty: { ...prev.ticketQty, [t.type]: Math.max(0, (prev.ticketQty[t.type] || 0) - 1) }
+                              }))}
+                              className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-100 font-bold text-gray-600 transition-colors">
+                              <Minus className="w-3.5 h-3.5" />
+                            </button>
+                            <span className="w-7 text-center font-bold text-sm text-gray-900">
+                              {createFormData.ticketQty[t.type] || 0}
+                            </span>
+                            <button type="button"
+                              onClick={() => setCreateFormData(prev => ({
+                                ...prev, 
+                                ticketQty: { ...prev.ticketQty, [t.type]: (prev.ticketQty[t.type] || 0) + 1 }
+                              }))}
+                              className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-100 font-bold text-gray-600 transition-colors">
+                              <Plus className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                     <div className="px-4 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Total: <strong className="text-gray-900">{tp} {tp === 1 ? 'person' : 'persons'}</strong></span>
+                      <span className="text-sm text-gray-600">Total: <strong className="text-gray-900">{tp} tickets</strong></span>
                       <span className="text-sm font-bold text-gray-900">₹{total.toLocaleString('en-IN')}</span>
                     </div>
-                  );
-                })()}
-              </div>
+                  </div>
+                );
+              })()}
 
               {/* Notes */}
               <div className="space-y-1.5">

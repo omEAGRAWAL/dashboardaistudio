@@ -108,8 +108,7 @@ export default function PackageDetailsPage() {
   const [bookingFields, setBookingFields] = useState<BookingField[]>(DEFAULT_FIELDS);
   const [bookingColor, setBookingColor] = useState('#22c55e');
 
-  const [sharingType, setSharingType] = useState('double');
-  const [numberOfPersons, setNumberOfPersons] = useState(2);
+  const [ticketQty, setTicketQty] = useState<Record<string, number>>({});
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -164,8 +163,20 @@ export default function PackageDetailsPage() {
     { id: 'notes' as Tab, label: 'Notes & Terms', show: !!pkg.note },
   ] as const).filter(t => t.show);
 
-  const prices: Record<string, number> = { double: pkg.priceDouble || 0, triple: pkg.priceTriple || 0, quad: pkg.priceQuad || 0 };
-  const calcTotal = () => prices[sharingType] * numberOfPersons;
+  const calcTotal = () =>
+    ticketTypes.reduce((sum, t) => sum + (ticketQty[t.type] || 0) * t.price, 0);
+  
+  const totalPersons = () =>
+    ticketTypes.reduce((sum, t) => sum + (ticketQty[t.type] || 0), 0);
+  
+  const dominantType = () => {
+    let dominant = 'double';
+    let max = -1;
+    ticketTypes.forEach(t => {
+      if ((ticketQty[t.type] || 0) > max) { max = ticketQty[t.type] || 0; dominant = t.type; }
+    });
+    return dominant;
+  };
 
   const ticketTypes = [
     { type: 'double', label: 'Dual Occupancy', price: pkg.priceDouble },
@@ -192,6 +203,10 @@ export default function PackageDetailsPage() {
         }
       });
 
+      const ticketBreakdown = ticketTypes.map(t => ({
+        type: t.type, label: t.label, quantity: ticketQty[t.type] || 0, pricePerPerson: t.price,
+      }));
+
       await addDoc(collection(db, 'bookings'), {
         orgId,
         packageId: pkg.id,
@@ -203,8 +218,9 @@ export default function PackageDetailsPage() {
         state: standardData.state || '',
         city: standardData.city || '',
         leadSource: standardData.leadSource || '',
-        sharingType,
-        numberOfPersons,
+        sharingType: dominantType(),
+        numberOfPersons: totalPersons(),
+        ticketBreakdown,
         totalPrice: calcTotal(),
         status: 'Pending',
         source: 'Website',
@@ -221,6 +237,7 @@ export default function PackageDetailsPage() {
     setBookingStep(1);
     setBookingSuccess(false);
     setFieldValues({});
+    setTicketQty({ double: 1, triple: 1, quad: 1 });
     setBookingOpen(true);
   };
 
@@ -273,33 +290,26 @@ export default function PackageDetailsPage() {
               <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Select Ticket(s)</label>
               <div className="space-y-2">
                 {ticketTypes.map(t => (
-                  <div key={t.type}
-                    className={`flex items-center gap-3 px-4 py-3.5 rounded-xl border-2 cursor-pointer transition-all`}
-                    style={sharingType === t.type
-                      ? { borderColor: bookingColor, backgroundColor: `${bookingColor}10` }
-                      : { borderColor: '#e5e7eb' }}
-                    onClick={() => setSharingType(t.type)}>
+                  <div key={t.type} className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl border border-gray-200">
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-sm text-gray-900">{t.label}</p>
                       <p className="text-xs text-gray-500">₹{t.price?.toLocaleString()} per person</p>
                     </div>
-                    {sharingType === t.type ? (
-                      <div className="flex items-center gap-1 bg-white rounded-xl border border-gray-200 shadow-sm p-0.5">
-                        <button type="button"
-                          onClick={e => { e.stopPropagation(); setNumberOfPersons(n => Math.max(1, n - 1)); }}
-                          className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-100 transition-colors font-bold text-gray-600">
-                          <Minus className="w-3.5 h-3.5" />
-                        </button>
-                        <span className="w-7 text-center font-bold text-sm text-gray-900">{numberOfPersons}</span>
-                        <button type="button"
-                          onClick={e => { e.stopPropagation(); setNumberOfPersons(n => n + 1); }}
-                          className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-100 transition-colors font-bold text-gray-600">
-                          <Plus className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="w-5 h-5 rounded-full border-2 border-gray-300 flex-shrink-0" />
-                    )}
+                    <div className="flex items-center gap-1 bg-white rounded-xl border border-gray-200 shadow-sm p-0.5">
+                      <button type="button"
+                        onClick={() => setTicketQty(q => ({ ...q, [t.type]: Math.max(0, (q[t.type] || 0) - 1) }))}
+                        className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-100 font-bold text-gray-600 transition-colors">
+                        <Minus className="w-3.5 h-3.5" />
+                      </button>
+                      <span className="w-7 text-center font-bold text-sm text-gray-900">
+                        {ticketQty[t.type] || 0}
+                      </span>
+                      <button type="button"
+                        onClick={() => setTicketQty(q => ({ ...q, [t.type]: (q[t.type] || 0) + 1 }))}
+                        className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-100 font-bold text-gray-600 transition-colors">
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -309,9 +319,9 @@ export default function PackageDetailsPage() {
             <div className="flex items-center justify-between bg-gray-50 rounded-2xl px-5 py-4 border border-gray-100">
               <div>
                 <p className="text-xs text-gray-500">
-                  ₹{prices[sharingType]?.toLocaleString()} × {numberOfPersons} {numberOfPersons === 1 ? 'person' : 'persons'}
+                  {totalPersons()} tickets selected
                 </p>
-                <p className="text-[10px] text-gray-400 mt-0.5 capitalize">{sharingType} sharing</p>
+                <p className="text-[10px] text-gray-400 mt-0.5">Includes all sharing types</p>
               </div>
               <p className="text-2xl font-black text-gray-900">₹{calcTotal().toLocaleString()}</p>
             </div>
@@ -338,7 +348,7 @@ export default function PackageDetailsPage() {
                 <div className="min-w-0">
                   <p className="font-semibold text-gray-900 text-sm line-clamp-1">{pkg.title}</p>
                   <p className="text-xs text-gray-500 mt-0.5">
-                    {numberOfPersons} × {sharingType} · ₹{calcTotal().toLocaleString()}
+                    {totalPersons()} tickets · ₹{calcTotal().toLocaleString()}
                   </p>
                 </div>
               </div>
@@ -642,26 +652,12 @@ export default function PackageDetailsPage() {
               ) : (
                 <>
                   {/* Price header */}
-                  <div className="p-5 border-b border-gray-100">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-bold text-gray-900">Book This Package</h3>
-                      <div className="flex gap-1">
-                        {[1, 2].map(s => (
-                          <div key={s} className={`rounded-full transition-all ${bookingStep === s ? 'w-4 h-2' : 'w-2 h-2'}`}
-                            style={{ backgroundColor: s <= bookingStep ? bookingColor : '#e5e7eb' }} />
-                        ))}
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-2">
-                      {ticketTypes.map(t => (
-                        <div key={t.type}
-                          className="text-center p-3 rounded-xl border-2 cursor-pointer transition-all"
-                          style={sharingType === t.type ? { borderColor: bookingColor, backgroundColor: `${bookingColor}10` } : { borderColor: '#f3f4f6' }}
-                          onClick={() => setSharingType(t.type)}>
-                          <p className="text-[9px] text-gray-400 uppercase font-bold tracking-wider mb-1 capitalize">{t.label.split(' ')[0]}</p>
-                          <p className="font-black text-gray-900 text-sm">₹{t.price?.toLocaleString()}</p>
-                          <p className="text-[8px] text-gray-400 mt-0.5">per person</p>
-                        </div>
+                  <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+                    <h3 className="font-bold text-gray-900">Book This Package</h3>
+                    <div className="flex gap-1">
+                      {[1, 2].map(s => (
+                        <div key={s} className={`rounded-full transition-all ${bookingStep === s ? 'w-4 h-2' : 'w-2 h-2'}`}
+                          style={{ backgroundColor: s <= bookingStep ? bookingColor : '#e5e7eb' }} />
                       ))}
                     </div>
                   </div>
@@ -670,26 +666,40 @@ export default function PackageDetailsPage() {
                   {bookingStep === 1 ? (
                     <div className="p-5 space-y-4">
                       <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Persons</label>
-                        <div className="flex items-center gap-3 bg-gray-50 rounded-xl border border-gray-200 p-2 w-fit">
-                          <button type="button" onClick={() => setNumberOfPersons(n => Math.max(1, n - 1))}
-                            className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-100 transition-colors font-bold">
-                            <Minus className="w-3.5 h-3.5" />
-                          </button>
-                          <span className="font-black text-gray-900 text-lg w-8 text-center">{numberOfPersons}</span>
-                          <button type="button" onClick={() => setNumberOfPersons(n => n + 1)}
-                            className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-100 transition-colors font-bold">
-                            <Plus className="w-3.5 h-3.5" />
-                          </button>
+                        <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Select Ticket(s)</label>
+                        <div className="space-y-2">
+                          {ticketTypes.map(t => (
+                            <div key={t.type} className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl border border-gray-200">
+                              <div className="flex-1 min-w-0">
+                                <p className="font-semibold text-sm text-gray-900">{t.label}</p>
+                                <p className="text-xs text-gray-500">₹{t.price?.toLocaleString()} per person</p>
+                              </div>
+                              <div className="flex items-center gap-1 bg-white rounded-xl border border-gray-200 shadow-sm p-0.5">
+                                <button type="button"
+                                  onClick={() => setTicketQty(q => ({ ...q, [t.type]: Math.max(0, (q[t.type] || 0) - 1) }))}
+                                  className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-100 font-bold text-gray-600 transition-colors">
+                                  <Minus className="w-3.5 h-3.5" />
+                                </button>
+                                <span className="w-7 text-center font-bold text-sm text-gray-900">
+                                  {ticketQty[t.type] || 0}
+                                </span>
+                                <button type="button"
+                                  onClick={() => setTicketQty(q => ({ ...q, [t.type]: (q[t.type] || 0) + 1 }))}
+                                  className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-100 font-bold text-gray-600 transition-colors">
+                                  <Plus className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
 
                       <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
                         <div className="flex justify-between items-center mb-1">
-                          <span className="text-sm text-gray-500">₹{prices[sharingType]?.toLocaleString()} × {numberOfPersons} persons</span>
+                          <span className="text-sm text-gray-500">{totalPersons()} tickets</span>
                           <span className="text-2xl font-black text-gray-900">₹{calcTotal().toLocaleString()}</span>
                         </div>
-                        <p className="text-[10px] text-gray-400 capitalize">{sharingType} sharing — per person rate</p>
+                        <p className="text-[10px] text-gray-400">Total amount including all selected tickets</p>
                       </div>
 
                       <button type="button" onClick={() => setBookingStep(2)} disabled={calcTotal() === 0}
@@ -758,8 +768,8 @@ export default function PackageDetailsPage() {
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 px-4 py-3 shadow-2xl">
         <div className="flex items-center gap-3">
           <div className="flex-1">
-            <p className="text-xs text-gray-500 capitalize">{sharingType} sharing</p>
-            <p className="font-black text-gray-900 text-lg">₹{prices[sharingType]?.toLocaleString()}<span className="text-xs font-medium text-gray-400">/person</span></p>
+            <p className="text-xs text-gray-500">{totalPersons()} tickets selected</p>
+            <p className="font-black text-gray-900 text-lg">₹{calcTotal().toLocaleString()}</p>
           </div>
           {bookingSuccess ? (
             <div className="flex items-center gap-2 px-5 py-3 bg-green-100 text-green-700 rounded-2xl font-bold text-sm">
