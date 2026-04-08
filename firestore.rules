@@ -247,6 +247,12 @@ service cloud.firestore {
       allow delete: if isAuthenticated() && resource.data.orgId == getUserOrgId();
     }
 
+    // Custom domain reverse-lookup — read by middleware (unauthenticated), write by Admin SDK only
+    match /domains/{hostname} {
+      allow read: if true;
+      allow write: if false;
+    }
+
     // WhatsApp number assignments (orgId is document ID)
     match /whatsapp_numbers/{orgId} {
       allow read: if true; // webhook reads this without auth to look up orgId by phone number

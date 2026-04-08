@@ -209,7 +209,7 @@ export default function PublicSitePage() {
                 const prices = [pkg.priceDouble, pkg.priceTriple, pkg.priceQuad].filter(p => p > 0);
                 const minPrice = prices.length ? Math.min(...prices) : null;
                 return (
-                  <Link href={`/site/${orgId}/package/${pkg.id}`} key={pkg.id} className="group block">
+                  <Link href={`/package/${pkg.id}`} key={pkg.id} className="group block">
                     <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 h-full flex flex-col">
                       <div className="relative overflow-hidden h-60">
                         <img src={coverImage} alt={pkg.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />

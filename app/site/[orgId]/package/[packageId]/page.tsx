@@ -420,7 +420,7 @@ export default function PackageDetailsPage() {
       {/* Navbar */}
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link href={`/site/${orgId}`} className="flex items-center gap-2 text-gray-600 hover:text-gray-900 font-semibold transition-colors group">
+          <Link href="/" className="flex items-center gap-2 text-gray-600 hover:text-gray-900 font-semibold transition-colors group">
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
             {agencyName}
           </Link>
@@ -643,7 +643,7 @@ export default function PackageDetailsPage() {
                   </div>
                   <h3 className="text-2xl font-black text-gray-900 mb-3">Booking Received!</h3>
                   <p className="text-gray-500 mb-7 leading-relaxed">Thank you! Our team will contact you shortly to confirm your booking.</p>
-                  <Link href={`/site/${orgId}`}
+                  <Link href="/"
                     className="block w-full py-3.5 rounded-2xl text-white font-bold text-center shadow-md hover:shadow-xl hover:scale-[1.02] transition-all"
                     style={{ backgroundColor: tc }}>
                     Back to Home

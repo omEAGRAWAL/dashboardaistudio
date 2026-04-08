@@ -52,10 +52,17 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // Already routed to a /site/... path — let Next.js handle it directly
+  // (prevents double-rewriting when package links include /site/[orgId] in the href)
+  if (pathname.startsWith('/site/')) {
+    return NextResponse.next();
+  }
+
   const orgId = await resolveHostToOrgId(bareHost);
   if (!orgId) return NextResponse.next();
 
-  // Rewrite: agency.com/packages → /site/[orgId]/packages
+  // Rewrite: agency.com/ → /site/[orgId]/
+  // Rewrite: agency.com/package/abc → /site/[orgId]/package/abc
   const url = req.nextUrl.clone();
   url.pathname = `/site/${orgId}${pathname === '/' ? '' : pathname}`;
   return NextResponse.rewrite(url);
