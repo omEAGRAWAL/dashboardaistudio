@@ -85,31 +85,24 @@ export default function BusinessProfilePage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-    const preset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
-    if (!cloudName || !preset) {
-      alert('Cloudinary not configured');
-      return;
-    }
-
     setUploading(true);
     try {
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('upload_preset', preset);
-      formData.append('folder', 'business-logos');
 
-      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-        method: 'POST',
-        body: formData,
-      });
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
       const data = await res.json();
+      if (!data.secure_url) {
+        throw new Error(data.error || 'Upload failed — no URL returned');
+      }
       setProfile(prev => ({ ...prev, logoUrl: data.secure_url }));
     } catch (err) {
       console.error('Logo upload error:', err);
-      alert('Failed to upload logo');
+      alert(`Failed to upload logo: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
       setUploading(false);
+      // Reset input so the same file can be re-selected if needed
+      e.target.value = '';
     }
   };
 
@@ -117,10 +110,11 @@ export default function BusinessProfilePage() {
     if (!orgId) return;
     setSaving(true);
     try {
-      await setDoc(doc(db, 'business_profiles', orgId), {
-        ...profile,
-        orgId,
-      }, { merge: true });
+      // Strip undefined values — Firestore rejects them
+      const clean = Object.fromEntries(
+        Object.entries({ ...profile, orgId }).filter(([, v]) => v !== undefined)
+      );
+      await setDoc(doc(db, 'business_profiles', orgId), clean, { merge: true });
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
@@ -184,32 +178,49 @@ export default function BusinessProfilePage() {
                     {/* Logo Upload */}
                     <div className="flex items-start gap-6">
                       <div className="flex-shrink-0">
-                        <label className="text-sm font-semibold text-gray-700 block mb-2">Logo</label>
-                        <div className="relative group">
+                        <label className="text-sm font-semibold text-gray-700 block mb-2">Agency Logo</label>
+                        <div className="relative group w-28 h-28">
                           {profile.logoUrl ? (
-                            <div className="w-24 h-24 rounded-xl border-2 border-gray-200 overflow-hidden relative">
-                              <img src={profile.logoUrl} alt="Logo" className="w-full h-full object-contain bg-white" />
-                              <button
-                                onClick={() => setProfile(prev => ({ ...prev, logoUrl: '' }))}
-                                className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                              >
-                                <X className="w-3 h-3" />
-                              </button>
-                            </div>
+                            <>
+                              <div className="w-28 h-28 rounded-xl border-2 border-gray-200 overflow-hidden bg-white shadow-sm">
+                                <img src={profile.logoUrl} alt="Agency logo preview" className="w-full h-full object-contain p-1" />
+                              </div>
+                              {/* Hover overlay: Change / Remove */}
+                              <div className="absolute inset-0 rounded-xl bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 pointer-events-none group-hover:pointer-events-auto">
+                                <label className="cursor-pointer flex items-center gap-1 text-white text-xs font-medium bg-white/20 hover:bg-white/30 px-2.5 py-1.5 rounded-lg transition-colors">
+                                  <Upload className="w-3 h-3" /> Change
+                                  <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+                                </label>
+                                <button
+                                  type="button"
+                                  onClick={() => setProfile(prev => ({ ...prev, logoUrl: '' }))}
+                                  className="flex items-center gap-1 text-white text-xs font-medium bg-red-500/70 hover:bg-red-600 px-2.5 py-1.5 rounded-lg transition-colors"
+                                >
+                                  <X className="w-3 h-3" /> Remove
+                                </button>
+                              </div>
+                              {/* Uploading overlay (replacing) */}
+                              {uploading && (
+                                <div className="absolute inset-0 rounded-xl bg-white/80 flex items-center justify-center">
+                                  <Loader2 className="w-6 h-6 text-indigo-500 animate-spin" />
+                                </div>
+                              )}
+                            </>
                           ) : (
-                            <label className="w-24 h-24 rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/50 transition-colors">
+                            <label className="w-28 h-28 rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/50 transition-colors">
                               {uploading ? (
                                 <Loader2 className="w-6 h-6 text-indigo-400 animate-spin" />
                               ) : (
                                 <>
                                   <Upload className="w-5 h-5 text-gray-400 mb-1" />
-                                  <span className="text-[10px] text-gray-400 font-medium">Upload</span>
+                                  <span className="text-[10px] text-gray-400 font-medium text-center leading-tight px-1">Click to upload</span>
                                 </>
                               )}
                               <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
                             </label>
                           )}
                         </div>
+                        <p className="text-[10px] text-gray-400 mt-1.5 text-center w-28">PNG, JPG · max 2 MB</p>
                       </div>
                       <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1.5">

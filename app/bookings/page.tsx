@@ -65,6 +65,12 @@ export default function BookingsPage() {
   const [invoiceAmountPaid, setInvoiceAmountPaid] = useState('');
   const [invoiceParticipants, setInvoiceParticipants] = useState<string[]>(['']);
   const [invoiceRemarks, setInvoiceRemarks] = useState('');
+  const [invoiceDiscount, setInvoiceDiscount] = useState('');
+  const [createStep, setCreateStep] = useState<1 | 2>(1);
+  const [createParticipants, setCreateParticipants] = useState<{ name: string; phone: string; age: string; gender: string }[]>([]);
+  const [isEditParticipantsOpen, setIsEditParticipantsOpen] = useState(false);
+  const [editingParticipants, setEditingParticipants] = useState<{ name: string; phone: string; age: string; gender: string }[]>([]);
+  const [savingParticipants, setSavingParticipants] = useState(false);
 
   const [createFormData, setCreateFormData] = useState({
     packageId: '',
@@ -77,6 +83,7 @@ export default function BookingsPage() {
     travelDate: '',
     notes: '',
     ticketQty: {} as Record<string, number>,
+    discountAmount: '',
   });
 
   useEffect(() => {
@@ -181,20 +188,73 @@ export default function BookingsPage() {
     return dominant;
   };
 
-  const handleCreateBooking = async (e: React.FormEvent) => {
+  const resetCreateModal = () => {
+    setIsCreateModalOpen(false);
+    setCreateStep(1);
+    setCreateParticipants([]);
+    setCreateFormData({
+      packageId: '', customerName: '', customerEmail: '', customerPhone: '',
+      customerAddress: '', customerCity: '', customerState: '', travelDate: '', notes: '',
+      ticketQty: {}, discountAmount: '',
+    });
+  };
+
+  const openEditParticipants = (booking: any) => {
+    const count = booking.numberOfPersons || 1;
+    const existing: { name: string; phone: string; age: string; gender: string }[] =
+      (booking.participants || []).map((p: any) => ({
+        name: p.name || '', phone: p.phone || '', age: p.age || '', gender: p.gender || '',
+      }));
+    // Pad to numberOfPersons so every slot is editable
+    while (existing.length < count) existing.push({ name: '', phone: '', age: '', gender: '' });
+    setEditingParticipants(existing);
+    setIsEditParticipantsOpen(true);
+  };
+
+  const handleSaveParticipants = async () => {
+    if (!viewingBooking) return;
+    setSavingParticipants(true);
+    try {
+      const saved = editingParticipants
+        .filter(p => p.name.trim())
+        .map(p => ({ name: p.name.trim(), phone: p.phone.trim(), age: p.age.trim(), gender: p.gender }));
+      await updateDoc(doc(db, 'bookings', viewingBooking.id), { participants: saved });
+      setViewingBooking((prev: any) => ({ ...prev, participants: saved }));
+      setIsEditParticipantsOpen(false);
+    } catch (err) {
+      console.error('Error saving participants:', err);
+      alert('Failed to save participants');
+    } finally {
+      setSavingParticipants(false);
+    }
+  };
+
+  const handleStep1Next = (e: React.FormEvent) => {
     e.preventDefault();
+    const totalPersons = getTotalPersons(createFormData.ticketQty);
+    if (totalPersons < 1) { alert('Add at least 1 person'); return; }
+    setCreateParticipants(
+      Array.from({ length: totalPersons }, () => ({ name: '', phone: '', age: '', gender: '' }))
+    );
+    setCreateStep(2);
+  };
+
+  const handleCreateBookingFinal = async (participants: typeof createParticipants) => {
     if (!orgId) return;
     const selectedPkg = packages.find(p => p.id === createFormData.packageId);
     if (!selectedPkg) return;
     const totalPersons = getTotalPersons(createFormData.ticketQty);
     const totalPrice = calcTotalPrice(createFormData.ticketQty, selectedPkg);
-    if (totalPersons < 1) { alert('Add at least 1 person'); return; }
     try {
       const ticketBreakdown = [
         { type: 'double', label: 'Dual Occupancy', quantity: createFormData.ticketQty['double'] || 0, pricePerPerson: selectedPkg.priceDouble || 0 },
         { type: 'triple', label: 'Triple Occupancy', quantity: createFormData.ticketQty['triple'] || 0, pricePerPerson: selectedPkg.priceTriple || 0 },
         { type: 'quad', label: 'Quad Occupancy', quantity: createFormData.ticketQty['quad'] || 0, pricePerPerson: selectedPkg.priceQuad || 0 },
       ].filter(t => t.pricePerPerson > 0);
+
+      const savedParticipants = participants
+        .filter(p => p.name.trim())
+        .map(p => ({ name: p.name.trim(), phone: p.phone.trim(), age: p.age.trim(), gender: p.gender }));
 
       await addDoc(collection(db, 'bookings'), {
         orgId,
@@ -212,16 +272,13 @@ export default function BookingsPage() {
         ticketBreakdown,
         numberOfPersons: totalPersons,
         totalPrice,
+        discountAmount: Number(createFormData.discountAmount) || 0,
+        participants: savedParticipants,
         status: 'Confirmed',
         source: 'CRM',
         createdAt: serverTimestamp()
       });
-      setIsCreateModalOpen(false);
-      setCreateFormData({
-        packageId: '', customerName: '', customerEmail: '', customerPhone: '',
-        customerAddress: '', customerCity: '', customerState: '', travelDate: '', notes: '',
-        ticketQty: {},
-      });
+      resetCreateModal();
     } catch (error) {
       console.error("Error creating booking:", error);
       alert("Failed to create booking");
@@ -232,8 +289,14 @@ export default function BookingsPage() {
   const openInvoiceModal = (booking: any) => {
     setInvoiceModalBooking(booking);
     setInvoiceAmountPaid('');
-    setInvoiceParticipants(['']);
     setInvoiceRemarks('');
+    setInvoiceDiscount(booking.discountAmount ? String(booking.discountAmount) : '');
+    // Pre-fill participant names from saved booking data
+    if (booking.participants?.length > 0) {
+      setInvoiceParticipants(booking.participants.map((p: any) => p.name || ''));
+    } else {
+      setInvoiceParticipants(['']);
+    }
   };
 
   const buildInvoiceBooking = (booking: any): InvoiceBooking => {
@@ -255,6 +318,7 @@ export default function BookingsPage() {
       participants: invoiceParticipants.filter(p => p.trim()),
       remarks: invoiceRemarks,
       amountPaid: Number(invoiceAmountPaid) || 0,
+      discount: Number(invoiceDiscount) || 0,
       priceDouble: pkg?.priceDouble || 0,
       priceTriple: pkg?.priceTriple || 0,
       priceQuad: pkg?.priceQuad || 0,
@@ -323,13 +387,33 @@ export default function BookingsPage() {
     }
   }, []);
 
+  const getLogoDataUrl = useCallback(async (url: string): Promise<string> => {
+    if (!url) return '';
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      return await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch {
+      return url;
+    }
+  }, []);
+
   const handleDownloadInvoice = async () => {
     if (!orgId || !invoiceModalBooking || !businessProfile) return;
     setGeneratingFor(invoiceModalBooking.id);
     try {
       const invoiceNum = incrementInvoiceCounter(orgId);
       const invoiceBooking = buildInvoiceBooking(invoiceModalBooking);
-      const html = generateInvoiceHTML(invoiceBooking, businessProfile, invoiceNum);
+      const profileForInvoice = { ...businessProfile };
+      if (businessProfile.logoUrl) {
+        profileForInvoice.logoUrl = await getLogoDataUrl(businessProfile.logoUrl);
+      }
+      const html = generateInvoiceHTML(invoiceBooking, profileForInvoice, invoiceNum);
       const blob = await generatePdfBlob(html);
       
       // Trigger download
@@ -373,7 +457,11 @@ export default function BookingsPage() {
     try {
       const invoiceNum = incrementInvoiceCounter(orgId);
       const invoiceBooking = buildInvoiceBooking(invoiceModalBooking);
-      const html = generateInvoiceHTML(invoiceBooking, businessProfile, invoiceNum);
+      const profileForInvoice = { ...businessProfile };
+      if (businessProfile.logoUrl) {
+        profileForInvoice.logoUrl = await getLogoDataUrl(businessProfile.logoUrl);
+      }
+      const html = generateInvoiceHTML(invoiceBooking, profileForInvoice, invoiceNum);
       const blob = await generatePdfBlob(html);
       
       // Convert blob to base64
@@ -541,7 +629,10 @@ export default function BookingsPage() {
                           <span className="capitalize">{booking.sharingType} · {booking.numberOfPersons}p</span>
                           <span>· {booking.createdAt ? format(booking.createdAt.toDate(), 'MMM d') : 'N/A'}</span>
                         </div>
-                        <span className="font-semibold text-gray-900 text-sm">₹{booking.totalPrice?.toLocaleString?.() ?? booking.totalPrice}</span>
+                        <div className="text-right">
+                          <span className="font-semibold text-gray-900 text-sm">₹{((booking.totalPrice || 0) - (booking.discountAmount || 0)).toLocaleString('en-IN')}</span>
+                          {booking.discountAmount > 0 && <div className="text-[10px] text-green-600 font-medium">₹{booking.discountAmount.toLocaleString('en-IN')} off</div>}
+                        </div>
                       </div>
                       <div className="flex items-center gap-2 pt-1">
                         <button onClick={() => handleOpenView(booking)} className="flex-1 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-center">View</button>
@@ -592,7 +683,8 @@ export default function BookingsPage() {
                             <div className="text-sm text-gray-500">{booking.numberOfPersons} Persons</div>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="font-medium text-gray-900">₹{booking.totalPrice?.toLocaleString?.() ?? booking.totalPrice}</div>
+                            <div className="font-medium text-gray-900">₹{((booking.totalPrice || 0) - (booking.discountAmount || 0)).toLocaleString('en-IN')}</div>
+                            {booking.discountAmount > 0 && <div className="text-xs text-green-600 font-medium">₹{booking.discountAmount.toLocaleString('en-IN')} off</div>}
                           </td>
                           <td className="px-6 py-4">
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -701,7 +793,10 @@ export default function BookingsPage() {
                   <span>·</span>
                   <span>{viewingBooking.numberOfPersons} {viewingBooking.numberOfPersons === 1 ? 'person' : 'persons'}</span>
                   <span>·</span>
-                  <span className="font-bold text-gray-900">₹{viewingBooking.totalPrice?.toLocaleString?.() ?? viewingBooking.totalPrice}</span>
+                  <span className="font-bold text-gray-900">₹{((viewingBooking.totalPrice || 0) - (viewingBooking.discountAmount || 0)).toLocaleString('en-IN')}</span>
+                  {viewingBooking.discountAmount > 0 && (
+                    <span className="text-xs text-green-600 font-medium">(₹{viewingBooking.discountAmount.toLocaleString('en-IN')} off)</span>
+                  )}
                 </div>
                 {viewingBooking.travelDate && (
                   <p className="text-sm text-gray-500 mt-1">Travel Date: {viewingBooking.travelDate}</p>
@@ -717,6 +812,56 @@ export default function BookingsPage() {
                   {viewingBooking.state && <p className="text-sm text-gray-600">{viewingBooking.city ? `${viewingBooking.city}, ` : ''}{viewingBooking.state}</p>}
                   {viewingBooking.leadSource && <p className="text-sm text-gray-500">Source: {viewingBooking.leadSource}</p>}
                 </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    Participants ({viewingBooking.participants?.length || 0}/{viewingBooking.numberOfPersons})
+                  </p>
+                  <button
+                    onClick={() => openEditParticipants(viewingBooking)}
+                    className="flex items-center gap-1 text-xs font-medium text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-lg transition-colors"
+                  >
+                    <Edit2 className="w-3 h-3" /> Edit Participants
+                  </button>
+                </div>
+                {viewingBooking.participants?.length > 0 ? (
+                  <div className="space-y-2">
+                    {viewingBooking.participants.map((p: any, i: number) => (
+                      <div key={i} className="bg-gray-50 rounded-xl border border-gray-100 px-4 py-3">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-[10px] font-bold flex-shrink-0">{i + 1}</span>
+                          <p className="font-semibold text-gray-900 text-sm">{p.name || '—'}</p>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2 pl-7">
+                          <div>
+                            <p className="text-[10px] text-gray-400 uppercase font-medium">Phone</p>
+                            <p className="text-xs text-gray-700 font-medium mt-0.5">{p.phone || '—'}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-gray-400 uppercase font-medium">Age</p>
+                            <p className="text-xs text-gray-700 font-medium mt-0.5">{p.age || '—'}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-gray-400 uppercase font-medium">Gender</p>
+                            <p className="text-xs text-gray-700 font-medium mt-0.5">{p.gender || '—'}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-gray-50 rounded-xl border border-dashed border-gray-200 p-4 text-center">
+                    <p className="text-xs text-gray-400">No participant details added yet.</p>
+                    <button
+                      onClick={() => openEditParticipants(viewingBooking)}
+                      className="text-xs font-medium text-indigo-600 hover:underline mt-1"
+                    >
+                      Add participant details →
+                    </button>
+                  </div>
+                )}
               </div>
 
               {viewingBooking.customFields && Object.keys(viewingBooking.customFields).length > 0 && (
@@ -759,10 +904,17 @@ export default function BookingsPage() {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
-              <h2 className="text-xl font-bold text-gray-900">Create New Booking</h2>
-              <button onClick={() => setIsCreateModalOpen(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Create New Booking</h2>
+                <div className="flex items-center gap-1.5 mt-1">
+                  <div className={`h-1.5 w-12 rounded-full ${createStep >= 1 ? 'bg-indigo-500' : 'bg-gray-200'}`} />
+                  <div className={`h-1.5 w-12 rounded-full ${createStep >= 2 ? 'bg-indigo-500' : 'bg-gray-200'}`} />
+                  <span className="text-xs text-gray-400 ml-1">Step {createStep} of 2</span>
+                </div>
+              </div>
+              <button onClick={resetCreateModal} className="text-gray-400 hover:text-gray-600">✕</button>
             </div>
-            <form onSubmit={handleCreateBooking} className="p-6 space-y-6">
+            <form onSubmit={handleStep1Next} className={`p-6 space-y-6 ${createStep === 2 ? 'hidden' : ''}`}>
               {/* Package Selection */}
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700">Select Package *</label>
@@ -887,9 +1039,29 @@ export default function BookingsPage() {
                         </div>
                       ))}
                     </div>
-                    <div className="px-4 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Total: <strong className="text-gray-900">{tp} tickets</strong></span>
-                      <span className="text-sm font-bold text-gray-900">₹{total.toLocaleString('en-IN')}</span>
+                    <div className="px-4 py-3 bg-gray-50 border-t border-gray-100 space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">Subtotal: <strong className="text-gray-900">{tp} tickets</strong></span>
+                        <span className="text-sm font-bold text-gray-900">₹{total.toLocaleString('en-IN')}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <label className="text-sm text-gray-600 whitespace-nowrap">Discount (₹)</label>
+                        <input
+                          type="number"
+                          min="0"
+                          max={total}
+                          value={createFormData.discountAmount}
+                          onChange={e => setCreateFormData({...createFormData, discountAmount: e.target.value})}
+                          className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                          placeholder="0"
+                        />
+                      </div>
+                      {Number(createFormData.discountAmount) > 0 && (
+                        <div className="flex items-center justify-between pt-1 border-t border-gray-200">
+                          <span className="text-sm font-semibold text-gray-700">Total After Discount</span>
+                          <span className="text-sm font-bold text-green-700">₹{(total - Number(createFormData.discountAmount)).toLocaleString('en-IN')}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -907,13 +1079,129 @@ export default function BookingsPage() {
                 />
               </div>
 
-              <div className="pt-4 flex justify-end gap-3">
-                <button type="button" onClick={() => setIsCreateModalOpen(false)} className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg font-medium transition-colors">Cancel</button>
-                <button type="submit" className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors">
-                  Create Booking
-                </button>
-              </div>
+              {/* Step 1 footer — hidden when on step 2 */}
+              {createStep === 1 && (
+                <div className="pt-4 flex justify-end gap-3">
+                  <button type="button" onClick={resetCreateModal} className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg font-medium transition-colors">Cancel</button>
+                  <button type="submit" className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors flex items-center gap-1.5">
+                    Continue to Participants →
+                  </button>
+                </div>
+              )}
             </form>
+
+            {/* ── Step 2: Participant Details ── */}
+            {createStep === 2 && (
+              <div className="p-6 space-y-5">
+                <div>
+                  <p className="text-sm font-semibold text-gray-800">Participant Details</p>
+                  <p className="text-xs text-gray-400 mt-0.5">Enter details for each traveller. Fields are optional — skip if not needed.</p>
+                </div>
+                <div className="space-y-4">
+                  {createParticipants.map((p, i) => (
+                    <div key={i} className="border border-gray-200 rounded-xl overflow-hidden">
+                      <div className="px-4 py-2.5 bg-gray-50 border-b border-gray-100 flex items-center gap-2">
+                        <span className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold">{i + 1}</span>
+                        <span className="text-sm font-semibold text-gray-700">Participant {i + 1}</span>
+                      </div>
+                      <div className="p-4 grid grid-cols-2 gap-3">
+                        <div className="col-span-2 space-y-1">
+                          <label className="text-xs font-medium text-gray-500">Full Name</label>
+                          <input
+                            type="text"
+                            value={p.name}
+                            onChange={e => {
+                              const arr = [...createParticipants];
+                              arr[i] = { ...arr[i], name: e.target.value };
+                              setCreateParticipants(arr);
+                            }}
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            placeholder="Traveller name"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-medium text-gray-500">Phone</label>
+                          <input
+                            type="tel"
+                            value={p.phone}
+                            onChange={e => {
+                              const arr = [...createParticipants];
+                              arr[i] = { ...arr[i], phone: e.target.value };
+                              setCreateParticipants(arr);
+                            }}
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            placeholder="+91-XXXXXXXXXX"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-medium text-gray-500">Age</label>
+                          <input
+                            type="number"
+                            min="1"
+                            max="120"
+                            value={p.age}
+                            onChange={e => {
+                              const arr = [...createParticipants];
+                              arr[i] = { ...arr[i], age: e.target.value };
+                              setCreateParticipants(arr);
+                            }}
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            placeholder="Age"
+                          />
+                        </div>
+                        <div className="col-span-2 space-y-1">
+                          <label className="text-xs font-medium text-gray-500">Gender</label>
+                          <div className="flex gap-2">
+                            {['Male', 'Female', 'Other'].map(g => (
+                              <button
+                                key={g}
+                                type="button"
+                                onClick={() => {
+                                  const arr = [...createParticipants];
+                                  arr[i] = { ...arr[i], gender: g };
+                                  setCreateParticipants(arr);
+                                }}
+                                className={`flex-1 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                                  p.gender === g
+                                    ? 'bg-indigo-600 text-white border-indigo-600'
+                                    : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                                }`}
+                              >
+                                {g}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setCreateStep(1)}
+                    className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg font-medium transition-colors text-sm"
+                  >
+                    ← Back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleCreateBookingFinal([])}
+                    className="px-4 py-2 text-gray-500 hover:bg-gray-100 rounded-lg font-medium transition-colors text-sm border border-gray-200"
+                  >
+                    Skip & Save
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleCreateBookingFinal(createParticipants)}
+                    className="flex-1 px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors text-sm"
+                  >
+                    Save Booking
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -936,7 +1224,32 @@ export default function BookingsPage() {
                 <div><span className="text-gray-500">Package:</span> <span className="font-medium text-gray-900">{invoiceModalBooking.packageTitle}</span></div>
                 <div><span className="text-gray-500">Persons:</span> <span className="font-medium text-gray-900">{invoiceModalBooking.numberOfPersons}</span></div>
                 <div><span className="text-gray-500">Sharing:</span> <span className="font-medium text-gray-900 capitalize">{invoiceModalBooking.sharingType}</span></div>
-                <div><span className="text-gray-500">Total:</span> <span className="font-bold text-gray-900">₹{invoiceModalBooking.totalPrice?.toLocaleString('en-IN')}</span></div>
+                <div>
+                  <span className="text-gray-500">Total:</span>{' '}
+                  {Number(invoiceDiscount) > 0 ? (
+                    <>
+                      <span className="line-through text-gray-400 text-xs">₹{invoiceModalBooking.totalPrice?.toLocaleString('en-IN')}</span>{' '}
+                      <span className="font-bold text-green-700">₹{(invoiceModalBooking.totalPrice - Number(invoiceDiscount)).toLocaleString('en-IN')}</span>
+                    </>
+                  ) : (
+                    <span className="font-bold text-gray-900">₹{invoiceModalBooking.totalPrice?.toLocaleString('en-IN')}</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Discount */}
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-gray-700">Discount Amount (₹)</label>
+                <input
+                  type="number"
+                  min="0"
+                  max={invoiceModalBooking.totalPrice}
+                  value={invoiceDiscount}
+                  onChange={e => setInvoiceDiscount(e.target.value)}
+                  className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-gray-50 focus:bg-white"
+                  placeholder="0"
+                />
+                <p className="text-xs text-gray-400">Deducted from ticket total before GST is applied</p>
               </div>
 
               {/* Amount Paid */}
@@ -998,7 +1311,7 @@ export default function BookingsPage() {
                 <FileText className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
                 <div>
                   GST: {businessProfile.gstRate}% ({businessProfile.gstType === 'igst' ? 'IGST' : 'SGST + CGST'})
-                  {businessProfile.gstRate > 0 && ` — Tax: ₹${Math.round(invoiceModalBooking.totalPrice * businessProfile.gstRate / 100)}`}
+                  {businessProfile.gstRate > 0 && ` — Tax: ₹${Math.round((invoiceModalBooking.totalPrice - (Number(invoiceDiscount) || 0)) * businessProfile.gstRate / 100)}`}
                 </div>
               </div>
             </div>
@@ -1020,6 +1333,140 @@ export default function BookingsPage() {
               >
                 {emailingFor === invoiceModalBooking.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
                 Email to Customer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Edit Participants Modal ── */}
+      {isEditParticipantsOpen && viewingBooking && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-xl max-h-[90vh] flex flex-col">
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center flex-shrink-0">
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">Edit Participants</h2>
+                <p className="text-xs text-gray-500 mt-0.5">{viewingBooking.customerName} · {viewingBooking.packageTitle}</p>
+              </div>
+              <button onClick={() => setIsEditParticipantsOpen(false)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+            </div>
+
+            <div className="overflow-y-auto flex-1 p-6 space-y-4">
+              {editingParticipants.map((p, i) => (
+                <div key={i} className="border border-gray-200 rounded-xl overflow-hidden">
+                  <div className="px-4 py-2.5 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold">{i + 1}</span>
+                      <span className="text-sm font-semibold text-gray-700">Participant {i + 1}</span>
+                    </div>
+                    {editingParticipants.length > viewingBooking.numberOfPersons && (
+                      <button
+                        type="button"
+                        onClick={() => setEditingParticipants(editingParticipants.filter((_, idx) => idx !== i))}
+                        className="text-red-400 hover:text-red-600 p-1"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                  <div className="p-4 grid grid-cols-2 gap-3">
+                    <div className="col-span-2 space-y-1">
+                      <label className="text-xs font-medium text-gray-500">Full Name</label>
+                      <input
+                        type="text"
+                        value={p.name}
+                        onChange={e => {
+                          const arr = [...editingParticipants];
+                          arr[i] = { ...arr[i], name: e.target.value };
+                          setEditingParticipants(arr);
+                        }}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="Traveller full name"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-gray-500">Phone</label>
+                      <input
+                        type="tel"
+                        value={p.phone}
+                        onChange={e => {
+                          const arr = [...editingParticipants];
+                          arr[i] = { ...arr[i], phone: e.target.value };
+                          setEditingParticipants(arr);
+                        }}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="+91-XXXXXXXXXX"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-gray-500">Age</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="120"
+                        value={p.age}
+                        onChange={e => {
+                          const arr = [...editingParticipants];
+                          arr[i] = { ...arr[i], age: e.target.value };
+                          setEditingParticipants(arr);
+                        }}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="Age"
+                      />
+                    </div>
+                    <div className="col-span-2 space-y-1">
+                      <label className="text-xs font-medium text-gray-500">Gender</label>
+                      <div className="flex gap-2">
+                        {['Male', 'Female', 'Other'].map(g => (
+                          <button
+                            key={g}
+                            type="button"
+                            onClick={() => {
+                              const arr = [...editingParticipants];
+                              arr[i] = { ...arr[i], gender: g };
+                              setEditingParticipants(arr);
+                            }}
+                            className={`flex-1 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                              p.gender === g
+                                ? 'bg-indigo-600 text-white border-indigo-600'
+                                : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                            }`}
+                          >
+                            {g}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {/* Add extra participant */}
+              <button
+                type="button"
+                onClick={() => setEditingParticipants([...editingParticipants, { name: '', phone: '', age: '', gender: '' }])}
+                className="w-full py-2 border border-dashed border-gray-300 rounded-xl text-sm text-gray-500 hover:border-indigo-400 hover:text-indigo-600 hover:bg-indigo-50/40 transition-colors flex items-center justify-center gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5" /> Add Another Participant
+              </button>
+            </div>
+
+            <div className="p-6 border-t border-gray-100 flex justify-end gap-3 flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsEditParticipantsOpen(false)}
+                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg font-medium text-sm transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveParticipants}
+                disabled={savingParticipants}
+                className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg font-medium text-sm transition-colors flex items-center gap-2"
+              >
+                {savingParticipants ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                Save Participants
               </button>
             </div>
           </div>

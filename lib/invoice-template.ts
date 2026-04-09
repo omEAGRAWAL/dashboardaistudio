@@ -30,6 +30,7 @@ export interface InvoiceBooking {
   participants?: string[];
   remarks?: string;
   amountPaid?: number;
+  discount?: number;
   ticketBreakdown?: { type: string; label: string; quantity: number; pricePerPerson: number }[];
   priceDouble?: number;
   priceTriple?: number;
@@ -46,13 +47,15 @@ export function generateInvoiceHTML(
 
   // Calculate GST
   const subtotal = booking.totalPrice;
+  const discountAmount = booking.discount ?? 0;
+  const afterDiscount = Math.max(0, subtotal - discountAmount);
   const gstRate = profile.gstRate || 0;
-  const gstAmount = Math.round((subtotal * gstRate) / 100 * 100) / 100;
+  const gstAmount = Math.round((afterDiscount * gstRate) / 100 * 100) / 100;
   const isIGST = profile.gstType === 'igst';
   const sgst = isIGST ? 0 : Math.round(gstAmount / 2 * 100) / 100;
   const cgst = isIGST ? 0 : Math.round(gstAmount / 2 * 100) / 100;
   const igst = isIGST ? gstAmount : 0;
-  const grandTotal = Math.round((subtotal + gstAmount) * 100) / 100;
+  const grandTotal = Math.round((afterDiscount + gstAmount) * 100) / 100;
   const amountPaid = booking.amountPaid ?? 0;
   const balance = Math.round((grandTotal - amountPaid) * 100) / 100;
 
@@ -250,11 +253,8 @@ export function generateInvoiceHTML(
           </div>
           <div>
             <div class="section-title">Payment Status</div>
-            <div style="font-size:13px;margin-bottom:4px;">Balance Amount: <strong>INR ${balance.toLocaleString('en-IN')}</strong></div>
-            <div style="font-size:13px;margin-bottom:4px;">Status: ${balance <= 0
-              ? '<span class="paid-badge">Paid</span>'
-              : '<span class="pending-badge">Pending</span>'
-            }</div>
+            <div style="font-size:13px;margin-bottom:8px;">Balance: <strong>INR ${balance.toLocaleString('en-IN')}</strong></div>
+            <table style="border-collapse:collapse;"><tr><td style="padding:4px 14px;border-radius:20px;font-size:11px;font-weight:700;line-height:1.4;text-align:center;white-space:nowrap;background-color:${balance <= 0 ? '#d4edda' : '#fff3cd'};color:${balance <= 0 ? '#155724' : '#856404'};">${balance <= 0 ? 'PAID' : 'PENDING'}</td></tr></table>
           </div>
         </div>
       </div>
@@ -265,9 +265,14 @@ export function generateInvoiceHTML(
           <span class="summary-value">${subtotal.toLocaleString('en-IN')} INR</span>
         </div>
         <div class="summary-row">
-          <span class="summary-label">Discounts</span>
-          <span class="summary-value">- 0.0 INR</span>
+          <span class="summary-label">Discount</span>
+          <span class="summary-value" style="${discountAmount > 0 ? 'color:#22863a;font-weight:600;' : ''}">- ${discountAmount > 0 ? discountAmount.toLocaleString('en-IN') : '0'} INR</span>
         </div>
+        ${discountAmount > 0 ? `
+        <div class="summary-row">
+          <span class="summary-label">After Discount</span>
+          <span class="summary-value">${afterDiscount.toLocaleString('en-IN')} INR</span>
+        </div>` : ''}
         ${isIGST ? `
         <div class="summary-row">
           <span class="summary-label">IGST (${gstRate}%)</span>
