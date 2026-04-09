@@ -249,12 +249,12 @@ export function generateInvoiceHTML(
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
           <div>
             <div class="section-title">Remarks</div>
-            <div style="font-size:13px;color:#555;">${booking.remarks || '—'}</div>
+            <div style="font-size:13px;">${booking.remarks || '—'}</div>
           </div>
           <div>
             <div class="section-title">Payment Status</div>
             <div style="font-size:13px;margin-bottom:8px;">Balance: <strong>INR ${balance.toLocaleString('en-IN')}</strong></div>
-            <table style="border-collapse:collapse;"><tr><td style="padding:4px 14px;border-radius:20px;font-size:11px;font-weight:700;line-height:1.4;text-align:center;white-space:nowrap;background-color:${balance <= 0 ? '#d4edda' : '#fff3cd'};color:${balance <= 0 ? '#155724' : '#856404'};">${balance <= 0 ? 'PAID' : 'PENDING'}</td></tr></table>
+            <table style="border-collapse:collapse;"><tr><td style="padding:4px 14px;border-radius:20px;font-size:11px;font-weight:700;line-height:1.4;text-align:center;white-space:nowrap;">${balance <= 0 ? 'PAID' : 'PENDING'}</td></tr></table>
           </div>
         </div>
       </div>
