@@ -438,11 +438,7 @@ export default function PublicSitePage() {
                   </div>
                 </div>
               )}
-              {settings?.googleMapsUrl && (
-                <div className="rounded-2xl overflow-hidden border border-gray-100 shadow-sm h-48">
-                  <iframe src={settings.googleMapsUrl} className="w-full h-full border-0" loading="lazy" allowFullScreen />
-                </div>
-              )}
+
             </div>
           </div>
         </div>
@@ -451,8 +447,8 @@ export default function PublicSitePage() {
       {/* Footer */}
       <footer className="bg-gray-950 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
-            <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
+            <div className="lg:col-span-2">
               <div className="flex items-center gap-3 mb-4">
                 {settings?.agencyLogo
                   ? <img src={settings.agencyLogo} alt={agencyName} className="h-9 w-auto rounded-lg" />
@@ -479,18 +475,12 @@ export default function PublicSitePage() {
               </div>
             </div>
             <div>
-              <h4 className="font-bold text-xs uppercase tracking-wider text-gray-400 mb-5">Follow Us</h4>
-              <div className="flex gap-3">
-                {settings?.socialInstagram && (
-                  <a href={settings.socialInstagram} target="_blank" rel="noreferrer" className="w-10 h-10 rounded-xl bg-gray-800 hover:bg-gradient-to-br hover:from-purple-500 hover:via-pink-500 hover:to-orange-400 flex items-center justify-center text-gray-400 hover:text-white transition-all">
-                    <Instagram className="w-5 h-5" />
-                  </a>
-                )}
-                {settings?.socialFacebook && (
-                  <a href={settings.socialFacebook} target="_blank" rel="noreferrer" className="w-10 h-10 rounded-xl bg-gray-800 hover:bg-blue-600 flex items-center justify-center text-gray-400 hover:text-white transition-all">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg>
-                  </a>
-                )}
+              <h4 className="font-bold text-xs uppercase tracking-wider text-gray-400 mb-5">Legal</h4>
+              <div className="space-y-3">
+                <Link href={`/site/${orgId}/about-us`} className="block text-sm text-gray-500 hover:text-white transition-colors">About Us</Link>
+                <Link href={`/site/${orgId}/privacy-policy`} className="block text-sm text-gray-500 hover:text-white transition-colors">Privacy Policy</Link>
+                <Link href={`/site/${orgId}/terms-conditions`} className="block text-sm text-gray-500 hover:text-white transition-colors">Terms &amp; Conditions</Link>
+                <Link href={`/site/${orgId}/cancellation-refund`} className="block text-sm text-gray-500 hover:text-white transition-colors">Cancellation &amp; Refund</Link>
               </div>
             </div>
           </div>

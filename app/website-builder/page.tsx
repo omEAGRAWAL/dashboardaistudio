@@ -5,14 +5,16 @@ import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
 import { MobilePreview } from '@/components/MobilePreview';
 import { ImageUploadGrid } from '@/components/ImageUploadGrid';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import React from 'react';
 import { doc, getDoc, setDoc, serverTimestamp, collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import {
   Globe, Save, ExternalLink, ChevronDown, ChevronRight,
   Palette, Type, Image as ImageIcon, Info, Phone,
   FileText, Search, Loader2, Smartphone, Monitor,
-  Megaphone, BarChart2, Star, Zap, Package, Plus, X, Quote
+  Megaphone, BarChart2, Star, Zap, Package, Plus, X, Quote,
+  BookOpen, Bold, Italic, Underline, List, Heading1, Heading2, AlignLeft
 } from 'lucide-react';
 
 interface WebsiteSettings {
@@ -35,6 +37,10 @@ interface WebsiteSettings {
   socialInstagram: string; socialFacebook: string; googleMapsUrl: string;
   footerText: string; metaTitle: string; metaDescription: string;
   cloudinaryCloudName: string; cloudinaryUploadPreset: string;
+  pageAboutUs: string;
+  pageCancellationRefund: string;
+  pagePrivacyPolicy: string;
+  pageTermsConditions: string;
 }
 
 const DEFAULT_SETTINGS: WebsiteSettings = {
@@ -74,6 +80,10 @@ const DEFAULT_SETTINGS: WebsiteSettings = {
   socialInstagram: '', socialFacebook: '', googleMapsUrl: '',
   footerText: '', metaTitle: '', metaDescription: '',
   cloudinaryCloudName: '', cloudinaryUploadPreset: '',
+  pageAboutUs: '',
+  pageCancellationRefund: '',
+  pagePrivacyPolicy: '',
+  pageTermsConditions: '',
 };
 
 const COLOR_PRESETS = [
@@ -85,7 +95,7 @@ const COLOR_PRESETS = [
   { name: 'Amber', primary: '#b45309', secondary: '#d97706' },
 ];
 
-type SectionId = 'appearance' | 'announcement' | 'brand' | 'hero' | 'features' | 'packages' | 'gallery' | 'stats' | 'about' | 'testimonials' | 'contact' | 'footer' | 'seo';
+type SectionId = 'appearance' | 'announcement' | 'brand' | 'hero' | 'features' | 'packages' | 'gallery' | 'stats' | 'about' | 'testimonials' | 'contact' | 'footer' | 'seo' | 'pages';
 
 const SECTIONS: { id: SectionId; label: string; icon: React.ReactNode; description: string }[] = [
   { id: 'appearance', label: 'Appearance', icon: <Palette className="w-4 h-4" />, description: 'Font, colors & theme presets' },
@@ -101,6 +111,7 @@ const SECTIONS: { id: SectionId; label: string; icon: React.ReactNode; descripti
   { id: 'contact', label: 'Contact & Social', icon: <Phone className="w-4 h-4" />, description: 'Phone, email, socials & map' },
   { id: 'footer', label: 'Footer', icon: <FileText className="w-4 h-4" />, description: 'Footer text & copyright' },
   { id: 'seo', label: 'SEO', icon: <Search className="w-4 h-4" />, description: 'Meta title & description' },
+  { id: 'pages', label: 'Legal Pages', icon: <BookOpen className="w-4 h-4" />, description: 'About Us, Privacy Policy, Terms & more' },
 ];
 
 function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
@@ -112,8 +123,80 @@ function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) =>
   );
 }
 
+// Rich text editor toolbar button
+function ToolbarBtn({ onClick, title, children }: { onClick: () => void; title: string; children: React.ReactNode }) {
+  return (
+    <button type="button" onMouseDown={e => { e.preventDefault(); onClick(); }}
+      title={title}
+      className="p-1.5 rounded hover:bg-gray-100 text-gray-600 hover:text-gray-900 transition-colors">
+      {children}
+    </button>
+  );
+}
+
+function RichTextEditor({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  const editorRef = React.useRef<HTMLDivElement>(null);
+
+  // Sync external value into editor (only on first load or if changed externally)
+  const lastValueRef = React.useRef<string>('');
+  React.useEffect(() => {
+    if (editorRef.current && value !== lastValueRef.current) {
+      editorRef.current.innerHTML = value;
+      lastValueRef.current = value;
+    }
+  }, [value]);
+
+  const exec = (cmd: string, val?: string) => {
+    document.execCommand(cmd, false, val);
+    if (editorRef.current) {
+      const html = editorRef.current.innerHTML;
+      lastValueRef.current = html;
+      onChange(html);
+    }
+    editorRef.current?.focus();
+  };
+
+  return (
+    <div className="space-y-1.5">
+      <label className="text-sm font-medium text-gray-700">{label}</label>
+      <div className="border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 bg-white">
+        {/* Toolbar */}
+        <div className="flex flex-wrap items-center gap-0.5 px-2 py-1.5 border-b border-gray-100 bg-gray-50">
+          <ToolbarBtn onClick={() => exec('bold')} title="Bold"><Bold className="w-3.5 h-3.5" /></ToolbarBtn>
+          <ToolbarBtn onClick={() => exec('italic')} title="Italic"><Italic className="w-3.5 h-3.5" /></ToolbarBtn>
+          <ToolbarBtn onClick={() => exec('underline')} title="Underline"><Underline className="w-3.5 h-3.5" /></ToolbarBtn>
+          <div className="w-px h-4 bg-gray-200 mx-1" />
+          <ToolbarBtn onClick={() => exec('formatBlock', 'h2')} title="Heading 2"><Heading1 className="w-3.5 h-3.5" /></ToolbarBtn>
+          <ToolbarBtn onClick={() => exec('formatBlock', 'h3')} title="Heading 3"><Heading2 className="w-3.5 h-3.5" /></ToolbarBtn>
+          <ToolbarBtn onClick={() => exec('formatBlock', 'p')} title="Paragraph"><AlignLeft className="w-3.5 h-3.5" /></ToolbarBtn>
+          <div className="w-px h-4 bg-gray-200 mx-1" />
+          <ToolbarBtn onClick={() => exec('insertUnorderedList')} title="Bullet List"><List className="w-3.5 h-3.5" /></ToolbarBtn>
+          <div className="w-px h-4 bg-gray-200 mx-1" />
+          <ToolbarBtn onClick={() => exec('removeFormat')} title="Clear Formatting"><span className="text-[10px] font-bold">T̶</span></ToolbarBtn>
+        </div>
+        {/* Editable area */}
+        <div
+          ref={editorRef}
+          contentEditable
+          suppressContentEditableWarning
+          onInput={() => {
+            if (editorRef.current) {
+              const html = editorRef.current.innerHTML;
+              lastValueRef.current = html;
+              onChange(html);
+            }
+          }}
+          className="min-h-[200px] max-h-[360px] overflow-y-auto px-4 py-3 text-sm text-gray-700 focus:outline-none prose prose-sm max-w-none rich-editor"
+        />
+      </div>
+      <p className="text-[11px] text-gray-400">Use the toolbar to format your content. Changes are saved with the rest of your settings.</p>
+    </div>
+  );
+}
+
 export default function WebsiteBuilderPage() {
   const { user, orgId, role } = useAuth();
+  const [activePage, setActivePage] = React.useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [settings, setSettings] = useState<WebsiteSettings>(DEFAULT_SETTINGS);
@@ -462,6 +545,98 @@ export default function WebsiteBuilderPage() {
       <div className="space-y-5">
         {renderInput('Meta Title', S.metaTitle, v => set({ metaTitle: v }), { placeholder: 'Agency Name - Best Travel Packages' })}
         {renderTextarea('Meta Description', S.metaDescription, v => set({ metaDescription: v }), { placeholder: 'Describe your travel agency for search engines...', rows: 2 })}
+      </div>
+    ),
+
+    pages: (
+      <div className="space-y-6">
+        <div className="p-3 rounded-xl bg-indigo-50 border border-indigo-100 text-xs text-indigo-700">
+          <p className="font-semibold mb-1">📄 Legal & Info Pages</p>
+          <p>These pages will be accessible from the footer of your public website. Visitors can navigate back using the back button on each page.</p>
+        </div>
+
+        {/* Page Selector Tabs */}
+        <div className="grid grid-cols-2 gap-2">
+          {[
+            { key: 'aboutUs', label: 'About Us', field: 'pageAboutUs' as const },
+            { key: 'cancellation', label: 'Cancellation & Refund', field: 'pageCancellationRefund' as const },
+            { key: 'privacy', label: 'Privacy Policy', field: 'pagePrivacyPolicy' as const },
+            { key: 'terms', label: 'Terms & Conditions', field: 'pageTermsConditions' as const },
+          ].map(page => (
+            <button key={page.key} type="button"
+              onClick={() => setActivePage(activePage === page.key ? null : page.key)}
+              className={`px-3 py-2.5 rounded-xl border-2 text-xs font-semibold text-left transition-all leading-tight ${
+                activePage === page.key
+                  ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                  : 'border-gray-200 text-gray-600 hover:border-gray-300 bg-white'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span>{page.label}</span>
+                {S[page.field] && S[page.field].length > 10 && (
+                  <span className="text-[9px] bg-green-100 text-green-600 px-1.5 py-0.5 rounded-full ml-1 font-bold flex-shrink-0">Saved</span>
+                )}
+              </div>
+            </button>
+          ))}
+        </div>
+
+        {/* Active page editor */}
+        {activePage === 'aboutUs' && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-1 h-5 rounded-full bg-indigo-500" />
+              <h4 className="text-sm font-bold text-gray-800">About Us Page</h4>
+            </div>
+            <RichTextEditor
+              label="Content"
+              value={S.pageAboutUs}
+              onChange={v => set({ pageAboutUs: v })}
+            />
+          </div>
+        )}
+
+        {activePage === 'cancellation' && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-1 h-5 rounded-full bg-indigo-500" />
+              <h4 className="text-sm font-bold text-gray-800">Cancellation & Refund Policy Page</h4>
+            </div>
+            <RichTextEditor
+              label="Content"
+              value={S.pageCancellationRefund}
+              onChange={v => set({ pageCancellationRefund: v })}
+            />
+          </div>
+        )}
+
+        {activePage === 'privacy' && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-1 h-5 rounded-full bg-indigo-500" />
+              <h4 className="text-sm font-bold text-gray-800">Privacy Policy Page</h4>
+            </div>
+            <RichTextEditor
+              label="Content"
+              value={S.pagePrivacyPolicy}
+              onChange={v => set({ pagePrivacyPolicy: v })}
+            />
+          </div>
+        )}
+
+        {activePage === 'terms' && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-1 h-5 rounded-full bg-indigo-500" />
+              <h4 className="text-sm font-bold text-gray-800">Terms & Conditions Page</h4>
+            </div>
+            <RichTextEditor
+              label="Content"
+              value={S.pageTermsConditions}
+              onChange={v => set({ pageTermsConditions: v })}
+            />
+          </div>
+        )}
       </div>
     ),
   };
