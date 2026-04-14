@@ -6,9 +6,20 @@ import { Header } from '@/components/Header';
 import { useEffect, useState, useCallback } from 'react';
 import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc, addDoc, serverTimestamp, getDoc, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { CalendarCheck, Search, Filter, Trash2, Edit2, Plus, Minus, Eye, FileText, Mail, Download, Loader2, X, History } from 'lucide-react';
+import { CalendarCheck, Search, Filter, Trash2, Edit2, Plus, Minus, Eye, FileText, Mail, Download, Loader2, X, History, Link, Copy, CheckCircle2, CreditCard, Banknote, Smartphone } from 'lucide-react';
 import { format } from 'date-fns';
 import { generateInvoiceHTML, type BusinessProfile, type InvoiceBooking } from '@/lib/invoice-template';
+import { getAuth } from 'firebase/auth';
+
+// ─── Payment status helpers ────────────────────────────────────────────────
+const PAYMENT_STATUS_LABELS: Record<string, { label: string; color: string }> = {
+  payment_pending:       { label: 'Payment Pending',   color: 'bg-yellow-100 text-yellow-800' },
+  advance_payment_done:  { label: 'Advance Paid',       color: 'bg-blue-100 text-blue-800' },
+  payment_done:          { label: 'Fully Paid',          color: 'bg-green-100 text-green-800' },
+  payment_failed:        { label: 'Payment Failed',      color: 'bg-red-100 text-red-800' },
+  cash_collected:        { label: 'Cash Collected',      color: 'bg-emerald-100 text-emerald-800' },
+  upi_collected:         { label: 'UPI Collected',       color: 'bg-purple-100 text-purple-800' },
+};
 
 // ─── localStorage helpers ──────────────────────────────────────────────
 const INVOICE_KEY_PREFIX = 'invoices_';
@@ -85,6 +96,32 @@ export default function BookingsPage() {
     ticketQty: {} as Record<string, number>,
     discountAmount: '',
   });
+
+  // Payment state
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'upi' | 'razorpay'>('cash');
+  const [paymentType, setPaymentType] = useState<'advance' | 'full'>('advance');
+  const [agentAdvanceAmount, setAgentAdvanceAmount] = useState('');
+  const [rzpConfig, setRzpConfig] = useState<{ keyId: string; advancePercentage: number } | null>(null);
+  const [rzpLinkLoading, setRzpLinkLoading] = useState<string | null>(null); // bookingId being linked
+  const [rzpLinkModal, setRzpLinkModal] = useState<{ url: string; amount: number; bookingId: string } | null>(null);
+  const [rzpLinkCopied, setRzpLinkCopied] = useState(false);
+
+  // Load Razorpay config (non-sensitive) for agent use
+  useEffect(() => {
+    if (!orgId) return;
+    const auth = getAuth();
+    auth.currentUser?.getIdToken().then(async (token) => {
+      try {
+        const res = await fetch(`/api/razorpay/save-config?orgId=${orgId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.configured) setRzpConfig({ keyId: data.keyId, advancePercentage: data.advancePercentage ?? 30 });
+        }
+      } catch { /* ignore */ }
+    });
+  }, [orgId]);
 
   useEffect(() => {
     if (!orgId) return;
@@ -197,6 +234,31 @@ export default function BookingsPage() {
       customerAddress: '', customerCity: '', customerState: '', travelDate: '', notes: '',
       ticketQty: {}, discountAmount: '',
     });
+    setPaymentMethod('cash');
+    setPaymentType('advance');
+    setAgentAdvanceAmount('');
+  };
+
+  const handleGeneratePaymentLink = async (bookingId: string, pType: 'advance' | 'full', advAmt?: number) => {
+    if (!orgId) return;
+    setRzpLinkLoading(bookingId);
+    try {
+      const auth = getAuth();
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) throw new Error('Not authenticated');
+      const res = await fetch('/api/razorpay/create-payment-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ bookingId, orgId, paymentType: pType, agentAdvanceAmount: advAmt }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setRzpLinkModal({ url: data.paymentLinkUrl, amount: data.amount, bookingId });
+    } catch (err: any) {
+      alert(`Failed to generate payment link: ${err.message}`);
+    } finally {
+      setRzpLinkLoading(null);
+    }
   };
 
   const openEditParticipants = (booking: any) => {
@@ -245,6 +307,8 @@ export default function BookingsPage() {
     if (!selectedPkg) return;
     const totalPersons = getTotalPersons(createFormData.ticketQty);
     const totalPrice = calcTotalPrice(createFormData.ticketQty, selectedPkg);
+    const netTotal = totalPrice - (Number(createFormData.discountAmount) || 0);
+
     try {
       const ticketBreakdown = [
         { type: 'double', label: 'Dual Occupancy', quantity: createFormData.ticketQty['double'] || 0, pricePerPerson: selectedPkg.priceDouble || 0 },
@@ -256,7 +320,18 @@ export default function BookingsPage() {
         .filter(p => p.name.trim())
         .map(p => ({ name: p.name.trim(), phone: p.phone.trim(), age: p.age.trim(), gender: p.gender }));
 
-      await addDoc(collection(db, 'bookings'), {
+      // Determine payment status & amount for offline methods
+      let initialPaymentStatus = 'payment_pending';
+      let amountPaid = 0;
+      if (paymentMethod === 'cash' || paymentMethod === 'upi') {
+        const advAmt = Number(agentAdvanceAmount) || 0;
+        if (advAmt > 0) {
+          initialPaymentStatus = paymentMethod === 'cash' ? 'cash_collected' : 'upi_collected';
+          amountPaid = advAmt;
+        }
+      }
+
+      const docRef = await addDoc(collection(db, 'bookings'), {
         orgId,
         packageId: selectedPkg.id,
         packageTitle: selectedPkg.title,
@@ -276,9 +351,20 @@ export default function BookingsPage() {
         participants: savedParticipants,
         status: 'Confirmed',
         source: 'CRM',
+        paymentMethod,
+        paymentType,
+        paymentStatus: initialPaymentStatus,
+        amountPaid,
         createdAt: serverTimestamp()
       });
+
       resetCreateModal();
+
+      // If Razorpay selected, generate a payment link after booking is created
+      if (paymentMethod === 'razorpay') {
+        const advAmt = Number(agentAdvanceAmount) || 0;
+        await handleGeneratePaymentLink(docRef.id, paymentType, advAmt > 0 ? advAmt : undefined);
+      }
     } catch (error) {
       console.error("Error creating booking:", error);
       alert("Failed to create booking");
@@ -617,11 +703,18 @@ export default function BookingsPage() {
                           <p className="font-semibold text-gray-900 truncate">{booking.customerName}</p>
                           <p className="text-xs text-gray-500 truncate">{booking.customerPhone}</p>
                         </div>
-                        <span className={`flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                          booking.status === 'Confirmed' ? 'bg-green-100 text-green-800' :
-                          booking.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
-                          'bg-yellow-100 text-yellow-800'
-                        }`}>{booking.status || 'Pending'}</span>
+                        <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                            booking.status === 'Confirmed' ? 'bg-green-100 text-green-800' :
+                            booking.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
+                            'bg-yellow-100 text-yellow-800'
+                          }`}>{booking.status || 'Pending'}</span>
+                          {booking.paymentStatus && PAYMENT_STATUS_LABELS[booking.paymentStatus] && (
+                            <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium ${PAYMENT_STATUS_LABELS[booking.paymentStatus].color}`}>
+                              {PAYMENT_STATUS_LABELS[booking.paymentStatus].label}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <p className="text-sm font-medium text-gray-700 line-clamp-1">{booking.packageTitle}</p>
                       <div className="flex items-center justify-between">
@@ -687,13 +780,22 @@ export default function BookingsPage() {
                             {booking.discountAmount > 0 && <div className="text-xs text-green-600 font-medium">₹{booking.discountAmount.toLocaleString('en-IN')} off</div>}
                           </td>
                           <td className="px-6 py-4">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              booking.status === 'Confirmed' ? 'bg-green-100 text-green-800' :
-                              booking.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
-                              'bg-yellow-100 text-yellow-800'
-                            }`}>
-                              {booking.status || 'Pending'}
-                            </span>
+                            <div className="space-y-1">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                booking.status === 'Confirmed' ? 'bg-green-100 text-green-800' :
+                                booking.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
+                                'bg-yellow-100 text-yellow-800'
+                              }`}>
+                                {booking.status || 'Pending'}
+                              </span>
+                              {booking.paymentStatus && PAYMENT_STATUS_LABELS[booking.paymentStatus] && (
+                                <div>
+                                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${PAYMENT_STATUS_LABELS[booking.paymentStatus].color}`}>
+                                    {PAYMENT_STATUS_LABELS[booking.paymentStatus].label}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-500">
                             {booking.createdAt ? format(booking.createdAt.toDate(), 'MMM d, yyyy') : 'N/A'}
@@ -709,6 +811,24 @@ export default function BookingsPage() {
                                 >
                                   <FileText className="w-4 h-4" />
                                 </button>
+                              )}
+                              {rzpConfig && booking.paymentStatus !== 'payment_done' && (
+                                booking.razorpayPaymentLinkUrl ? (
+                                  <button
+                                    onClick={() => setRzpLinkModal({ url: booking.razorpayPaymentLinkUrl, amount: booking.advanceAmount || 0, bookingId: booking.id })}
+                                    className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
+                                    title="View Payment Link"
+                                  ><Link className="w-4 h-4" /></button>
+                                ) : (
+                                  <button
+                                    onClick={() => handleGeneratePaymentLink(booking.id, 'advance')}
+                                    disabled={rzpLinkLoading === booking.id}
+                                    className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors disabled:opacity-40"
+                                    title="Generate Payment Link"
+                                  >
+                                    {rzpLinkLoading === booking.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <CreditCard className="w-4 h-4" />}
+                                  </button>
+                                )
                               )}
                               <button onClick={() => handleOpenEdit(booking)} className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors" title="Edit Status"><Edit2 className="w-4 h-4" /></button>
                               <button onClick={() => handleDelete(booking.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors" title="Delete Booking"><Trash2 className="w-4 h-4" /></button>
@@ -1079,6 +1199,113 @@ export default function BookingsPage() {
                 />
               </div>
 
+              {/* ── Payment Method ── */}
+              <div className="border border-gray-200 rounded-xl overflow-hidden">
+                <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
+                  <p className="text-sm font-semibold text-gray-800">Payment Collection</p>
+                  <p className="text-xs text-gray-400 mt-0.5">How will you collect payment from the customer?</p>
+                </div>
+                <div className="p-4 space-y-4">
+                  {/* Method selector */}
+                  <div className="grid grid-cols-3 gap-2">
+                    {([
+                      { id: 'cash' as const, label: 'Cash', icon: Banknote, disabled: false },
+                      { id: 'upi' as const, label: 'UPI', icon: Smartphone, disabled: false },
+                      { id: 'razorpay' as const, label: 'Razorpay Link', icon: CreditCard, disabled: !rzpConfig },
+                    ]).map(({ id, label, icon: Icon, disabled }) => (
+                      <button
+                        key={id}
+                        type="button"
+                        disabled={disabled}
+                        onClick={() => setPaymentMethod(id as typeof paymentMethod)}
+                        className={`flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border-2 text-xs font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+                          paymentMethod === id
+                            ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                            : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                        }`}
+                      >
+                        <Icon className="w-5 h-5" />
+                        {label}
+                        {id === 'razorpay' && !rzpConfig && <span className="text-[9px] text-gray-400">Not set up</span>}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Advance vs Full (for all methods) */}
+                  <div className="flex gap-2">
+                    {(['advance', 'full'] as const).map(pt => (
+                      <button
+                        key={pt}
+                        type="button"
+                        onClick={() => setPaymentType(pt)}
+                        className={`flex-1 py-2 rounded-lg text-xs font-semibold border transition-colors ${
+                          paymentType === pt
+                            ? 'bg-indigo-600 text-white border-indigo-600'
+                            : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        {pt === 'advance' ? 'Advance Payment' : 'Full Payment'}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Amount input for Cash/UPI; or preview for Razorpay */}
+                  {(() => {
+                    const pkg = packages.find(p => p.id === createFormData.packageId);
+                    const netTotal = pkg
+                      ? calcTotalPrice(createFormData.ticketQty, pkg) - (Number(createFormData.discountAmount) || 0)
+                      : 0;
+                    const defaultAdv = rzpConfig ? Math.round(netTotal * rzpConfig.advancePercentage / 100) : Math.round(netTotal * 0.3);
+
+                    if (paymentMethod === 'razorpay') {
+                      return (
+                        <div className="space-y-2">
+                          <label className="text-xs font-medium text-gray-600">
+                            {paymentType === 'advance' ? 'Advance Amount (₹)' : 'Full Amount (₹)'}
+                          </label>
+                          {paymentType === 'advance' ? (
+                            <>
+                              <input
+                                type="number"
+                                min="1"
+                                max={netTotal}
+                                value={agentAdvanceAmount}
+                                onChange={e => setAgentAdvanceAmount(e.target.value)}
+                                placeholder={`Default: ₹${defaultAdv.toLocaleString('en-IN')} (${rzpConfig?.advancePercentage ?? 30}%)`}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                              />
+                              <p className="text-xs text-gray-400">Leave blank to use default advance % from settings. A Razorpay payment link will be generated after saving.</p>
+                            </>
+                          ) : (
+                            <div className="bg-indigo-50 rounded-lg px-3 py-2 text-sm font-bold text-indigo-700">
+                              ₹{netTotal.toLocaleString('en-IN')} (Full amount)
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }
+
+                    // Cash or UPI
+                    return (
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium text-gray-600">
+                          Amount Collected (₹) <span className="text-gray-400 font-normal">— optional, 0 if not yet collected</span>
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          max={netTotal}
+                          value={agentAdvanceAmount}
+                          onChange={e => setAgentAdvanceAmount(e.target.value)}
+                          placeholder={paymentType === 'advance' ? `e.g. ₹${defaultAdv.toLocaleString('en-IN')}` : `₹${netTotal.toLocaleString('en-IN')}`}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        />
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+
               {/* Step 1 footer — hidden when on step 2 */}
               {createStep === 1 && (
                 <div className="pt-4 flex justify-end gap-3">
@@ -1334,6 +1561,61 @@ export default function BookingsPage() {
                 {emailingFor === invoiceModalBooking.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
                 Email to Customer
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Razorpay Payment Link Modal ── */}
+      {rzpLinkModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[70] p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">Payment Link Ready</h2>
+                <p className="text-xs text-gray-500 mt-0.5">Share this link with the customer</p>
+              </div>
+              <button onClick={() => { setRzpLinkModal(null); setRzpLinkCopied(false); }} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+                <p className="text-xs text-green-600 font-semibold uppercase tracking-wide mb-1">Amount</p>
+                <p className="text-2xl font-bold text-green-800">₹{rzpLinkModal.amount.toLocaleString('en-IN')}</p>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Payment URL</label>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-800 overflow-x-auto whitespace-nowrap">
+                    {rzpLinkModal.url}
+                  </code>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(rzpLinkModal.url);
+                      setRzpLinkCopied(true);
+                      setTimeout(() => setRzpLinkCopied(false), 2000);
+                    }}
+                    className="p-2 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 rounded-lg transition-colors flex-shrink-0"
+                  >
+                    {rzpLinkCopied ? <CheckCircle2 className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent(`Hi! Please complete your booking payment here: ${rzpLinkModal.url}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 py-2.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-xl text-center transition-colors"
+                >
+                  Send on WhatsApp
+                </a>
+                <button
+                  onClick={() => { setRzpLinkModal(null); setRzpLinkCopied(false); }}
+                  className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-xl transition-colors"
+                >
+                  Done
+                </button>
+              </div>
             </div>
           </div>
         </div>

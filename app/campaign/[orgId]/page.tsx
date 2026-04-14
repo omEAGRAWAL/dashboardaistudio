@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import {
   collection, query, where, getDocs, doc, getDoc, addDoc, serverTimestamp,
@@ -37,6 +37,12 @@ export default function CampaignPage() {
   const [bookingStep, setBookingStep] = useState<1 | 2>(1);
   const [submitting, setSubmitting] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
+
+  // Payment state
+  const [rzpConfig, setRzpConfig] = useState<{ keyId: string; advancePercentage: number } | null>(null);
+  const [pendingBookingId, setPendingBookingId] = useState<string | null>(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentLoading, setPaymentLoading] = useState(false);
 
   // Step 1 fields
   const [travelDate, setTravelDate] = useState('');
@@ -91,6 +97,85 @@ export default function CampaignPage() {
     ? packages
     : packages.filter(p => (p.campaignCategory || p.category) === selectedCategory);
 
+  // Load Razorpay config for this org
+  useEffect(() => {
+    if (!orgId) return;
+    fetch(`/api/razorpay/public-config?orgId=${orgId}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.configured) setRzpConfig({ keyId: data.keyId, advancePercentage: data.advancePercentage ?? 30 }); })
+      .catch(() => {});
+  }, [orgId]);
+
+  const loadRazorpayScript = useCallback((): Promise<boolean> => {
+    return new Promise(resolve => {
+      if ((window as any).Razorpay) { resolve(true); return; }
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  }, []);
+
+  const handleRazorpayPayment = useCallback(async (bookingId: string, paymentType: 'advance' | 'full') => {
+    if (!rzpConfig || !orgId) return;
+    setPaymentLoading(true);
+    try {
+      const orderRes = await fetch('/api/razorpay/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookingId, orgId, paymentType }),
+      });
+      const orderData = await orderRes.json();
+      if (!orderRes.ok) throw new Error(orderData.error);
+
+      const loaded = await loadRazorpayScript();
+      if (!loaded) throw new Error('Failed to load payment gateway');
+
+      await new Promise<void>((resolve) => {
+        const options = {
+          key: orderData.keyId,
+          amount: orderData.amount,
+          currency: orderData.currency,
+          order_id: orderData.orderId,
+          name: agencyName,
+          description: selectedPkg?.title || 'Package Booking',
+          theme: { color: accentColor },
+          handler: async (response: any) => {
+            try {
+              const verifyRes = await fetch('/api/razorpay/verify-payment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  razorpayPaymentId: response.razorpay_payment_id,
+                  razorpayOrderId: response.razorpay_order_id,
+                  razorpaySignature: response.razorpay_signature,
+                  bookingId,
+                  orgId,
+                }),
+              });
+              if (verifyRes.ok) {
+                setShowPaymentModal(false);
+                setBookingSuccess(true);
+              } else {
+                alert('Payment verification failed. Please contact support.');
+              }
+            } catch { alert('Payment verification failed.'); }
+            resolve();
+          },
+          modal: { ondismiss: () => resolve() },
+        };
+        const rzp = new (window as any).Razorpay(options);
+        rzp.on('payment.failed', () => resolve());
+        rzp.open();
+      });
+    } catch (err: any) {
+      alert(`Payment error: ${err.message}`);
+    } finally {
+      setPaymentLoading(false);
+    }
+  }, [rzpConfig, orgId, agencyName, selectedPkg, accentColor, loadRazorpayScript]);
+
   // Ticket calculation for selected package
   const getTicketTypes = (pkg: any) => [
     { type: 'double' as const, label: 'Dual Occupancy', price: pkg?.priceDouble },
@@ -123,7 +208,7 @@ export default function CampaignPage() {
       const totalTickets = ticketBreakdown.reduce((s, t) => s + t.quantity, 0);
       const dominant = ticketBreakdown.reduce((a, b) => a.quantity >= b.quantity ? a : b);
 
-      await addDoc(collection(db, 'bookings'), {
+      const docRef = await addDoc(collection(db, 'bookings'), {
         orgId,
         packageId: selectedPkg.id,
         packageTitle: selectedPkg.title,
@@ -141,10 +226,17 @@ export default function CampaignPage() {
         couponCode: couponCode || '',
         status: 'Pending',
         source: 'Campaign',
+        paymentStatus: 'payment_pending',
         createdAt: serverTimestamp(),
       });
-      setBookingSuccess(true);
       setBookingOpen(false);
+      // If Razorpay configured, show payment choice
+      if (rzpConfig) {
+        setPendingBookingId(docRef.id);
+        setShowPaymentModal(true);
+      } else {
+        setBookingSuccess(true);
+      }
     } catch (e) {
       console.error(e);
       alert('Failed to submit. Please try again.');
@@ -188,6 +280,51 @@ export default function CampaignPage() {
       {bookingSuccess && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-green-600 text-white px-6 py-3 rounded-2xl shadow-xl flex items-center gap-2 text-sm font-semibold">
           <CheckCircle2 className="w-4 h-4" /> Booking submitted! We'll reach out soon.
+        </div>
+      )}
+
+      {/* ── Razorpay Payment Modal ── */}
+      {showPaymentModal && pendingBookingId && rzpConfig && selectedPkg && (
+        <div className="fixed inset-0 z-[300] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="w-full sm:w-[400px] bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden">
+            <div className="px-6 pt-6 pb-2 text-center">
+              <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <CheckCircle2 className="w-7 h-7 text-green-600" />
+              </div>
+              <h2 className="text-xl font-bold text-gray-900 mb-1">Booking Submitted!</h2>
+              <p className="text-sm text-gray-500 mb-5">Complete your payment to confirm the booking.</p>
+            </div>
+            <div className="px-6 pb-6 space-y-3">
+              {/* Advance */}
+              <button
+                disabled={paymentLoading}
+                onClick={() => handleRazorpayPayment(pendingBookingId, 'advance')}
+                className="w-full py-4 rounded-2xl text-white font-bold text-base shadow-md hover:brightness-110 transition-all disabled:opacity-50 flex items-center justify-between px-5"
+                style={{ backgroundColor: accentColor }}
+              >
+                <span>Pay Advance ({rzpConfig.advancePercentage}%)</span>
+                <span className="font-black">₹{Math.round(calcTotal(selectedPkg) * rzpConfig.advancePercentage / 100).toLocaleString('en-IN')}</span>
+              </button>
+              {/* Full */}
+              <button
+                disabled={paymentLoading}
+                onClick={() => handleRazorpayPayment(pendingBookingId, 'full')}
+                className="w-full py-4 rounded-2xl border-2 text-gray-800 font-bold text-base hover:bg-gray-50 transition-all disabled:opacity-50 flex items-center justify-between px-5"
+                style={{ borderColor: accentColor }}
+              >
+                <span>Pay Full Amount</span>
+                <span className="font-black">₹{calcTotal(selectedPkg).toLocaleString('en-IN')}</span>
+              </button>
+              {/* Pay Later */}
+              <button
+                disabled={paymentLoading}
+                onClick={() => { setShowPaymentModal(false); setBookingSuccess(true); }}
+                className="w-full py-3 rounded-2xl text-gray-500 text-sm font-medium hover:text-gray-700 transition-colors disabled:opacity-50"
+              >
+                {paymentLoading ? 'Processing payment…' : 'Pay Later — Agent will contact me'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
