@@ -59,12 +59,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Payment signature verification failed' }, { status: 400 });
     }
 
-    // 7. Calculate amountPaid from what we stored on the order
+    // 7. Determine amount paid from the stored advanceAmount (set during create-order).
+    // This is the authoritative source — it reflects exactly what the Razorpay order charged,
+    // including any custom agent override. Fall back to recalculating only if missing.
     const netTotal = (booking.totalPrice || 0) - (booking.discountAmount || 0);
-    const pct = configSnap.data()!.advancePercentage ?? 30;
-    const amountPaid = booking.paymentType === 'advance'
-      ? Math.round((netTotal * pct) / 100)
-      : Math.round(netTotal);
+    let amountPaid: number;
+    if (booking.advanceAmount && booking.advanceAmount > 0) {
+      amountPaid = booking.advanceAmount; // stored in rupees during create-order
+    } else {
+      // Fallback: derive from stored paymentType and config percentage
+      const pct = configSnap.data()!.advancePercentage ?? 30;
+      amountPaid = booking.paymentType === 'advance'
+        ? Math.round((netTotal * pct) / 100)
+        : Math.round(netTotal);
+    }
 
     const newPaymentStatus = booking.paymentType === 'advance' ? 'advance_payment_done' : 'payment_done';
 

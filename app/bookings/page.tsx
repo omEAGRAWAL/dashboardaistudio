@@ -61,6 +61,9 @@ export default function BookingsPage() {
   const [viewingBooking, setViewingBooking] = useState<any>(null);
   const [editingBooking, setEditingBooking] = useState<any>(null);
   const [editStatus, setEditStatus] = useState('');
+  const [editPaymentStatus, setEditPaymentStatus] = useState('');
+  const [editAmountPaid, setEditAmountPaid] = useState('');
+  const [editPaymentMethod, setEditPaymentMethod] = useState('');
   const [packages, setPackages] = useState<any[]>([]);
   
   // Business profile for invoices
@@ -175,6 +178,9 @@ export default function BookingsPage() {
   const handleOpenEdit = (booking: any) => {
     setEditingBooking(booking);
     setEditStatus(booking.status || 'Pending');
+    setEditPaymentStatus(booking.paymentStatus || 'payment_pending');
+    setEditAmountPaid(booking.amountPaid ? String(booking.amountPaid) : '');
+    setEditPaymentMethod(booking.paymentMethod || 'cash');
     setIsModalOpen(true);
   };
 
@@ -186,11 +192,28 @@ export default function BookingsPage() {
   const handleSaveStatus = async () => {
     if (!editingBooking) return;
     try {
-      await updateDoc(doc(db, 'bookings', editingBooking.id), { status: editStatus });
+      const updates: Record<string, any> = { status: editStatus };
+
+      // Always persist payment status changes
+      updates.paymentStatus = editPaymentStatus;
+      updates.paymentMethod = editPaymentMethod;
+
+      const newAmountPaid = Number(editAmountPaid) || 0;
+      updates.amountPaid = newAmountPaid;
+
+      // Auto-derive paymentStatus when agent manually enters full amount
+      const netTotal = getNetTotal(editingBooking);
+      if (newAmountPaid > 0 && newAmountPaid >= netTotal &&
+          !['payment_done', 'advance_payment_done'].includes(editPaymentStatus)) {
+        updates.paymentStatus = 'payment_done';
+        setEditPaymentStatus('payment_done');
+      }
+
+      await updateDoc(doc(db, 'bookings', editingBooking.id), updates);
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error updating booking:", error);
-      alert("Failed to update booking status");
+      alert("Failed to update booking");
     }
   };
 
@@ -326,8 +349,13 @@ export default function BookingsPage() {
       if (paymentMethod === 'cash' || paymentMethod === 'upi') {
         const advAmt = Number(agentAdvanceAmount) || 0;
         if (advAmt > 0) {
-          initialPaymentStatus = paymentMethod === 'cash' ? 'cash_collected' : 'upi_collected';
           amountPaid = advAmt;
+          // If collected amount covers the full net total → fully paid
+          if (advAmt >= netTotal) {
+            initialPaymentStatus = 'payment_done';
+          } else {
+            initialPaymentStatus = paymentMethod === 'cash' ? 'cash_collected' : 'upi_collected';
+          }
         }
       }
 
@@ -371,10 +399,20 @@ export default function BookingsPage() {
     }
   };
 
+  // ─── Helpers ─────────────────────────────────────────────────────
+  // Net total (before GST) — the cash amount the customer owes
+  const getNetTotal = (booking: any) =>
+    Math.max(0, (booking.totalPrice || 0) - (booking.discountAmount || 0));
+
+  // Remaining balance the customer still owes
+  const getRemainingBalance = (booking: any) =>
+    Math.max(0, getNetTotal(booking) - (booking.amountPaid || 0));
+
   // ─── Invoice Generation ──────────────────────────────────────────
   const openInvoiceModal = (booking: any) => {
     setInvoiceModalBooking(booking);
-    setInvoiceAmountPaid('');
+    // Pre-fill amountPaid from booking's recorded payment — agent can still override
+    setInvoiceAmountPaid(booking.amountPaid ? String(booking.amountPaid) : '');
     setInvoiceRemarks('');
     setInvoiceDiscount(booking.discountAmount ? String(booking.discountAmount) : '');
     // Pre-fill participant names from saved booking data
@@ -727,6 +765,18 @@ export default function BookingsPage() {
                           {booking.discountAmount > 0 && <div className="text-[10px] text-green-600 font-medium">₹{booking.discountAmount.toLocaleString('en-IN')} off</div>}
                         </div>
                       </div>
+                      {(booking.amountPaid > 0 || (booking.paymentStatus && booking.paymentStatus !== 'payment_pending')) && (
+                        <div className="flex items-center gap-2 text-xs">
+                          {booking.amountPaid > 0 && (
+                            <span className="text-green-600 font-medium">₹{(booking.amountPaid || 0).toLocaleString('en-IN')} paid</span>
+                          )}
+                          {getRemainingBalance(booking) > 0 ? (
+                            <span className="text-red-500">· ₹{getRemainingBalance(booking).toLocaleString('en-IN')} due</span>
+                          ) : booking.amountPaid > 0 ? (
+                            <span className="text-green-600">· Fully paid</span>
+                          ) : null}
+                        </div>
+                      )}
                       <div className="flex items-center gap-2 pt-1">
                         <button onClick={() => handleOpenView(booking)} className="flex-1 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-center">View</button>
                         {booking.status === 'Confirmed' && !noProfile && (
@@ -750,6 +800,7 @@ export default function BookingsPage() {
                         <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Package</th>
                         <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Details</th>
                         <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Price</th>
+                        <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Payment</th>
                         <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                         <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
                         <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
@@ -778,6 +829,25 @@ export default function BookingsPage() {
                           <td className="px-6 py-4">
                             <div className="font-medium text-gray-900">₹{((booking.totalPrice || 0) - (booking.discountAmount || 0)).toLocaleString('en-IN')}</div>
                             {booking.discountAmount > 0 && <div className="text-xs text-green-600 font-medium">₹{booking.discountAmount.toLocaleString('en-IN')} off</div>}
+                          </td>
+                          <td className="px-6 py-4">
+                            {(() => {
+                              const amtPaid = booking.amountPaid || 0;
+                              const balance = getRemainingBalance(booking);
+                              if (amtPaid === 0 && !booking.paymentStatus) return <span className="text-xs text-gray-400">—</span>;
+                              return (
+                                <div className="space-y-0.5">
+                                  {amtPaid > 0 && (
+                                    <div className="text-sm font-semibold text-green-700">₹{amtPaid.toLocaleString('en-IN')} paid</div>
+                                  )}
+                                  {balance > 0 ? (
+                                    <div className="text-xs text-red-500 font-medium">₹{balance.toLocaleString('en-IN')} due</div>
+                                  ) : amtPaid > 0 ? (
+                                    <div className="text-xs text-green-600 font-medium">Fully paid</div>
+                                  ) : null}
+                                </div>
+                              );
+                            })()}
                           </td>
                           <td className="px-6 py-4">
                             <div className="space-y-1">
@@ -845,45 +915,139 @@ export default function BookingsPage() {
         </main>
       </div>
 
-      {/* ── Edit Status Modal ── */}
-      {isModalOpen && editingBooking && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-900">Update Booking Status</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">✕</button>
-            </div>
-            <div className="p-6 space-y-4">
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Customer</p>
-                <p className="font-medium text-gray-900">{editingBooking.customerName}</p>
+      {/* ── Edit Booking Modal ── */}
+      {isModalOpen && editingBooking && (() => {
+        const netTotal = getNetTotal(editingBooking);
+        const currentPaid = Number(editAmountPaid) || 0;
+        const remaining = Math.max(0, netTotal - currentPaid);
+        return (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[92vh] overflow-y-auto">
+              <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Update Booking</h2>
+                  <p className="text-xs text-gray-500 mt-0.5">{editingBooking.customerName} · {editingBooking.packageTitle}</p>
+                </div>
+                <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">✕</button>
               </div>
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Package</p>
-                <p className="font-medium text-gray-900">{editingBooking.packageTitle}</p>
+
+              <div className="p-6 space-y-5">
+                {/* Booking Status */}
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700">Booking Status</label>
+                  <select
+                    value={editStatus}
+                    onChange={e => setEditStatus(e.target.value)}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                  >
+                    <option value="Pending">Pending</option>
+                    <option value="Confirmed">Confirmed</option>
+                    <option value="Cancelled">Cancelled</option>
+                  </select>
+                </div>
+
+                {/* Payment Section */}
+                <div className="border border-gray-200 rounded-xl overflow-hidden">
+                  <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
+                    <p className="text-sm font-semibold text-gray-800">Payment Details</p>
+                  </div>
+                  <div className="p-4 space-y-4">
+                    {/* Summary row */}
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                      <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                        <p className="text-[10px] text-gray-400 uppercase font-semibold mb-1">Net Total</p>
+                        <p className="text-sm font-bold text-gray-900">₹{netTotal.toLocaleString('en-IN')}</p>
+                      </div>
+                      <div className="bg-green-50 rounded-xl p-3 border border-green-100">
+                        <p className="text-[10px] text-green-600 uppercase font-semibold mb-1">Paid</p>
+                        <p className="text-sm font-bold text-green-700">₹{currentPaid.toLocaleString('en-IN')}</p>
+                      </div>
+                      <div className={`rounded-xl p-3 border ${remaining > 0 ? 'bg-red-50 border-red-100' : 'bg-green-50 border-green-100'}`}>
+                        <p className={`text-[10px] uppercase font-semibold mb-1 ${remaining > 0 ? 'text-red-500' : 'text-green-600'}`}>Balance</p>
+                        <p className={`text-sm font-bold ${remaining > 0 ? 'text-red-700' : 'text-green-700'}`}>₹{remaining.toLocaleString('en-IN')}</p>
+                      </div>
+                    </div>
+
+                    {/* Amount Paid input */}
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium text-gray-700">Amount Collected (₹)</label>
+                      <input
+                        type="number"
+                        min="0"
+                        max={netTotal}
+                        value={editAmountPaid}
+                        onChange={e => setEditAmountPaid(e.target.value)}
+                        placeholder={`0 – ${netTotal.toLocaleString('en-IN')}`}
+                        className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                      />
+                      <p className="text-xs text-gray-400">Total amount received from customer so far (advance + balance).</p>
+                    </div>
+
+                    {/* Quick fill buttons */}
+                    <div className="flex gap-2 flex-wrap">
+                      <button type="button"
+                        onClick={() => setEditAmountPaid(String(Math.round(netTotal * 0.3)))}
+                        className="text-xs px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg font-medium hover:bg-blue-100 transition-colors border border-blue-100">
+                        30% (₹{Math.round(netTotal * 0.3).toLocaleString('en-IN')})
+                      </button>
+                      <button type="button"
+                        onClick={() => setEditAmountPaid(String(Math.round(netTotal * 0.5)))}
+                        className="text-xs px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg font-medium hover:bg-blue-100 transition-colors border border-blue-100">
+                        50% (₹{Math.round(netTotal * 0.5).toLocaleString('en-IN')})
+                      </button>
+                      <button type="button"
+                        onClick={() => setEditAmountPaid(String(netTotal))}
+                        className="text-xs px-3 py-1.5 bg-green-50 text-green-700 rounded-lg font-medium hover:bg-green-100 transition-colors border border-green-100">
+                        Full (₹{netTotal.toLocaleString('en-IN')})
+                      </button>
+                    </div>
+
+                    {/* Payment Method */}
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium text-gray-700">Payment Method</label>
+                      <select
+                        value={editPaymentMethod}
+                        onChange={e => setEditPaymentMethod(e.target.value)}
+                        className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                      >
+                        <option value="cash">Cash</option>
+                        <option value="upi">UPI</option>
+                        <option value="razorpay">Razorpay</option>
+                        <option value="">Not specified</option>
+                      </select>
+                    </div>
+
+                    {/* Payment Status */}
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium text-gray-700">Payment Status</label>
+                      <select
+                        value={editPaymentStatus}
+                        onChange={e => setEditPaymentStatus(e.target.value)}
+                        className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                      >
+                        <option value="payment_pending">Payment Pending</option>
+                        <option value="advance_payment_done">Advance Paid (Online)</option>
+                        <option value="cash_collected">Cash Collected</option>
+                        <option value="upi_collected">UPI Collected</option>
+                        <option value="payment_done">Fully Paid</option>
+                        <option value="payment_failed">Payment Failed</option>
+                      </select>
+                      <p className="text-xs text-gray-400">Status auto-upgrades to "Fully Paid" when collected amount ≥ net total.</p>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Status</label>
-                <select 
-                  value={editStatus}
-                  onChange={(e) => setEditStatus(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                >
-                  <option value="Pending">Pending</option>
-                  <option value="Confirmed">Confirmed</option>
-                  <option value="Cancelled">Cancelled</option>
-                </select>
+
+              <div className="p-6 bg-gray-50 rounded-b-2xl flex justify-end gap-3">
+                <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-lg font-medium transition-colors text-sm">Cancel</button>
+                <button onClick={handleSaveStatus} className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors text-sm">
+                  Save Changes
+                </button>
               </div>
-            </div>
-            <div className="p-6 bg-gray-50 rounded-b-2xl flex justify-end gap-3">
-              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-lg font-medium transition-colors">Cancel</button>
-              <button onClick={handleSaveStatus} className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors">
-                Save Changes
-              </button>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* ── View Booking Modal ── */}
       {isViewModalOpen && viewingBooking && (
@@ -894,7 +1058,7 @@ export default function BookingsPage() {
               <button onClick={() => setIsViewModalOpen(false)} className="text-gray-400 hover:text-gray-600">✕</button>
             </div>
             <div className="p-6 space-y-5">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center flex-wrap gap-2">
                 <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
                   viewingBooking.status === 'Confirmed' ? 'bg-green-100 text-green-800' :
                   viewingBooking.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
@@ -902,13 +1066,18 @@ export default function BookingsPage() {
                 }`}>
                   {viewingBooking.status || 'Pending'}
                 </span>
+                {viewingBooking.paymentStatus && PAYMENT_STATUS_LABELS[viewingBooking.paymentStatus] && (
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${PAYMENT_STATUS_LABELS[viewingBooking.paymentStatus].color}`}>
+                    {PAYMENT_STATUS_LABELS[viewingBooking.paymentStatus].label}
+                  </span>
+                )}
                 <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-lg">{viewingBooking.source || 'Website'}</span>
               </div>
 
               <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Package</p>
                 <p className="font-bold text-gray-900">{viewingBooking.packageTitle}</p>
-                <div className="flex gap-4 mt-2 text-sm text-gray-600">
+                <div className="flex gap-4 mt-2 text-sm text-gray-600 flex-wrap">
                   <span className="capitalize">{viewingBooking.sharingType} sharing</span>
                   <span>·</span>
                   <span>{viewingBooking.numberOfPersons} {viewingBooking.numberOfPersons === 1 ? 'person' : 'persons'}</span>
@@ -922,6 +1091,70 @@ export default function BookingsPage() {
                   <p className="text-sm text-gray-500 mt-1">Travel Date: {viewingBooking.travelDate}</p>
                 )}
               </div>
+
+              {/* ── Payment Details ── */}
+              {(() => {
+                const netTotal = getNetTotal(viewingBooking);
+                const amtPaid = viewingBooking.amountPaid || 0;
+                const balance = getRemainingBalance(viewingBooking);
+                const isFullyPaid = balance <= 0 && amtPaid > 0;
+                return (
+                  <div className="border border-gray-200 rounded-xl overflow-hidden">
+                    <div className="px-4 py-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+                      <p className="text-xs font-semibold text-gray-700 uppercase tracking-wider">Payment Summary</p>
+                      {viewingBooking.paymentMethod && (
+                        <span className="text-xs text-gray-500 capitalize bg-white border border-gray-200 px-2 py-0.5 rounded-full">
+                          {viewingBooking.paymentMethod}
+                        </span>
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <div className="grid grid-cols-3 gap-3 mb-3">
+                        <div className="text-center">
+                          <p className="text-[10px] text-gray-400 uppercase font-semibold mb-1">Net Total</p>
+                          <p className="text-base font-bold text-gray-900">₹{netTotal.toLocaleString('en-IN')}</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-[10px] text-green-500 uppercase font-semibold mb-1">Paid</p>
+                          <p className="text-base font-bold text-green-700">₹{amtPaid.toLocaleString('en-IN')}</p>
+                        </div>
+                        <div className="text-center">
+                          <p className={`text-[10px] uppercase font-semibold mb-1 ${balance > 0 ? 'text-red-400' : 'text-green-500'}`}>Balance</p>
+                          <p className={`text-base font-bold ${balance > 0 ? 'text-red-600' : 'text-green-700'}`}>₹{balance.toLocaleString('en-IN')}</p>
+                        </div>
+                      </div>
+                      {/* Progress bar */}
+                      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all ${isFullyPaid ? 'bg-green-500' : 'bg-blue-500'}`}
+                          style={{ width: `${Math.min(100, netTotal > 0 ? (amtPaid / netTotal) * 100 : 0)}%` }}
+                        />
+                      </div>
+                      <p className="text-[10px] text-gray-400 mt-1.5 text-right">
+                        {netTotal > 0 ? `${Math.round((amtPaid / netTotal) * 100)}% received` : '—'}
+                      </p>
+                      {/* Advance amount breakdown if applicable */}
+                      {viewingBooking.paymentType === 'advance' && viewingBooking.advanceAmount > 0 && (
+                        <p className="text-xs text-gray-500 mt-2 bg-blue-50 rounded-lg px-3 py-2 border border-blue-100">
+                          Advance collected: <strong>₹{viewingBooking.advanceAmount.toLocaleString('en-IN')}</strong>
+                          {' · '}Balance due: <strong className="text-red-600">₹{balance.toLocaleString('en-IN')}</strong>
+                        </p>
+                      )}
+                      {viewingBooking.razorpayPaymentLinkUrl && (
+                        <div className="mt-2 flex items-center gap-2">
+                          <span className="text-xs text-gray-400">Payment link:</span>
+                          <button
+                            onClick={() => setRzpLinkModal({ url: viewingBooking.razorpayPaymentLinkUrl, amount: viewingBooking.advanceAmount || 0, bookingId: viewingBooking.id })}
+                            className="text-xs text-indigo-600 hover:underline font-medium"
+                          >
+                            View / Copy Link
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
 
               <div>
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Customer</p>

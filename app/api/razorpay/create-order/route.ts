@@ -72,12 +72,15 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // 6. Store orderId on booking atomically
+    // 6. Store orderId AND advance amount on booking atomically
+    // advanceAmount is stored in rupees so invoice and balance calculations are always accurate
+    const advanceAmountInRupees = amountInPaise / 100;
     await bookingRef.update({
       razorpayOrderId: order.id,
       paymentType,
       paymentStatus: 'payment_pending',
       paymentMethod: 'razorpay',
+      advanceAmount: advanceAmountInRupees,
       updatedAt: FieldValue.serverTimestamp(),
     });
 
