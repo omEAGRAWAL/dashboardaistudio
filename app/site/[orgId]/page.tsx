@@ -132,7 +132,7 @@ export default function PublicSitePage() {
       </nav>
 
       {/* Hero */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative h-[40vh] md:min-h-screen flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img src={heroImage} alt="Hero" className="w-full h-full object-cover" />
           <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${overlayOpacity})` }} />

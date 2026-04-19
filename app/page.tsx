@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import RootGate from '@/components/RootGate';
 
 export const metadata: Metadata = {
-  title: 'Yatrik — #1 CRM for Travel Agencies in India | Free Trial',
+  title: 'Yatrik — #1 CRM for Travel Agencies in India | Plans from ₹899',
   description:
-    'Yatrik is the all-in-one CRM built for Indian travel agencies & tour operators. Manage leads, packages, bookings & your website in one dashboard. ₹1,000/month. 1 month free trial + free setup.',
+    'Yatrik is the all-in-one CRM for Indian travel agencies. Manage leads, packages, bookings, campaigns & your website. Plans from ₹899/month incl. GST. 15-day free trial. WhatsApp: 7609098787.',
   keywords: [
     'travel agency CRM India',
     'CRM for travel agents India',
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Yatrik — #1 CRM for Travel Agencies in India',
     description:
-      'Stop losing leads. Start closing more bookings. Yatrik is the all-in-one CRM for Indian travel agencies & DMCs. Try free for 1 month.',
+      'Stop losing leads. Start closing more bookings. Yatrik is the all-in-one CRM for Indian travel agencies & DMCs. Try free for 15 days.',
     type: 'website',
     locale: 'en_IN',
   },
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Yatrik — #1 CRM for Travel Agencies in India',
     description:
-      'All-in-one travel agency CRM. Leads, packages, bookings & website builder. ₹1,000/month. 1 month free trial.',
+      'All-in-one travel agency CRM. Leads, packages, bookings & website builder. ₹1,000/month. 15-day free trial.',
   },
   alternates: {
     canonical: 'https://travelycrm.reviu.store',
@@ -51,14 +51,35 @@ const jsonLd = {
       url: 'https://travelycrm.reviu.store',
       description:
         'All-in-one CRM software for travel agencies and tour operators in India. Manage leads, packages, bookings, team, and build your travel website — all in one place.',
-      offers: {
-        '@type': 'Offer',
-        price: '1000',
-        priceCurrency: 'INR',
-        priceValidUntil: '2027-12-31',
-        availability: 'https://schema.org/InStock',
-        description: '1 month free trial included. Free initial setup.',
-      },
+      offers: [
+        {
+          '@type': 'Offer',
+          name: 'Basic CRM',
+          price: '899',
+          priceCurrency: 'INR',
+          priceValidUntil: '2027-12-31',
+          availability: 'https://schema.org/InStock',
+          description: 'Lead management, packages, analytics. 15-day free trial. GST included.',
+        },
+        {
+          '@type': 'Offer',
+          name: 'Growth',
+          price: '1499',
+          priceCurrency: 'INR',
+          priceValidUntil: '2027-12-31',
+          availability: 'https://schema.org/InStock',
+          description: 'Basic CRM + bookings + campaign page + WhatsApp. GST included.',
+        },
+        {
+          '@type': 'Offer',
+          name: 'Pro',
+          price: '3000',
+          priceCurrency: 'INR',
+          priceValidUntil: '2027-12-31',
+          availability: 'https://schema.org/InStock',
+          description: 'Full CRM + custom landing page + website builder. GST included. Free setup.',
+        },
+      ],
       featureList: [
         'Lead Management',
         'Package Management',
@@ -78,7 +99,7 @@ const jsonLd = {
           name: 'Is there a free trial for Yatrik?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Yes! Yatrik offers a full 1-month free trial with all features included. No credit card required.',
+            text: 'Yes! Yatrik offers a full 15-day free trial with all features included. No credit card required.',
           },
         },
         {
@@ -86,7 +107,7 @@ const jsonLd = {
           name: 'How much does Yatrik cost?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Yatrik costs ₹1,000 per month after the free trial. This includes all features, free initial setup, and customer support.',
+            text: 'Yatrik has three plans, all incl. GST: Basic CRM at ₹899/month (leads, packages, analytics), Growth at ₹1,499/month (adds bookings & campaign page), and Pro at ₹3,000/month (adds custom landing page & website builder). All plans include 15-day free trial. Contact: 7609098787.',
           },
         },
         {
