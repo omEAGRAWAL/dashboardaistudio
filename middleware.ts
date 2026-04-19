@@ -52,23 +52,29 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // Already routed to a /site/... path — let Next.js handle it directly
-  // (prevents double-rewriting when package links include /site/[orgId] in the href)
-  if (pathname.startsWith('/site/')) {
+  // Already routed — prevent double-rewriting
+  if (pathname.startsWith('/site/') || pathname.startsWith('/campaign/')) {
     return NextResponse.next();
   }
 
   const orgId = await resolveHostToOrgId(bareHost);
   if (!orgId) return NextResponse.next();
 
+  const url = req.nextUrl.clone();
+
+  // Rewrite: agency.com/campaign → /campaign/[orgId]
+  if (pathname === '/campaign') {
+    url.pathname = `/campaign/${orgId}`;
+    return NextResponse.rewrite(url);
+  }
+
   // Rewrite: agency.com/ → /site/[orgId]/
   // Rewrite: agency.com/package/abc → /site/[orgId]/package/abc
-  const url = req.nextUrl.clone();
   url.pathname = `/site/${orgId}${pathname === '/' ? '' : pathname}`;
   return NextResponse.rewrite(url);
 }
 
 export const config = {
   // Exclude static assets and API routes from middleware
-  matcher: ['/((?!_next/static|_next/image|favicon\\.ico|api/).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon\\.ico|manifest\\.json|api/|icons/|.*\\.png$|.*\\.jpg$|.*\\.svg$|.*\\.ico$|.*\\.webp$).*)'],
 };

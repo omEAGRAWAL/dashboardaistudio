@@ -11,7 +11,7 @@ import {
 import {
   Palette, Link as LinkIcon, Copy, Check, Instagram, MessageCircle,
   FileText, Smartphone, Luggage, Globe, Save, ExternalLink, RefreshCw,
-  ChevronDown, Image as ImageIcon,
+  ChevronDown, Image as ImageIcon, Upload, X,
 } from 'lucide-react';
 
 const PRESET_ACCENTS = [
@@ -54,6 +54,10 @@ export default function CampaignBuilderPage() {
   const [instagram, setInstagram] = useState('');
   const [poweredByText, setPoweredByText] = useState('logout.studio');
   const [showPoweredBy, setShowPoweredBy] = useState(true);
+  const [logoUploading, setLogoUploading] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const [orgSubdomain, setOrgSubdomain] = useState<string | null>(null);
+  const [orgCustomDomain, setOrgCustomDomain] = useState<string | null>(null);
 
   // Per-package overrides: { [packageId]: { pdfUrl, campaignCategory } }
   const [pkgOverrides, setPkgOverrides] = useState<Record<string, { pdfUrl?: string; campaignCategory?: string }>>({});
@@ -66,7 +70,10 @@ export default function CampaignBuilderPage() {
     if (!orgId) return;
     (async () => {
       try {
-        const snap = await getDoc(doc(db, 'campaign_settings', orgId));
+        const [snap, orgSnap] = await Promise.all([
+          getDoc(doc(db, 'campaign_settings', orgId)),
+          getDoc(doc(db, 'organizations', orgId)),
+        ]);
         if (snap.exists()) {
           const d = snap.data();
           setAccentColor(d.accentColor || '#F59E0B');
@@ -77,6 +84,11 @@ export default function CampaignBuilderPage() {
           setInstagram(d.instagram || '');
           setPoweredByText(d.poweredByText || 'logout.studio');
           setShowPoweredBy(d.showPoweredBy !== false);
+        }
+        if (orgSnap.exists()) {
+          const od = orgSnap.data();
+          setOrgSubdomain(od.subdomain || null);
+          setOrgCustomDomain(od.customDomain || null);
         }
       } catch (e) { console.error(e); }
       finally { setLoading(false); }
@@ -102,6 +114,25 @@ export default function CampaignBuilderPage() {
     });
     return () => unsub();
   }, [orgId]);
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setLogoUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setLogoUrl(data.secure_url);
+    } catch (err: any) {
+      alert(`Upload failed: ${err.message}`);
+    } finally {
+      setLogoUploading(false);
+      if (logoInputRef.current) logoInputRef.current.value = '';
+    }
+  };
 
   const handleSave = async () => {
     if (!orgId) return;
@@ -173,12 +204,6 @@ export default function CampaignBuilderPage() {
                 <p className="text-sm text-gray-400 mt-1">Create a mobile-first package listing page to share with customers.</p>
               </div>
               <div className="flex items-center gap-3">
-                <a
-                  href={campaignUrl}
-                  target="_blank" rel="noreferrer"
-                  className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors">
-                  <ExternalLink className="w-4 h-4" /> Preview
-                </a>
                 <button
                   onClick={handleSave}
                   disabled={saving}
@@ -190,20 +215,85 @@ export default function CampaignBuilderPage() {
             </div>
 
             {/* Campaign URL Banner */}
-            <div className="bg-indigo-50 border border-indigo-100 rounded-2xl px-5 py-4 flex items-center gap-4 mb-6">
-              <div className="w-9 h-9 bg-indigo-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                <LinkIcon className="w-4 h-4 text-indigo-600" />
+            <div className="bg-indigo-50 border border-indigo-100 rounded-2xl px-5 py-4 mb-6 space-y-3">
+              {/* Platform URL */}
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <LinkIcon className="w-3.5 h-3.5 text-indigo-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-wider">Platform URL</p>
+                  <p className="text-sm font-mono text-gray-700 truncate">{campaignUrl}</p>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <a href={campaignUrl} target="_blank" rel="noreferrer"
+                    className="p-1.5 rounded-lg text-indigo-500 hover:bg-indigo-100 transition-colors">
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                  <button onClick={copyUrl}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-semibold hover:bg-indigo-700 transition-colors">
+                    {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copied ? 'Copied!' : 'Copy'}
+                  </button>
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-0.5">Campaign URL</p>
-                <p className="text-sm font-mono text-gray-700 truncate">{campaignUrl}</p>
-              </div>
-              <button
-                onClick={copyUrl}
-                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-colors flex-shrink-0">
-                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                {copied ? 'Copied!' : 'Copy'}
-              </button>
+
+              {/* Custom Domain URL */}
+              {orgCustomDomain && (
+                <div className="flex items-center gap-3 pt-3 border-t border-indigo-100">
+                  <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Globe className="w-3.5 h-3.5 text-green-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-bold text-green-600 uppercase tracking-wider">Custom Domain</p>
+                    <p className="text-sm font-mono text-gray-700 truncate">
+                      https://{orgCustomDomain}/campaign
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <a href={`https://${orgCustomDomain}/campaign`} target="_blank" rel="noreferrer"
+                      className="p-1.5 rounded-lg text-green-600 hover:bg-green-100 transition-colors">
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                    <button onClick={() => { navigator.clipboard.writeText(`https://${orgCustomDomain}/campaign`); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs font-semibold hover:bg-green-700 transition-colors">
+                      <Copy className="w-3.5 h-3.5" /> Copy
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Subdomain URL */}
+              {orgSubdomain && (
+                <div className="flex items-center gap-3 pt-3 border-t border-indigo-100">
+                  <div className="w-8 h-8 bg-violet-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Globe className="w-3.5 h-3.5 text-violet-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-bold text-violet-600 uppercase tracking-wider">Subdomain</p>
+                    <p className="text-sm font-mono text-gray-700 truncate">
+                      https://{orgSubdomain}/campaign
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <a href={`https://${orgSubdomain}/campaign`} target="_blank" rel="noreferrer"
+                      className="p-1.5 rounded-lg text-violet-600 hover:bg-violet-100 transition-colors">
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                    <button onClick={() => { navigator.clipboard.writeText(`https://${orgSubdomain}/campaign`); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-600 text-white rounded-lg text-xs font-semibold hover:bg-violet-700 transition-colors">
+                      <Copy className="w-3.5 h-3.5" /> Copy
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* No domain hint */}
+              {!orgCustomDomain && !orgSubdomain && (
+                <p className="text-xs text-indigo-400 pt-1 border-t border-indigo-100">
+                  No custom domain linked yet. Ask your admin to assign one so customers can access this via your own domain.
+                </p>
+              )}
             </div>
 
             {/* Main layout: settings + preview */}
@@ -238,10 +328,46 @@ export default function CampaignBuilderPage() {
                             className={inp} placeholder="e.g. Yatrik" />
                         </div>
                         <div className="space-y-1.5">
-                          <label className="text-sm font-semibold text-gray-700">Logo URL</label>
+                          <label className="text-sm font-semibold text-gray-700">Logo</label>
+                          <div className="flex items-center gap-3">
+                            {/* Preview */}
+                            <div
+                              className="w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center border-2 border-gray-200 overflow-hidden"
+                              style={{ backgroundColor: accentColor }}>
+                              {logoUrl
+                                ? <img src={logoUrl} alt="logo" className="w-full h-full object-cover" />
+                                : <Luggage className="w-6 h-6 text-gray-900" />
+                              }
+                            </div>
+                            {/* Upload button */}
+                            <div className="flex-1 space-y-2">
+                              <input
+                                ref={logoInputRef}
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handleLogoUpload}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => logoInputRef.current?.click()}
+                                disabled={logoUploading}
+                                className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50">
+                                <Upload className="w-4 h-4" />
+                                {logoUploading ? 'Uploading...' : 'Upload Logo'}
+                              </button>
+                              <p className="text-xs text-gray-400">Or paste a URL below</p>
+                            </div>
+                            {/* Clear */}
+                            {logoUrl && (
+                              <button type="button" onClick={() => setLogoUrl('')}
+                                className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0">
+                                <X className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
                           <input value={logoUrl} onChange={e => setLogoUrl(e.target.value)}
                             className={inp} placeholder="https://..." />
-                          <p className="text-xs text-gray-400">Paste a direct image URL. Leave empty to use the default icon.</p>
                         </div>
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

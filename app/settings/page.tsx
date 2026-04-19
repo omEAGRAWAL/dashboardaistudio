@@ -3,7 +3,7 @@
 import { useAuth } from '@/components/AuthProvider';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
-import { Settings as SettingsIcon, Webhook, Copy, CheckCircle2, MessageSquare, Phone, AlertCircle, Loader2, ExternalLink, Globe, Link2, RefreshCw, Trash2, CreditCard, Eye, EyeOff } from 'lucide-react';
+import { Settings as SettingsIcon, Webhook, Copy, CheckCircle2, MessageSquare, Phone, AlertCircle, Loader2, ExternalLink, Globe, Link2, RefreshCw, Trash2, CreditCard, Eye, EyeOff, Gift } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
@@ -49,6 +49,8 @@ export default function SettingsPage() {
   const [rzpKeySecret, setRzpKeySecret] = useState('');
   const [rzpWebhookSecret, setRzpWebhookSecret] = useState('');
   const [rzpAdvancePct, setRzpAdvancePct] = useState(30);
+  const [rzpAdvanceType, setRzpAdvanceType] = useState<'percentage' | 'fixed'>('percentage');
+  const [rzpAdvanceFixed, setRzpAdvanceFixed] = useState(0);
   const [rzpSaving, setRzpSaving] = useState(false);
   const [rzpError, setRzpError] = useState('');
   const [rzpSuccess, setRzpSuccess] = useState('');
@@ -75,6 +77,8 @@ export default function SettingsPage() {
             setRzpConfigured(true);
             setRzpKeyId(data.keyId || '');
             setRzpAdvancePct(data.advancePercentage ?? 30);
+            setRzpAdvanceType(data.advanceType ?? 'percentage');
+            setRzpAdvanceFixed(data.advanceFixedAmount ?? 0);
             setRzpHasWebhookSecret(data.hasWebhookSecret || false);
           }
         }
@@ -226,7 +230,9 @@ export default function SettingsPage() {
           keyId: rzpKeyId.trim(),
           keySecret: rzpKeySecret.trim(),
           webhookSecret: rzpWebhookSecret.trim(),
+          advanceType: rzpAdvanceType,
           advancePercentage: rzpAdvancePct,
+          advanceFixedAmount: rzpAdvanceFixed,
         }),
       });
       const data = await res.json();
@@ -744,26 +750,61 @@ export default function SettingsPage() {
                     <p className="text-xs text-gray-400">Stored securely server-side. Never exposed to the browser.</p>
                   </div>
 
-                  {/* Advance Percentage */}
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Advance Payment Percentage: <strong>{rzpAdvancePct}%</strong>
-                    </label>
-                    <input
-                      type="range"
-                      min={1}
-                      max={100}
-                      value={rzpAdvancePct}
-                      onChange={e => setRzpAdvancePct(Number(e.target.value))}
-                      className="w-full accent-indigo-600"
-                    />
-                    <div className="flex justify-between text-xs text-gray-400">
-                      <span>1%</span>
-                      <span>50%</span>
-                      <span>100%</span>
+                  {/* Advance Payment Type */}
+                  <div className="space-y-3">
+                    <label className="block text-sm font-medium text-gray-700">Advance Payment Type</label>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setRzpAdvanceType('percentage')}
+                        className={`flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-colors ${rzpAdvanceType === 'percentage' ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-gray-300 text-gray-600 hover:border-indigo-400'}`}
+                      >
+                        % Percentage
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setRzpAdvanceType('fixed')}
+                        className={`flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-colors ${rzpAdvanceType === 'fixed' ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-gray-300 text-gray-600 hover:border-indigo-400'}`}
+                      >
+                        ₹ Fixed Amount
+                      </button>
                     </div>
+
+                    {rzpAdvanceType === 'percentage' ? (
+                      <div className="space-y-1.5">
+                        <label className="block text-sm text-gray-600">
+                          Advance Percentage: <strong>{rzpAdvancePct}%</strong>
+                        </label>
+                        <input
+                          type="range"
+                          min={1}
+                          max={100}
+                          value={rzpAdvancePct}
+                          onChange={e => setRzpAdvancePct(Number(e.target.value))}
+                          className="w-full accent-indigo-600"
+                        />
+                        <div className="flex justify-between text-xs text-gray-400">
+                          <span>1%</span><span>50%</span><span>100%</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-1.5">
+                        <label className="block text-sm text-gray-600">Fixed Advance Amount (₹)</label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium">₹</span>
+                          <input
+                            type="number"
+                            min={1}
+                            placeholder="e.g. 5000"
+                            value={rzpAdvanceFixed || ''}
+                            onChange={e => setRzpAdvanceFixed(Number(e.target.value))}
+                            className="w-full border border-gray-300 rounded-lg pl-7 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          />
+                        </div>
+                      </div>
+                    )}
                     <p className="text-xs text-gray-500">
-                      Customers booking from your landing page or campaign will see an option to pay this % as advance. Agents can also override the advance amount manually.
+                      Customers will see an option to pay this advance when booking. Agents can still override the amount manually per booking.
                     </p>
                   </div>
 
@@ -831,6 +872,9 @@ export default function SettingsPage() {
                 </div>
               </div>
 
+              {/* Refer & Earn */}
+              <ReferEarnSection orgId={orgId} />
+
               {/* Organization Info */}
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
@@ -857,6 +901,106 @@ export default function SettingsPage() {
             </div>
           </div>
         </main>
+      </div>
+    </div>
+  );
+}
+
+// ─── Refer & Earn Section ─────────────────────────────────────────────────────
+
+function ReferEarnSection({ orgId }: { orgId: string | null }) {
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [stats, setStats] = useState<{ total: number; converted: number; pending: number } | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!orgId) return;
+    const uid = getAuth().currentUser?.uid;
+    if (!uid) { setLoading(false); return; }
+    fetch(`/api/admin/manage-referral-code?orgId=${orgId}`, {
+      headers: { 'x-uid': uid },
+    }).then(async (res) => {
+      if (res.ok) {
+        const data = await res.json();
+        setReferralCode(data.code);
+        setStats(data.stats);
+      }
+    }).catch(() => {}).finally(() => setLoading(false));
+  }, [orgId]);
+
+  const shareLink = typeof window !== 'undefined' && referralCode
+    ? `${window.location.origin}/?ref=${referralCode}`
+    : '';
+
+  const handleCopy = () => {
+    if (!shareLink) return;
+    navigator.clipboard.writeText(shareLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div className="px-6 py-4 border-b border-gray-200 bg-gray-50 flex items-center gap-2">
+        <Gift className="w-5 h-5 text-indigo-500" />
+        <h2 className="text-lg font-semibold text-gray-900">Refer &amp; Earn</h2>
+      </div>
+      <div className="p-6">
+        {loading ? (
+          <div className="flex items-center gap-2 text-sm text-gray-400">
+            <Loader2 className="w-4 h-4 animate-spin" /> Loading…
+          </div>
+        ) : !referralCode ? (
+          <div className="text-sm text-gray-500">
+            Your referral code hasn't been set up yet. Contact support to get your unique referral link and start earning rewards.
+          </div>
+        ) : (
+          <div className="space-y-5">
+            <p className="text-sm text-gray-600">
+              Share your referral link with other travel agencies. When they sign up, you both earn a free month when they become a paid subscriber.
+            </p>
+
+            {/* Code + share link */}
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-2.5 flex items-center gap-2">
+                <span className="text-xs text-indigo-500 font-medium">Code</span>
+                <span className="font-mono font-bold text-indigo-700 text-lg tracking-widest">{referralCode}</span>
+              </div>
+              <button
+                onClick={handleCopy}
+                className={`flex items-center gap-2 border rounded-xl px-4 py-2.5 text-sm font-medium transition-colors ${
+                  copied ? 'border-green-200 bg-green-50 text-green-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                {copied ? <CheckCircle2 className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                {copied ? 'Copied!' : 'Copy Share Link'}
+              </button>
+            </div>
+
+            {shareLink && (
+              <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs font-mono text-gray-500 truncate">
+                {shareLink}
+              </div>
+            )}
+
+            {/* Stats */}
+            {stats && (
+              <div className="grid grid-cols-3 gap-3 pt-2">
+                {[
+                  { label: 'Total Referred', value: stats.total },
+                  { label: 'Converted',      value: stats.converted },
+                  { label: 'Pending',        value: stats.pending },
+                ].map(({ label, value }) => (
+                  <div key={label} className="bg-gray-50 rounded-xl border border-gray-100 p-3 text-center">
+                    <div className="text-xl font-bold text-gray-900">{value}</div>
+                    <div className="text-xs text-gray-500 mt-0.5">{label}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

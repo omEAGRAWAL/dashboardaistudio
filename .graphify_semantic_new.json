@@ -1,0 +1,172 @@
+{
+  "nodes": [
+    {
+      "id": "readme_ai_studio_app",
+      "label": "AI Studio App",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": "https://ai.studio/apps/c83d2f1c-17a1-4b32-bdd1-af35d695e578",
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "readme_nodejs",
+      "label": "Node.js",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "readme_gemini_api_key",
+      "label": "GEMINI_API_KEY",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "readme_env_local",
+      "label": ".env.local",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "readme_npm_install",
+      "label": "npm install",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "readme_npm_run_dev",
+      "label": "npm run dev",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "readme_gh_banner",
+      "label": "GitHub Banner Image",
+      "file_type": "image",
+      "source_file": "README.md",
+      "source_location": "line 2",
+      "source_url": "https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6",
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "readme_ai_studio_app",
+      "target": "readme_nodejs",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": "line 13",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_ai_studio_app",
+      "target": "readme_gemini_api_key",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": "line 18",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_gemini_api_key",
+      "target": "readme_env_local",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": "line 18",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_ai_studio_app",
+      "target": "readme_npm_install",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": "line 17",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_ai_studio_app",
+      "target": "readme_npm_run_dev",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": "line 19",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_npm_install",
+      "target": "readme_npm_run_dev",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": "README.md",
+      "source_location": "lines 17-19",
+      "weight": 0.9
+    },
+    {
+      "source": "readme_ai_studio_app",
+      "target": "readme_gh_banner",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": "line 2",
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "local_dev_setup",
+      "label": "Local Development Setup Steps",
+      "nodes": [
+        "readme_nodejs",
+        "readme_npm_install",
+        "readme_gemini_api_key",
+        "readme_env_local",
+        "readme_npm_run_dev"
+      ],
+      "relation": "participate_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md"
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

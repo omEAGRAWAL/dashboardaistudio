@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { orgId, keyId, keySecret, webhookSecret, advancePercentage } = body;
+    const { orgId, keyId, keySecret, webhookSecret, advancePercentage, advanceType, advanceFixedAmount } = body;
 
     if (!orgId || !keyId || !keySecret) {
       return NextResponse.json({ error: 'orgId, keyId, and keySecret are required' }, { status: 400 });
@@ -35,10 +35,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Validate advancePercentage
+    const type: 'percentage' | 'fixed' = advanceType === 'fixed' ? 'fixed' : 'percentage';
+
+    // Validate based on advance type
     const pct = Number(advancePercentage);
     if (isNaN(pct) || pct < 1 || pct > 100) {
       return NextResponse.json({ error: 'advancePercentage must be between 1 and 100' }, { status: 400 });
+    }
+    const fixedAmt = Number(advanceFixedAmount ?? 0);
+    if (type === 'fixed' && (isNaN(fixedAmt) || fixedAmt < 1)) {
+      return NextResponse.json({ error: 'advanceFixedAmount must be at least ₹1' }, { status: 400 });
     }
 
     // Store config — keySecret never goes back to client
@@ -46,13 +52,15 @@ export async function POST(req: NextRequest) {
       keyId: keyId.trim(),
       keySecret: keySecret.trim(),
       webhookSecret: (webhookSecret || '').trim(),
+      advanceType: type,
       advancePercentage: pct,
+      advanceFixedAmount: fixedAmt,
       currency: 'INR',
       updatedAt: FieldValue.serverTimestamp(),
     });
 
     // Return only non-sensitive fields
-    return NextResponse.json({ success: true, keyId: keyId.trim(), advancePercentage: pct });
+    return NextResponse.json({ success: true, keyId: keyId.trim(), advanceType: type, advancePercentage: pct, advanceFixedAmount: fixedAmt });
   } catch (err: any) {
     console.error('[save-config]', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -94,7 +102,9 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       configured: true,
       keyId: data.keyId,
+      advanceType: data.advanceType ?? 'percentage',
       advancePercentage: data.advancePercentage ?? 30,
+      advanceFixedAmount: data.advanceFixedAmount ?? 0,
       hasWebhookSecret: !!data.webhookSecret,
     });
   } catch (err: any) {

@@ -39,7 +39,7 @@ export default function CampaignPage() {
   const [bookingSuccess, setBookingSuccess] = useState(false);
 
   // Payment state
-  const [rzpConfig, setRzpConfig] = useState<{ keyId: string; advancePercentage: number } | null>(null);
+  const [rzpConfig, setRzpConfig] = useState<{ keyId: string; advanceType: 'percentage' | 'fixed'; advancePercentage: number; advanceFixedAmount: number } | null>(null);
   const [pendingBookingId, setPendingBookingId] = useState<string | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
@@ -102,7 +102,7 @@ export default function CampaignPage() {
     if (!orgId) return;
     fetch(`/api/razorpay/public-config?orgId=${orgId}`)
       .then(r => r.ok ? r.json() : null)
-      .then(data => { if (data?.configured) setRzpConfig({ keyId: data.keyId, advancePercentage: data.advancePercentage ?? 30 }); })
+      .then(data => { if (data?.configured) setRzpConfig({ keyId: data.keyId, advanceType: data.advanceType ?? 'percentage', advancePercentage: data.advancePercentage ?? 30, advanceFixedAmount: data.advanceFixedAmount ?? 0 }); })
       .catch(() => {});
   }, [orgId]);
 
@@ -296,15 +296,26 @@ export default function CampaignPage() {
             </div>
             <div className="px-6 pb-6 space-y-3">
               {/* Advance */}
-              <button
-                disabled={paymentLoading}
-                onClick={() => handleRazorpayPayment(pendingBookingId, 'advance')}
-                className="w-full py-4 rounded-2xl text-white font-bold text-base shadow-md hover:brightness-110 transition-all disabled:opacity-50 flex items-center justify-between px-5"
-                style={{ backgroundColor: accentColor }}
-              >
-                <span>Pay Advance ({rzpConfig.advancePercentage}%)</span>
-                <span className="font-black">₹{Math.round(calcTotal(selectedPkg) * rzpConfig.advancePercentage / 100).toLocaleString('en-IN')}</span>
-              </button>
+              {(() => {
+                const total = calcTotal(selectedPkg);
+                const advanceAmt = rzpConfig.advanceType === 'fixed'
+                  ? Math.min(rzpConfig.advanceFixedAmount, total)
+                  : Math.round(total * rzpConfig.advancePercentage / 100);
+                const advanceLabel = rzpConfig.advanceType === 'fixed'
+                  ? 'Pay Advance (Fixed)'
+                  : `Pay Advance (${rzpConfig.advancePercentage}%)`;
+                return (
+                  <button
+                    disabled={paymentLoading}
+                    onClick={() => handleRazorpayPayment(pendingBookingId, 'advance')}
+                    className="w-full py-4 rounded-2xl text-white font-bold text-base shadow-md hover:brightness-110 transition-all disabled:opacity-50 flex items-center justify-between px-5"
+                    style={{ backgroundColor: accentColor }}
+                  >
+                    <span>{advanceLabel}</span>
+                    <span className="font-black">₹{advanceAmt.toLocaleString('en-IN')}</span>
+                  </button>
+                );
+              })()}
               {/* Full */}
               <button
                 disabled={paymentLoading}

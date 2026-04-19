@@ -17,7 +17,9 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       configured: true,
       keyId: data.keyId,
+      advanceType: data.advanceType ?? 'percentage',
       advancePercentage: data.advancePercentage ?? 30,
+      advanceFixedAmount: data.advanceFixedAmount ?? 0,
     });
   } catch (err: any) {
     console.error('[public-config]', err);

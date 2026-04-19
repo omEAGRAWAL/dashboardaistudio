@@ -150,8 +150,29 @@ service cloud.firestore {
     match /organizations/{orgId} {
       allow read: if true; // webhook reads org name for greeting message
       allow create: if isAuthenticated() && isValidOrganization(request.resource.data) && request.resource.data.ownerId == request.auth.uid;
-      allow update: if isAuthenticated() && isValidOrganization(request.resource.data) && resource.data.ownerId == request.auth.uid;
+      // Superadmin can update any fields (subscription, features, metadata, etc.)
+      // Org owner can update basic fields only (validated)
+      allow update: if isAuthenticated() && (
+        isSuperAdmin() ||
+        (isValidOrganization(request.resource.data) && resource.data.ownerId == request.auth.uid)
+      );
       allow delete: if isAdmin();
+    }
+
+    match /plans/{planId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /referrals/{referralId} {
+      allow read: if isAuthenticated() && (
+        isSuperAdmin() ||
+        resource.data.referrerOrgId == getUserOrgId() ||
+        resource.data.referredOrgId == getUserOrgId()
+      );
+      allow create: if isAuthenticated();
+      allow update: if isSuperAdmin();
+      allow delete: if isSuperAdmin();
     }
 
     match /invites/{inviteId} {

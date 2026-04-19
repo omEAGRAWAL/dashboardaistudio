@@ -43,8 +43,13 @@ export async function POST(req: NextRequest) {
     const netTotal = (booking.totalPrice || 0) - (booking.discountAmount || 0);
     let amountInPaise: number;
     if (paymentType === 'advance') {
-      const pct = config.advancePercentage ?? 30;
-      amountInPaise = Math.round((netTotal * pct) / 100) * 100; // round to nearest rupee
+      if (config.advanceType === 'fixed') {
+        const fixedAmt = config.advanceFixedAmount ?? 0;
+        amountInPaise = Math.round(Math.min(fixedAmt, netTotal)) * 100;
+      } else {
+        const pct = config.advancePercentage ?? 30;
+        amountInPaise = Math.round((netTotal * pct) / 100) * 100; // round to nearest rupee
+      }
     } else {
       amountInPaise = Math.round(netTotal) * 100;
     }
