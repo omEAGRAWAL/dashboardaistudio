@@ -1,11 +1,11 @@
 # Graph Report - C:\Users\OmAgrawal\Downloads\dashboardaistudio  (2026-04-19)
 
 ## Corpus Check
-- 82 files · ~91,852 words
+- 82 files · ~92,939 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 267 nodes · 339 edges · 44 communities detected
+- 266 nodes · 338 edges · 44 communities detected
 - Extraction: 88% EXTRACTED · 12% INFERRED · 0% AMBIGUOUS · INFERRED: 40 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -137,7 +137,7 @@ Cohesion: 0.7
 Nodes (3): calcTotal(), getTicketTypes(), handleBookingSubmit()
 
 ### Community 13 - "Community 13"
-Cohesion: 0.4
+Cohesion: 0.5
 Nodes (0): 
 
 ### Community 14 - "Community 14"
@@ -322,11 +322,11 @@ Nodes (0):
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `POST()` connect `Community 0` to `Community 2`, `Community 3`, `Community 4`?**
-  _High betweenness centrality (0.160) - this node is a cross-community bridge._
+  _High betweenness centrality (0.161) - this node is a cross-community bridge._
 - **Why does `toDate()` connect `Community 6` to `Community 1`, `Community 2`?**
-  _High betweenness centrality (0.101) - this node is a cross-community bridge._
+  _High betweenness centrality (0.102) - this node is a cross-community bridge._
 - **Why does `set()` connect `Community 4` to `Community 0`, `Community 3`?**
-  _High betweenness centrality (0.092) - this node is a cross-community bridge._
+  _High betweenness centrality (0.093) - this node is a cross-community bridge._
 - **Are the 5 inferred relationships involving `POST()` (e.g. with `set()` and `update()`) actually correct?**
   _`POST()` has 5 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 8 inferred relationships involving `GET()` (e.g. with `scrape_justdial()` and `scrape_indiamart()`) actually correct?**
