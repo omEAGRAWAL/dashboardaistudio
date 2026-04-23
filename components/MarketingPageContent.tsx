@@ -88,7 +88,7 @@ const features = [
 const plans = [
   {
     name: 'Basic CRM',
-    price: '899',
+    price: '1,499',
     gst: 'incl. GST',
     tagline: 'Everything you need to get started',
     highlight: false,
@@ -112,7 +112,7 @@ const plans = [
   },
   {
     name: 'Growth',
-    price: '1,499',
+    price: '2,499',
     gst: 'incl. GST',
     tagline: 'For agencies ready to scale bookings',
     highlight: true,
@@ -134,7 +134,7 @@ const plans = [
   },
   {
     name: 'Pro',
-    price: '3,000',
+    price: '3,999',
     gst: 'incl. GST',
     tagline: 'Full-stack CRM + professional website',
     highlight: false,
@@ -163,7 +163,7 @@ const testimonials = [
     city: 'Delhi',
   },
   {
-    quote: 'The booking management is a game-changer. Tracking payments, passengers, and travel dates used to take hours. Now it takes seconds. Totally worth ₹1,499.',
+    quote: 'The booking management is a game-changer. Tracking payments, passengers, and travel dates used to take hours. Now it takes seconds. Totally worth ₹2,499.',
     name: 'Priya Mehta',
     role: 'Founder, Dream Voyages',
     city: 'Mumbai',
@@ -179,7 +179,7 @@ const testimonials = [
 const faqs = [
   {
     q: 'Is there a free trial?',
-    a: 'Yes! Every plan includes a 15-day free trial — all features, no restrictions. No credit card needed to start.',
+    a: 'Yes! Every plan includes a 7-day free trial — all features, no restrictions. No credit card needed to start.',
   },
   {
     q: 'What does "incl. GST" mean on the pricing?',
@@ -231,7 +231,7 @@ export default function MarketingPageContent() {
 
       {/* ── ANNOUNCEMENT BAR ── */}
       <div className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-center text-xs sm:text-sm py-2.5 px-4">
-        <span className="font-semibold">Limited Offer:</span> 15-day free trial on all plans — no credit card needed.{' '}
+        <span className="font-semibold">Limited Offer:</span> 7-day free trial on all plans — no credit card needed.{' '}
         <a href="#pricing" className="underline font-semibold hover:no-underline">See plans →</a>
       </div>
 
@@ -370,7 +370,7 @@ export default function MarketingPageContent() {
             from one beautiful dashboard.
           </p>
           <p className="max-w-xl mx-auto text-sm sm:text-base text-white/50 mb-10">
-            Plans starting at ₹899/month incl. GST · Trusted across Delhi, Mumbai, Bangalore, Jaipur &amp; beyond.
+            Plans starting at ₹1,499/month incl. GST · Trusted across Delhi, Mumbai, Bangalore, Jaipur &amp; beyond.
           </p>
 
           {/* CTAs */}
@@ -400,7 +400,7 @@ export default function MarketingPageContent() {
 
           {/* Trust badges */}
           <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2.5 text-xs sm:text-sm text-white/50">
-            {['15-Day Free Trial', 'No Credit Card', 'Free Setup', 'Cancel Anytime', 'GST Invoice', 'Indian Support'].map((b) => (
+            {['7-Day Free Trial', 'No Credit Card', 'Free Setup', 'Cancel Anytime', 'GST Invoice', 'Indian Support'].map((b) => (
               <div key={b} className="flex items-center gap-1.5">
                 <CheckIcon className="w-3.5 h-3.5 text-green-400" />
                 <span>{b}</span>
@@ -513,7 +513,7 @@ export default function MarketingPageContent() {
               {
                 step: '01',
                 title: 'Sign Up Free',
-                desc: 'Create your account in 60 seconds. No credit card, no commitment. Get 15 days to explore every feature — unlimited leads, packages, bookings.',
+                desc: 'Create your account in 60 seconds. No credit card, no commitment. Get 7 days to explore every feature — unlimited leads, packages, bookings.',
               },
               {
                 step: '02',
@@ -549,7 +549,7 @@ export default function MarketingPageContent() {
               Simple, transparent pricing. No surprises.
             </h2>
             <p className="max-w-xl mx-auto text-gray-500 text-base sm:text-lg">
-              All prices include GST. 15-day free trial on every plan. Cancel anytime.
+              All prices include GST. 7-day free trial on every plan. Cancel anytime.
             </p>
           </div>
 
@@ -598,7 +598,12 @@ export default function MarketingPageContent() {
                       plan.highlight ? 'bg-white/15 text-green-200' : 'bg-green-50 text-green-700 border border-green-100'
                     }`}>
                       <span className="w-1.5 h-1.5 bg-green-400 rounded-full" />
-                      15-day FREE trial
+                      7-day FREE trial
+                    </div>
+                    {/* Setup fee */}
+                    <div className={`mt-2 text-xs font-medium ${plan.highlight ? 'text-indigo-200' : 'text-gray-500'}`}>
+                      Setup fee: <span className={`line-through ${plan.highlight ? 'text-indigo-300' : 'text-gray-400'}`}>₹999</span>{' '}
+                      <span className={`font-bold ${plan.highlight ? 'text-green-300' : 'text-green-600'}`}>FREE</span>
                     </div>
                   </div>
 
@@ -656,12 +661,12 @@ export default function MarketingPageContent() {
               <thead>
                 <tr className="bg-gray-900">
                   <th className="text-left px-5 py-4 text-gray-400 font-semibold text-sm">Feature</th>
-                  <th className="text-center px-4 py-4 text-white font-semibold">Basic<div className="text-xs font-normal text-gray-400">₹899</div></th>
+                  <th className="text-center px-4 py-4 text-white font-semibold">Basic<div className="text-xs font-normal text-gray-400">₹1,499</div></th>
                   <th className="text-center px-4 py-4 font-bold bg-indigo-900/50">
                     <span className="text-indigo-300">Growth</span>
-                    <div className="text-xs font-normal text-indigo-400">₹1,499</div>
+                    <div className="text-xs font-normal text-indigo-400">₹2,499</div>
                   </th>
-                  <th className="text-center px-4 py-4 text-white font-semibold">Pro<div className="text-xs font-normal text-gray-400">₹3,000</div></th>
+                  <th className="text-center px-4 py-4 text-white font-semibold">Pro<div className="text-xs font-normal text-gray-400">₹3,999</div></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -797,7 +802,7 @@ export default function MarketingPageContent() {
             Ready to grow your travel agency?
           </h2>
           <p className="text-white/60 text-base sm:text-lg mb-10 max-w-2xl mx-auto">
-            Join 500+ travel agencies across India. Start free with a 15-day trial. Or chat with Om directly on WhatsApp to find the right plan.
+            Join 500+ travel agencies across India. Start free with a 7-day trial. Or chat with Om directly on WhatsApp to find the right plan.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
@@ -823,7 +828,7 @@ export default function MarketingPageContent() {
             </a>
           </div>
           <p className="text-white/30 text-xs mt-6">
-            No credit card · 15-day free trial · Free setup · Cancel anytime · GST invoice
+            No credit card · 7-day free trial · Free setup · Cancel anytime · GST invoice
           </p>
         </div>
       </section>
@@ -867,9 +872,9 @@ export default function MarketingPageContent() {
               <h4 className="text-white font-semibold text-sm mb-4">Plans</h4>
               <ul className="space-y-2 text-sm">
                 {[
-                  { label: 'Basic CRM — ₹899', href: '#pricing' },
-                  { label: 'Growth — ₹1,499', href: '#pricing' },
-                  { label: 'Pro — ₹3,000', href: '#pricing' },
+                  { label: 'Basic CRM — ₹1,499', href: '#pricing' },
+                  { label: 'Growth — ₹2,499', href: '#pricing' },
+                  { label: 'Pro — ₹3,999', href: '#pricing' },
                   { label: 'Compare Plans', href: '#pricing' },
                   { label: 'FAQ', href: '#faq' },
                 ].map((l) => (
