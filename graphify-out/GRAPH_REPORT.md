@@ -1,12 +1,12 @@
-# Graph Report - C:\Users\OmAgrawal\Downloads\dashboardaistudio  (2026-04-20)
+# Graph Report - C:\Users\OmAgrawal\Downloads\dashboardaistudio  (2026-04-23)
 
 ## Corpus Check
-- 83 files · ~93,042 words
+- 84 files · ~94,682 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 270 nodes · 342 edges · 46 communities detected
-- Extraction: 88% EXTRACTED · 12% INFERRED · 0% AMBIGUOUS · INFERRED: 40 edges (avg confidence: 0.8)
+- 287 nodes · 388 edges · 46 communities detected
+- Extraction: 87% EXTRACTED · 13% INFERRED · 0% AMBIGUOUS · INFERRED: 51 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -58,28 +58,28 @@
 - [[_COMMUNITY_Community 45|Community 45]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `POST()` - 34 edges
-2. `GET()` - 20 edges
-3. `set()` - 11 edges
+1. `POST()` - 35 edges
+2. `GET()` - 24 edges
+3. `set()` - 12 edges
 4. `main()` - 9 edges
 5. `toDate()` - 8 edges
-6. `useAuth()` - 8 edges
-7. `scrape_justdial()` - 7 edges
-8. `scrape_indiamart()` - 7 edges
-9. `update()` - 7 edges
-10. `DELETE()` - 6 edges
+6. `handleMetaWebhook()` - 8 edges
+7. `runChatbotFlow()` - 8 edges
+8. `update()` - 8 edges
+9. `useAuth()` - 8 edges
+10. `scrape_justdial()` - 7 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `toDate()` --calls--> `trialDaysLeft()`  [INFERRED]
   app\admin\page.tsx → lib\features.ts
 - `POST()` --calls--> `featuresFromPlan()`  [INFERRED]
-  app\api\whatsapp\send\route.ts → lib\features.ts
-- `deduplicate()` --calls--> `set()`  [INFERRED]
-  acrapper.py → app\website-builder\page.tsx
-- `resolveHostToOrgId()` --calls--> `set()`  [INFERRED]
-  C:\Users\OmAgrawal\Downloads\dashboardaistudio\middleware.ts → app\website-builder\page.tsx
-- `toDate()` --calls--> `serialize()`  [INFERRED]
-  app\admin\page.tsx → app\api\admin\list-orgs\route.ts
+  C:\Users\OmAgrawal\Downloads\dashboardaistudio\app\api\whatsapp\send\route.ts → lib\features.ts
+- `handleMetaWebhook()` --calls--> `extractMetaMessage()`  [INFERRED]
+  C:\Users\OmAgrawal\Downloads\dashboardaistudio\app\api\webhooks\whatsapp\route.ts → C:\Users\OmAgrawal\Downloads\dashboardaistudio\lib\meta-whatsapp.ts
+- `scrape_justdial()` --calls--> `GET()`  [INFERRED]
+  acrapper.py → C:\Users\OmAgrawal\Downloads\dashboardaistudio\app\api\webhooks\whatsapp\route.ts
+- `scrape_indiamart()` --calls--> `GET()`  [INFERRED]
+  acrapper.py → C:\Users\OmAgrawal\Downloads\dashboardaistudio\app\api\webhooks\whatsapp\route.ts
 
 ## Hyperedges (group relationships)
 - **Local Development Setup Steps** — readme_nodejs, readme_npm_install, readme_gemini_api_key, readme_env_local, readme_npm_run_dev [EXTRACTED 1.00]
@@ -87,24 +87,24 @@
 ## Communities
 
 ### Community 0 - "Community 0"
-Cohesion: 0.12
-Nodes (23): clean(), deduplicate(), main(), random_delay(), ====================================================  INDIA TRAVEL AGENCY LEAD, Scrape travel agencies from IndiaMART directory., Scrape travel agencies from Google Maps using Playwright (headless browser)., Attempt to find a contact email from a website's homepage or contact page. (+15 more)
+Cohesion: 0.08
+Nodes (21): toggleSelect(), getMetaCreds(), getNextAssignee(), buildEmailHtml(), createLead(), createTransport(), DELETE(), generateUniqueCode() (+13 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.1
-Nodes (10): getNextAssignee(), buildChoiceMessage(), buildEmailHtml(), createTransport(), generateUniqueCode(), getResponseKey(), getTwilioClient(), POST() (+2 more)
+Cohesion: 0.14
+Nodes (19): generateInvoiceHTML(), buildInvoiceBooking(), calcTotalPrice(), getDominantSharing(), getInvoiceCounter(), getInvoiceHistory(), getNetTotal(), getRemainingBalance() (+11 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.14
-Nodes (18): generateInvoiceHTML(), buildInvoiceBooking(), calcTotalPrice(), getDominantSharing(), getInvoiceCounter(), getInvoiceHistory(), getNetTotal(), getRemainingBalance() (+10 more)
+Cohesion: 0.1
+Nodes (11): middleware(), resolveHostToOrgId(), addDay(), addListItem(), handleLogoUpload(), handleSave(), removeDay(), removeListItem() (+3 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.09
 Nodes (13): useAuth(), featuresFromPlan(), getDefaultFeatures(), trialDaysLeft(), OrgProvider(), useFeatureAccess(), useOrg(), AdminPage() (+5 more)
 
 ### Community 4 - "Community 4"
-Cohesion: 0.11
-Nodes (3): addOption(), handleLogoUpload(), handleSave()
+Cohesion: 0.15
+Nodes (17): clean(), deduplicate(), main(), random_delay(), ====================================================  INDIA TRAVEL AGENCY LEAD, Scrape travel agencies from IndiaMART directory., Scrape travel agencies from Google Maps using Playwright (headless browser)., Attempt to find a contact email from a website's homepage or contact page. (+9 more)
 
 ### Community 5 - "Community 5"
 Cohesion: 0.18
@@ -115,16 +115,16 @@ Cohesion: 0.18
 Nodes (8): relativeDate(), formatDate(), formatTime(), handleKeyDown(), sendMessage(), toDate(), trialDaysLeft(), serialize()
 
 ### Community 7 - "Community 7"
-Cohesion: 0.29
-Nodes (8): addDay(), addListItem(), handleDelete(), removeDay(), removeListItem(), set(), updateDay(), updateList()
-
-### Community 8 - "Community 8"
 Cohesion: 0.27
 Nodes (4): addChoice(), removeChoice(), updateChoice(), updateQuestion()
 
-### Community 9 - "Community 9"
+### Community 8 - "Community 8"
 Cohesion: 0.29
 Nodes (5): getMessagingInstance(), requestNotificationPermission(), setupForegroundHandler(), silentTokenRefresh(), handleEnable()
+
+### Community 9 - "Community 9"
+Cohesion: 0.4
+Nodes (9): extractMetaMessage(), markRead(), metaPost(), sendButtons(), sendChoiceQuestion(), sendDocument(), sendImage(), sendList() (+1 more)
 
 ### Community 10 - "Community 10"
 Cohesion: 0.25
@@ -331,17 +331,17 @@ Nodes (0):
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `POST()` connect `Community 1` to `Community 0`, `Community 3`, `Community 7`?**
-  _High betweenness centrality (0.156) - this node is a cross-community bridge._
-- **Why does `toDate()` connect `Community 6` to `Community 2`, `Community 3`?**
+- **Why does `POST()` connect `Community 0` to `Community 9`, `Community 2`, `Community 3`, `Community 4`?**
+  _High betweenness centrality (0.173) - this node is a cross-community bridge._
+- **Why does `set()` connect `Community 2` to `Community 0`, `Community 4`?**
   _High betweenness centrality (0.099) - this node is a cross-community bridge._
-- **Why does `set()` connect `Community 7` to `Community 0`, `Community 1`, `Community 4`?**
-  _High betweenness centrality (0.090) - this node is a cross-community bridge._
-- **Are the 5 inferred relationships involving `POST()` (e.g. with `set()` and `update()`) actually correct?**
-  _`POST()` has 5 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 8 inferred relationships involving `GET()` (e.g. with `scrape_justdial()` and `scrape_indiamart()`) actually correct?**
-  _`GET()` has 8 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 3 inferred relationships involving `set()` (e.g. with `deduplicate()` and `resolveHostToOrgId()`) actually correct?**
-  _`set()` has 3 INFERRED edges - model-reasoned connections that need verification._
+- **Why does `toDate()` connect `Community 6` to `Community 1`, `Community 3`?**
+  _High betweenness centrality (0.093) - this node is a cross-community bridge._
+- **Are the 7 inferred relationships involving `POST()` (e.g. with `set()` and `update()`) actually correct?**
+  _`POST()` has 7 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 9 inferred relationships involving `GET()` (e.g. with `scrape_justdial()` and `scrape_indiamart()`) actually correct?**
+  _`GET()` has 9 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 4 inferred relationships involving `set()` (e.g. with `deduplicate()` and `resolveHostToOrgId()`) actually correct?**
+  _`set()` has 4 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 5 inferred relationships involving `toDate()` (e.g. with `serialize()` and `buildInvoiceBooking()`) actually correct?**
   _`toDate()` has 5 INFERRED edges - model-reasoned connections that need verification._

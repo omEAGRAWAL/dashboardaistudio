@@ -95,7 +95,7 @@ const plans = [
     badge: null,
     features: [
       'Lead Management & CRM',
-      'Package Management',
+      
       'Team Access (up to 5 agents)',
       'Analytics Dashboard',
       'Meta Ads Lead Capture',
@@ -121,7 +121,6 @@ const plans = [
       'Everything in Basic CRM',
       'Booking Management',
       'Campaign Page',
-      'WhatsApp Integration',
       'Team Access (up to 10 agents)',
       'Priority Support',
       'GST Invoice',

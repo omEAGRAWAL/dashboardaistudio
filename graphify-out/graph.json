@@ -27,7 +27,7 @@
       "source_file": "acrapper.py",
       "source_location": "L1",
       "id": "acrapper_py",
-      "community": 0,
+      "community": 4,
       "norm_label": "acrapper.py"
     },
     {
@@ -36,7 +36,7 @@
       "source_file": "acrapper.py",
       "source_location": "L51",
       "id": "acrapper_random_delay",
-      "community": 0,
+      "community": 4,
       "norm_label": "random_delay()"
     },
     {
@@ -45,7 +45,7 @@
       "source_file": "acrapper.py",
       "source_location": "L54",
       "id": "acrapper_clean",
-      "community": 0,
+      "community": 4,
       "norm_label": "clean()"
     },
     {
@@ -54,7 +54,7 @@
       "source_file": "acrapper.py",
       "source_location": "L64",
       "id": "acrapper_scrape_justdial",
-      "community": 0,
+      "community": 4,
       "norm_label": "scrape_justdial()"
     },
     {
@@ -63,7 +63,7 @@
       "source_file": "acrapper.py",
       "source_location": "L144",
       "id": "acrapper_scrape_indiamart",
-      "community": 0,
+      "community": 4,
       "norm_label": "scrape_indiamart()"
     },
     {
@@ -72,7 +72,7 @@
       "source_file": "acrapper.py",
       "source_location": "L215",
       "id": "acrapper_scrape_google_maps",
-      "community": 0,
+      "community": 4,
       "norm_label": "scrape_google_maps()"
     },
     {
@@ -81,7 +81,7 @@
       "source_file": "acrapper.py",
       "source_location": "L316",
       "id": "acrapper_try_find_email",
-      "community": 0,
+      "community": 4,
       "norm_label": "try_find_email()"
     },
     {
@@ -90,7 +90,7 @@
       "source_file": "acrapper.py",
       "source_location": "L338",
       "id": "acrapper_deduplicate",
-      "community": 0,
+      "community": 4,
       "norm_label": "deduplicate()"
     },
     {
@@ -99,7 +99,7 @@
       "source_file": "acrapper.py",
       "source_location": "L356",
       "id": "acrapper_save_leads",
-      "community": 0,
+      "community": 4,
       "norm_label": "save_leads()"
     },
     {
@@ -108,7 +108,7 @@
       "source_file": "acrapper.py",
       "source_location": "L367",
       "id": "acrapper_main",
-      "community": 0,
+      "community": 4,
       "norm_label": "main()"
     },
     {
@@ -116,7 +116,7 @@
       "file_type": "rationale",
       "source_file": "acrapper.py",
       "source_location": "L1",
-      "community": 0,
+      "community": 4,
       "norm_label": "====================================================  india travel agency lead",
       "id": "acrapper_rationale_1"
     },
@@ -125,7 +125,7 @@
       "file_type": "rationale",
       "source_file": "acrapper.py",
       "source_location": "L65",
-      "community": 0,
+      "community": 4,
       "norm_label": "scrape travel agencies from justdial for a given city.",
       "id": "acrapper_rationale_65"
     },
@@ -134,7 +134,7 @@
       "file_type": "rationale",
       "source_file": "acrapper.py",
       "source_location": "L145",
-      "community": 0,
+      "community": 4,
       "norm_label": "scrape travel agencies from indiamart directory.",
       "id": "acrapper_rationale_145"
     },
@@ -143,7 +143,7 @@
       "file_type": "rationale",
       "source_file": "acrapper.py",
       "source_location": "L216",
-      "community": 0,
+      "community": 4,
       "norm_label": "scrape travel agencies from google maps using playwright (headless browser).",
       "id": "acrapper_rationale_216"
     },
@@ -152,7 +152,7 @@
       "file_type": "rationale",
       "source_file": "acrapper.py",
       "source_location": "L317",
-      "community": 0,
+      "community": 4,
       "norm_label": "attempt to find a contact email from a website's homepage or contact page.",
       "id": "acrapper_rationale_317"
     },
@@ -161,7 +161,7 @@
       "file_type": "rationale",
       "source_file": "acrapper.py",
       "source_location": "L357",
-      "community": 0,
+      "community": 4,
       "norm_label": "write current leads list to csv (overwrites each time).",
       "id": "acrapper_rationale_357"
     },
@@ -180,7 +180,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\middleware.ts",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_middleware_ts",
-      "community": 0,
+      "community": 2,
       "norm_label": "middleware.ts"
     },
     {
@@ -189,7 +189,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\middleware.ts",
       "source_location": "L9",
       "id": "middleware_resolvehosttoorgid",
-      "community": 0,
+      "community": 2,
       "norm_label": "resolvehosttoorgid()"
     },
     {
@@ -198,7 +198,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\middleware.ts",
       "source_location": "L38",
       "id": "middleware_middleware",
-      "community": 0,
+      "community": 2,
       "norm_label": "middleware()"
     },
     {
@@ -393,10 +393,10 @@
     {
       "label": "POST()",
       "file_type": "code",
-      "source_file": "app\\api\\whatsapp\\send\\route.ts",
-      "source_location": "L26",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\whatsapp\\send\\route.ts",
+      "source_location": "L7",
       "id": "route_post",
-      "community": 1,
+      "community": 0,
       "norm_label": "post()"
     },
     {
@@ -429,8 +429,8 @@
     {
       "label": "GET()",
       "file_type": "code",
-      "source_file": "app\\api\\webhooks\\whatsapp\\route.ts",
-      "source_location": "L68",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L33",
       "id": "route_get",
       "community": 0,
       "norm_label": "get()"
@@ -459,7 +459,7 @@
       "source_file": "app\\api\\admin\\list-users\\route.ts",
       "source_location": "L1",
       "id": "app_api_admin_list_users_route_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "route.ts"
     },
     {
@@ -468,7 +468,7 @@
       "source_file": "app\\api\\admin\\update-org-subscription\\route.ts",
       "source_location": "L7",
       "id": "route_verifysuperadmin",
-      "community": 1,
+      "community": 0,
       "norm_label": "verifysuperadmin()"
     },
     {
@@ -477,7 +477,7 @@
       "source_file": "app\\api\\admin\\manage-referral-code\\route.ts",
       "source_location": "L1",
       "id": "app_api_admin_manage_referral_code_route_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "route.ts"
     },
     {
@@ -486,7 +486,7 @@
       "source_file": "app\\api\\admin\\manage-referral-code\\route.ts",
       "source_location": "L6",
       "id": "route_generateuniquecode",
-      "community": 1,
+      "community": 0,
       "norm_label": "generateuniquecode()"
     },
     {
@@ -495,7 +495,7 @@
       "source_file": "app\\api\\admin\\update-org-subscription\\route.ts",
       "source_location": "L1",
       "id": "app_api_admin_update_org_subscription_route_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "route.ts"
     },
     {
@@ -504,7 +504,7 @@
       "source_file": "app\\api\\leads\\create\\route.ts",
       "source_location": "L1",
       "id": "app_api_leads_create_route_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "route.ts"
     },
     {
@@ -513,7 +513,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\razorpay\\create-order\\route.ts",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_api_razorpay_create_order_route_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "route.ts"
     },
     {
@@ -522,7 +522,7 @@
       "source_file": "app\\api\\razorpay\\create-payment-link\\route.ts",
       "source_location": "L1",
       "id": "app_api_razorpay_create_payment_link_route_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "route.ts"
     },
     {
@@ -540,7 +540,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\razorpay\\save-config\\route.ts",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_api_razorpay_save_config_route_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "route.ts"
     },
     {
@@ -549,7 +549,7 @@
       "source_file": "app\\api\\razorpay\\verify-payment\\route.ts",
       "source_location": "L1",
       "id": "app_api_razorpay_verify_payment_route_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "route.ts"
     },
     {
@@ -558,7 +558,7 @@
       "source_file": "app\\api\\referrals\\track\\route.ts",
       "source_location": "L1",
       "id": "app_api_referrals_track_route_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "route.ts"
     },
     {
@@ -567,7 +567,7 @@
       "source_file": "app\\api\\send-assignment-email\\route.ts",
       "source_location": "L1",
       "id": "app_api_send_assignment_email_route_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "route.ts"
     },
     {
@@ -576,7 +576,7 @@
       "source_file": "app\\api\\send-role-notification\\route.ts",
       "source_location": "L4",
       "id": "route_createtransport",
-      "community": 1,
+      "community": 0,
       "norm_label": "createtransport()"
     },
     {
@@ -585,7 +585,7 @@
       "source_file": "app\\api\\send-role-notification\\route.ts",
       "source_location": "L18",
       "id": "route_buildemailhtml",
-      "community": 1,
+      "community": 0,
       "norm_label": "buildemailhtml()"
     },
     {
@@ -594,7 +594,7 @@
       "source_file": "app\\api\\send-invoice\\route.ts",
       "source_location": "L1",
       "id": "app_api_send_invoice_route_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "route.ts"
     },
     {
@@ -603,7 +603,7 @@
       "source_file": "app\\api\\send-role-notification\\route.ts",
       "source_location": "L1",
       "id": "app_api_send_role_notification_route_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "route.ts"
     },
     {
@@ -612,7 +612,7 @@
       "source_file": "app\\api\\upload\\route.ts",
       "source_location": "L1",
       "id": "app_api_upload_route_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "route.ts"
     },
     {
@@ -621,7 +621,7 @@
       "source_file": "app\\api\\webhooks\\meta-leads\\route.ts",
       "source_location": "L1",
       "id": "app_api_webhooks_meta_leads_route_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "route.ts"
     },
     {
@@ -630,53 +630,107 @@
       "source_file": "app\\api\\webhooks\\razorpay\\route.ts",
       "source_location": "L1",
       "id": "app_api_webhooks_razorpay_route_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "route.ts"
     },
     {
       "label": "route.ts",
       "file_type": "code",
-      "source_file": "app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
       "source_location": "L1",
-      "id": "app_api_webhooks_whatsapp_route_ts",
-      "community": 1,
+      "id": "c_users_omagrawal_downloads_dashboardaistudio_app_api_webhooks_whatsapp_route_ts",
+      "community": 0,
       "norm_label": "route.ts"
-    },
-    {
-      "label": "getTwilioClient()",
-      "file_type": "code",
-      "source_file": "app\\api\\whatsapp\\send\\route.ts",
-      "source_location": "L7",
-      "id": "route_gettwilioclient",
-      "community": 1,
-      "norm_label": "gettwilioclient()"
-    },
-    {
-      "label": "sendMessage()",
-      "file_type": "code",
-      "source_file": "app\\api\\webhooks\\whatsapp\\route.ts",
-      "source_location": "L36",
-      "id": "route_sendmessage",
-      "community": 1,
-      "norm_label": "sendmessage()"
-    },
-    {
-      "label": "buildChoiceMessage()",
-      "file_type": "code",
-      "source_file": "app\\api\\webhooks\\whatsapp\\route.ts",
-      "source_location": "L58",
-      "id": "route_buildchoicemessage",
-      "community": 1,
-      "norm_label": "buildchoicemessage()"
     },
     {
       "label": "getResponseKey()",
       "file_type": "code",
-      "source_file": "app\\api\\webhooks\\whatsapp\\route.ts",
-      "source_location": "L63",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L61",
       "id": "route_getresponsekey",
-      "community": 1,
+      "community": 0,
       "norm_label": "getresponsekey()"
+    },
+    {
+      "label": "logMessage()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L66",
+      "id": "route_logmessage",
+      "community": 0,
+      "norm_label": "logmessage()"
+    },
+    {
+      "label": "createLead()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L85",
+      "id": "route_createlead",
+      "community": 0,
+      "norm_label": "createlead()"
+    },
+    {
+      "label": "handleMetaWebhook()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L121",
+      "id": "route_handlemetawebhook",
+      "community": 0,
+      "norm_label": "handlemetawebhook()"
+    },
+    {
+      "label": "sendAndLog()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L199",
+      "id": "route_sendandlog",
+      "community": 0,
+      "norm_label": "sendandlog()"
+    },
+    {
+      "label": "sendQuestionAndLog()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L212",
+      "id": "route_sendquestionandlog",
+      "community": 0,
+      "norm_label": "sendquestionandlog()"
+    },
+    {
+      "label": "handleTwilioWebhook()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L233",
+      "id": "route_handletwiliowebhook",
+      "community": 0,
+      "norm_label": "handletwiliowebhook()"
+    },
+    {
+      "label": "buildTwilioChoiceMessage()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L313",
+      "id": "route_buildtwiliochoicemessage",
+      "community": 0,
+      "norm_label": "buildtwiliochoicemessage()"
+    },
+    {
+      "label": "getTwilioClient()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\whatsapp\\send\\route.ts",
+      "source_location": "L70",
+      "id": "route_gettwilioclient",
+      "community": 0,
+      "norm_label": "gettwilioclient()"
+    },
+    {
+      "label": "runChatbotFlow()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L346",
+      "id": "route_runchatbotflow",
+      "community": 0,
+      "norm_label": "runchatbotflow()"
     },
     {
       "label": "route.ts",
@@ -684,16 +738,16 @@
       "source_file": "app\\api\\whatsapp\\connect-own-number\\route.ts",
       "source_location": "L1",
       "id": "app_api_whatsapp_connect_own_number_route_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "route.ts"
     },
     {
       "label": "route.ts",
       "file_type": "code",
-      "source_file": "app\\api\\whatsapp\\send\\route.ts",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\whatsapp\\send\\route.ts",
       "source_location": "L1",
-      "id": "app_api_whatsapp_send_route_ts",
-      "community": 1,
+      "id": "c_users_omagrawal_downloads_dashboardaistudio_app_api_whatsapp_send_route_ts",
+      "community": 0,
       "norm_label": "route.ts"
     },
     {
@@ -711,7 +765,7 @@
       "source_file": "app\\website-builder\\page.tsx",
       "source_location": "L223",
       "id": "page_handlesave",
-      "community": 4,
+      "community": 2,
       "norm_label": "handlesave()"
     },
     {
@@ -738,7 +792,7 @@
       "source_file": "app\\booking-form\\page.tsx",
       "source_location": "L121",
       "id": "page_update",
-      "community": 0,
+      "community": 4,
       "norm_label": "update()"
     },
     {
@@ -774,7 +828,7 @@
       "source_file": "app\\bookings\\page.tsx",
       "source_location": "L1",
       "id": "app_bookings_page_tsx",
-      "community": 2,
+      "community": 1,
       "norm_label": "page.tsx"
     },
     {
@@ -783,7 +837,7 @@
       "source_file": "app\\bookings\\page.tsx",
       "source_location": "L28",
       "id": "page_getinvoicecounter",
-      "community": 2,
+      "community": 1,
       "norm_label": "getinvoicecounter()"
     },
     {
@@ -792,7 +846,7 @@
       "source_file": "app\\bookings\\page.tsx",
       "source_location": "L32",
       "id": "page_incrementinvoicecounter",
-      "community": 2,
+      "community": 1,
       "norm_label": "incrementinvoicecounter()"
     },
     {
@@ -801,7 +855,7 @@
       "source_file": "app\\bookings\\page.tsx",
       "source_location": "L37",
       "id": "page_getinvoicehistory",
-      "community": 2,
+      "community": 1,
       "norm_label": "getinvoicehistory()"
     },
     {
@@ -810,7 +864,7 @@
       "source_file": "app\\bookings\\page.tsx",
       "source_location": "L43",
       "id": "page_saveinvoicetohistory",
-      "community": 2,
+      "community": 1,
       "norm_label": "saveinvoicetohistory()"
     },
     {
@@ -819,7 +873,7 @@
       "source_file": "app\\bookings\\page.tsx",
       "source_location": "L178",
       "id": "page_handleopenedit",
-      "community": 2,
+      "community": 1,
       "norm_label": "handleopenedit()"
     },
     {
@@ -828,7 +882,7 @@
       "source_file": "app\\bookings\\page.tsx",
       "source_location": "L187",
       "id": "page_handleopenview",
-      "community": 2,
+      "community": 1,
       "norm_label": "handleopenview()"
     },
     {
@@ -837,7 +891,7 @@
       "source_file": "app\\bookings\\page.tsx",
       "source_location": "L192",
       "id": "page_handlesavestatus",
-      "community": 2,
+      "community": 1,
       "norm_label": "handlesavestatus()"
     },
     {
@@ -846,7 +900,7 @@
       "source_file": "app\\packages\\page.tsx",
       "source_location": "L141",
       "id": "page_handledelete",
-      "community": 7,
+      "community": 1,
       "norm_label": "handledelete()"
     },
     {
@@ -855,7 +909,7 @@
       "source_file": "app\\bookings\\page.tsx",
       "source_location": "L230",
       "id": "page_gettotalpersons",
-      "community": 2,
+      "community": 1,
       "norm_label": "gettotalpersons()"
     },
     {
@@ -864,7 +918,7 @@
       "source_file": "app\\bookings\\page.tsx",
       "source_location": "L234",
       "id": "page_calctotalprice",
-      "community": 2,
+      "community": 1,
       "norm_label": "calctotalprice()"
     },
     {
@@ -873,7 +927,7 @@
       "source_file": "app\\bookings\\page.tsx",
       "source_location": "L242",
       "id": "page_getdominantsharing",
-      "community": 2,
+      "community": 1,
       "norm_label": "getdominantsharing()"
     },
     {
@@ -882,7 +936,7 @@
       "source_file": "app\\bookings\\page.tsx",
       "source_location": "L251",
       "id": "page_resetcreatemodal",
-      "community": 2,
+      "community": 1,
       "norm_label": "resetcreatemodal()"
     },
     {
@@ -891,7 +945,7 @@
       "source_file": "app\\bookings\\page.tsx",
       "source_location": "L265",
       "id": "page_handlegeneratepaymentlink",
-      "community": 2,
+      "community": 1,
       "norm_label": "handlegeneratepaymentlink()"
     },
     {
@@ -900,7 +954,7 @@
       "source_file": "app\\bookings\\page.tsx",
       "source_location": "L287",
       "id": "page_openeditparticipants",
-      "community": 2,
+      "community": 1,
       "norm_label": "openeditparticipants()"
     },
     {
@@ -909,7 +963,7 @@
       "source_file": "app\\bookings\\page.tsx",
       "source_location": "L299",
       "id": "page_handlesaveparticipants",
-      "community": 2,
+      "community": 1,
       "norm_label": "handlesaveparticipants()"
     },
     {
@@ -918,7 +972,7 @@
       "source_file": "app\\bookings\\page.tsx",
       "source_location": "L317",
       "id": "page_handlestep1next",
-      "community": 2,
+      "community": 1,
       "norm_label": "handlestep1next()"
     },
     {
@@ -927,7 +981,7 @@
       "source_file": "app\\bookings\\page.tsx",
       "source_location": "L327",
       "id": "page_handlecreatebookingfinal",
-      "community": 2,
+      "community": 1,
       "norm_label": "handlecreatebookingfinal()"
     },
     {
@@ -936,7 +990,7 @@
       "source_file": "app\\bookings\\page.tsx",
       "source_location": "L404",
       "id": "page_getnettotal",
-      "community": 2,
+      "community": 1,
       "norm_label": "getnettotal()"
     },
     {
@@ -945,7 +999,7 @@
       "source_file": "app\\bookings\\page.tsx",
       "source_location": "L408",
       "id": "page_getremainingbalance",
-      "community": 2,
+      "community": 1,
       "norm_label": "getremainingbalance()"
     },
     {
@@ -954,7 +1008,7 @@
       "source_file": "app\\bookings\\page.tsx",
       "source_location": "L412",
       "id": "page_openinvoicemodal",
-      "community": 2,
+      "community": 1,
       "norm_label": "openinvoicemodal()"
     },
     {
@@ -963,7 +1017,7 @@
       "source_file": "app\\bookings\\page.tsx",
       "source_location": "L426",
       "id": "page_buildinvoicebooking",
-      "community": 2,
+      "community": 1,
       "norm_label": "buildinvoicebooking()"
     },
     {
@@ -972,7 +1026,7 @@
       "source_file": "app\\bookings\\page.tsx",
       "source_location": "L530",
       "id": "page_handledownloadinvoice",
-      "community": 2,
+      "community": 1,
       "norm_label": "handledownloadinvoice()"
     },
     {
@@ -981,7 +1035,7 @@
       "source_file": "app\\bookings\\page.tsx",
       "source_location": "L574",
       "id": "page_handleemailinvoice",
-      "community": 2,
+      "community": 1,
       "norm_label": "handleemailinvoice()"
     },
     {
@@ -990,7 +1044,7 @@
       "source_file": "app\\business-profile\\page.tsx",
       "source_location": "L1",
       "id": "app_business_profile_page_tsx",
-      "community": 4,
+      "community": 2,
       "norm_label": "page.tsx"
     },
     {
@@ -999,7 +1053,7 @@
       "source_file": "app\\business-profile\\page.tsx",
       "source_location": "L61",
       "id": "page_fetchprofile",
-      "community": 4,
+      "community": 2,
       "norm_label": "fetchprofile()"
     },
     {
@@ -1008,7 +1062,7 @@
       "source_file": "app\\business-profile\\page.tsx",
       "source_location": "L76",
       "id": "page_handlestatechange",
-      "community": 4,
+      "community": 2,
       "norm_label": "handlestatechange()"
     },
     {
@@ -1017,7 +1071,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\campaign-builder\\page.tsx",
       "source_location": "L118",
       "id": "page_handlelogoupload",
-      "community": 4,
+      "community": 2,
       "norm_label": "handlelogoupload()"
     },
     {
@@ -1071,7 +1125,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\campaign-builder\\page.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_campaign_builder_page_tsx",
-      "community": 4,
+      "community": 2,
       "norm_label": "page.tsx"
     },
     {
@@ -1080,7 +1134,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\campaign-builder\\page.tsx",
       "source_location": "L167",
       "id": "page_copyurl",
-      "community": 4,
+      "community": 2,
       "norm_label": "copyurl()"
     },
     {
@@ -1089,7 +1143,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\campaign-builder\\page.tsx",
       "source_location": "L173",
       "id": "page_updatepkgoverride",
-      "community": 4,
+      "community": 2,
       "norm_label": "updatepkgoverride()"
     },
     {
@@ -1098,7 +1152,7 @@
       "source_file": "app\\chatbot\\page.tsx",
       "source_location": "L1",
       "id": "app_chatbot_page_tsx",
-      "community": 8,
+      "community": 7,
       "norm_label": "page.tsx"
     },
     {
@@ -1107,7 +1161,7 @@
       "source_file": "app\\chatbot\\page.tsx",
       "source_location": "L36",
       "id": "page_newquestion",
-      "community": 8,
+      "community": 7,
       "norm_label": "newquestion()"
     },
     {
@@ -1116,7 +1170,7 @@
       "source_file": "app\\chatbot\\page.tsx",
       "source_location": "L76",
       "id": "page_addquestion",
-      "community": 8,
+      "community": 7,
       "norm_label": "addquestion()"
     },
     {
@@ -1125,7 +1179,7 @@
       "source_file": "app\\chatbot\\page.tsx",
       "source_location": "L80",
       "id": "page_removequestion",
-      "community": 8,
+      "community": 7,
       "norm_label": "removequestion()"
     },
     {
@@ -1134,7 +1188,7 @@
       "source_file": "app\\chatbot\\page.tsx",
       "source_location": "L86",
       "id": "page_updatequestion",
-      "community": 8,
+      "community": 7,
       "norm_label": "updatequestion()"
     },
     {
@@ -1143,7 +1197,7 @@
       "source_file": "app\\chatbot\\page.tsx",
       "source_location": "L90",
       "id": "page_movequestion",
-      "community": 8,
+      "community": 7,
       "norm_label": "movequestion()"
     },
     {
@@ -1152,7 +1206,7 @@
       "source_file": "app\\chatbot\\page.tsx",
       "source_location": "L102",
       "id": "page_addchoice",
-      "community": 8,
+      "community": 7,
       "norm_label": "addchoice()"
     },
     {
@@ -1161,7 +1215,7 @@
       "source_file": "app\\chatbot\\page.tsx",
       "source_location": "L108",
       "id": "page_updatechoice",
-      "community": 8,
+      "community": 7,
       "norm_label": "updatechoice()"
     },
     {
@@ -1170,7 +1224,7 @@
       "source_file": "app\\chatbot\\page.tsx",
       "source_location": "L116",
       "id": "page_removechoice",
-      "community": 8,
+      "community": 7,
       "norm_label": "removechoice()"
     },
     {
@@ -1179,7 +1233,7 @@
       "source_file": "app\\chatbot\\page.tsx",
       "source_location": "L123",
       "id": "page_save",
-      "community": 8,
+      "community": 7,
       "norm_label": "save()"
     },
     {
@@ -1260,7 +1314,7 @@
       "source_file": "app\\packages\\page.tsx",
       "source_location": "L1",
       "id": "app_packages_page_tsx",
-      "community": 7,
+      "community": 2,
       "norm_label": "page.tsx"
     },
     {
@@ -1269,7 +1323,7 @@
       "source_file": "app\\website-builder\\page.tsx",
       "source_location": "L256",
       "id": "page_set",
-      "community": 7,
+      "community": 2,
       "norm_label": "set()"
     },
     {
@@ -1278,7 +1332,7 @@
       "source_file": "app\\packages\\page.tsx",
       "source_location": "L70",
       "id": "page_handleopenmodal",
-      "community": 7,
+      "community": 2,
       "norm_label": "handleopenmodal()"
     },
     {
@@ -1287,7 +1341,7 @@
       "source_file": "app\\packages\\page.tsx",
       "source_location": "L147",
       "id": "page_updatelist",
-      "community": 7,
+      "community": 2,
       "norm_label": "updatelist()"
     },
     {
@@ -1296,7 +1350,7 @@
       "source_file": "app\\packages\\page.tsx",
       "source_location": "L150",
       "id": "page_addlistitem",
-      "community": 7,
+      "community": 2,
       "norm_label": "addlistitem()"
     },
     {
@@ -1305,7 +1359,7 @@
       "source_file": "app\\packages\\page.tsx",
       "source_location": "L151",
       "id": "page_removelistitem",
-      "community": 7,
+      "community": 2,
       "norm_label": "removelistitem()"
     },
     {
@@ -1314,7 +1368,7 @@
       "source_file": "app\\packages\\page.tsx",
       "source_location": "L154",
       "id": "page_updateday",
-      "community": 7,
+      "community": 2,
       "norm_label": "updateday()"
     },
     {
@@ -1323,7 +1377,7 @@
       "source_file": "app\\packages\\page.tsx",
       "source_location": "L157",
       "id": "page_addday",
-      "community": 7,
+      "community": 2,
       "norm_label": "addday()"
     },
     {
@@ -1332,7 +1386,7 @@
       "source_file": "app\\packages\\page.tsx",
       "source_location": "L162",
       "id": "page_removeday",
-      "community": 7,
+      "community": 2,
       "norm_label": "removeday()"
     },
     {
@@ -1341,7 +1395,7 @@
       "source_file": "app\\packages\\page.tsx",
       "source_location": "L166",
       "id": "page_toggleday",
-      "community": 7,
+      "community": 2,
       "norm_label": "toggleday()"
     },
     {
@@ -1548,7 +1602,7 @@
       "source_file": "app\\website-builder\\page.tsx",
       "source_location": "L1",
       "id": "app_website_builder_page_tsx",
-      "community": 4,
+      "community": 2,
       "norm_label": "page.tsx"
     },
     {
@@ -1557,7 +1611,7 @@
       "source_file": "app\\website-builder\\page.tsx",
       "source_location": "L210",
       "id": "page_fetchsettings",
-      "community": 4,
+      "community": 2,
       "norm_label": "fetchsettings()"
     },
     {
@@ -1566,7 +1620,7 @@
       "source_file": "app\\website-builder\\page.tsx",
       "source_location": "L234",
       "id": "page_togglesection",
-      "community": 4,
+      "community": 2,
       "norm_label": "togglesection()"
     },
     {
@@ -1575,7 +1629,7 @@
       "source_file": "app\\website-builder\\page.tsx",
       "source_location": "L242",
       "id": "page_uploadimage",
-      "community": 4,
+      "community": 2,
       "norm_label": "uploadimage()"
     },
     {
@@ -1584,7 +1638,7 @@
       "source_file": "app\\website-builder\\page.tsx",
       "source_location": "L427",
       "id": "page_imgs",
-      "community": 4,
+      "community": 2,
       "norm_label": "imgs()"
     },
     {
@@ -1926,7 +1980,7 @@
       "source_file": "components\\NotificationBanner.tsx",
       "source_location": "L1",
       "id": "components_notificationbanner_tsx",
-      "community": 9,
+      "community": 8,
       "norm_label": "notificationbanner.tsx"
     },
     {
@@ -1935,7 +1989,7 @@
       "source_file": "components\\NotificationBanner.tsx",
       "source_location": "L21",
       "id": "notificationbanner_isios",
-      "community": 9,
+      "community": 8,
       "norm_label": "isios()"
     },
     {
@@ -1944,7 +1998,7 @@
       "source_file": "components\\NotificationBanner.tsx",
       "source_location": "L26",
       "id": "notificationbanner_isstandalone",
-      "community": 9,
+      "community": 8,
       "norm_label": "isstandalone()"
     },
     {
@@ -1953,7 +2007,7 @@
       "source_file": "components\\NotificationBanner.tsx",
       "source_location": "L66",
       "id": "notificationbanner_handleenable",
-      "community": 9,
+      "community": 8,
       "norm_label": "handleenable()"
     },
     {
@@ -1962,7 +2016,7 @@
       "source_file": "components\\NotificationBanner.tsx",
       "source_location": "L84",
       "id": "notificationbanner_handledismiss",
-      "community": 9,
+      "community": 8,
       "norm_label": "handledismiss()"
     },
     {
@@ -2250,7 +2304,7 @@
       "source_file": "lib\\firebase-messaging.ts",
       "source_location": "L1",
       "id": "lib_firebase_messaging_ts",
-      "community": 9,
+      "community": 8,
       "norm_label": "firebase-messaging.ts"
     },
     {
@@ -2259,7 +2313,7 @@
       "source_file": "lib\\firebase-messaging.ts",
       "source_location": "L10",
       "id": "firebase_messaging_getmessaginginstance",
-      "community": 9,
+      "community": 8,
       "norm_label": "getmessaginginstance()"
     },
     {
@@ -2268,7 +2322,7 @@
       "source_file": "lib\\firebase-messaging.ts",
       "source_location": "L24",
       "id": "firebase_messaging_requestnotificationpermission",
-      "community": 9,
+      "community": 8,
       "norm_label": "requestnotificationpermission()"
     },
     {
@@ -2277,7 +2331,7 @@
       "source_file": "lib\\firebase-messaging.ts",
       "source_location": "L74",
       "id": "firebase_messaging_silenttokenrefresh",
-      "community": 9,
+      "community": 8,
       "norm_label": "silenttokenrefresh()"
     },
     {
@@ -2286,7 +2340,7 @@
       "source_file": "lib\\firebase-messaging.ts",
       "source_location": "L90",
       "id": "firebase_messaging_setupforegroundhandler",
-      "community": 9,
+      "community": 8,
       "norm_label": "setupforegroundhandler()"
     },
     {
@@ -2304,7 +2358,7 @@
       "source_file": "lib\\invoice-template.ts",
       "source_location": "L1",
       "id": "lib_invoice_template_ts",
-      "community": 2,
+      "community": 1,
       "norm_label": "invoice-template.ts"
     },
     {
@@ -2313,8 +2367,107 @@
       "source_file": "lib\\invoice-template.ts",
       "source_location": "L40",
       "id": "invoice_template_generateinvoicehtml",
-      "community": 2,
+      "community": 1,
       "norm_label": "generateinvoicehtml()"
+    },
+    {
+      "label": "meta-whatsapp.ts",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
+      "source_location": "L1",
+      "id": "c_users_omagrawal_downloads_dashboardaistudio_lib_meta_whatsapp_ts",
+      "community": 9,
+      "norm_label": "meta-whatsapp.ts"
+    },
+    {
+      "label": "getMetaCreds()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
+      "source_location": "L12",
+      "id": "meta_whatsapp_getmetacreds",
+      "community": 0,
+      "norm_label": "getmetacreds()"
+    },
+    {
+      "label": "metaPost()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
+      "source_location": "L33",
+      "id": "meta_whatsapp_metapost",
+      "community": 9,
+      "norm_label": "metapost()"
+    },
+    {
+      "label": "sendText()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
+      "source_location": "L49",
+      "id": "meta_whatsapp_sendtext",
+      "community": 9,
+      "norm_label": "sendtext()"
+    },
+    {
+      "label": "sendButtons()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
+      "source_location": "L58",
+      "id": "meta_whatsapp_sendbuttons",
+      "community": 9,
+      "norm_label": "sendbuttons()"
+    },
+    {
+      "label": "sendList()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
+      "source_location": "L84",
+      "id": "meta_whatsapp_sendlist",
+      "community": 9,
+      "norm_label": "sendlist()"
+    },
+    {
+      "label": "sendChoiceQuestion()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
+      "source_location": "L120",
+      "id": "meta_whatsapp_sendchoicequestion",
+      "community": 9,
+      "norm_label": "sendchoicequestion()"
+    },
+    {
+      "label": "sendImage()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
+      "source_location": "L141",
+      "id": "meta_whatsapp_sendimage",
+      "community": 9,
+      "norm_label": "sendimage()"
+    },
+    {
+      "label": "sendDocument()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
+      "source_location": "L154",
+      "id": "meta_whatsapp_senddocument",
+      "community": 9,
+      "norm_label": "senddocument()"
+    },
+    {
+      "label": "markRead()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
+      "source_location": "L169",
+      "id": "meta_whatsapp_markread",
+      "community": 9,
+      "norm_label": "markread()"
+    },
+    {
+      "label": "extractMetaMessage()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
+      "source_location": "L181",
+      "id": "meta_whatsapp_extractmetamessage",
+      "community": 9,
+      "norm_label": "extractmetamessage()"
     },
     {
       "label": "round-robin.ts",
@@ -2322,7 +2475,7 @@
       "source_file": "lib\\round-robin.ts",
       "source_location": "L1",
       "id": "lib_round_robin_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "round-robin.ts"
     },
     {
@@ -2331,7 +2484,7 @@
       "source_file": "lib\\round-robin.ts",
       "source_location": "L8",
       "id": "round_robin_getnextassignee",
-      "community": 1,
+      "community": 0,
       "norm_label": "getnextassignee()"
     },
     {
@@ -3396,8 +3549,8 @@
     {
       "relation": "calls",
       "confidence": "EXTRACTED",
-      "source_file": "app\\api\\webhooks\\whatsapp\\route.ts",
-      "source_location": "L75",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L50",
       "weight": 1.0,
       "_src": "route_post",
       "_tgt": "route_get",
@@ -3528,49 +3681,37 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "app\\api\\webhooks\\whatsapp\\route.ts",
-      "source_location": "L72",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L49",
       "weight": 1.0,
-      "_src": "app_api_webhooks_whatsapp_route_ts",
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_api_webhooks_whatsapp_route_ts",
       "_tgt": "route_post",
       "source": "route_post",
-      "target": "app_api_webhooks_whatsapp_route_ts",
+      "target": "c_users_omagrawal_downloads_dashboardaistudio_app_api_webhooks_whatsapp_route_ts",
       "confidence_score": 1.0
     },
     {
       "relation": "calls",
       "confidence": "EXTRACTED",
-      "source_file": "app\\api\\webhooks\\whatsapp\\route.ts",
-      "source_location": "L139",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L52",
       "weight": 1.0,
       "_src": "route_post",
-      "_tgt": "route_sendmessage",
+      "_tgt": "route_handlemetawebhook",
       "source": "route_post",
-      "target": "route_sendmessage",
+      "target": "route_handlemetawebhook",
       "confidence_score": 1.0
     },
     {
       "relation": "calls",
       "confidence": "EXTRACTED",
-      "source_file": "app\\api\\webhooks\\whatsapp\\route.ts",
-      "source_location": "L145",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L54",
       "weight": 1.0,
       "_src": "route_post",
-      "_tgt": "route_buildchoicemessage",
+      "_tgt": "route_handletwiliowebhook",
       "source": "route_post",
-      "target": "route_buildchoicemessage",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "app\\api\\webhooks\\whatsapp\\route.ts",
-      "source_location": "L180",
-      "weight": 1.0,
-      "_src": "route_post",
-      "_tgt": "route_getresponsekey",
-      "source": "route_post",
-      "target": "route_getresponsekey",
+      "target": "route_handletwiliowebhook",
       "confidence_score": 1.0
     },
     {
@@ -3588,20 +3729,20 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "app\\api\\whatsapp\\send\\route.ts",
-      "source_location": "L26",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\whatsapp\\send\\route.ts",
+      "source_location": "L7",
       "weight": 1.0,
-      "_src": "app_api_whatsapp_send_route_ts",
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_api_whatsapp_send_route_ts",
       "_tgt": "route_post",
       "source": "route_post",
-      "target": "app_api_whatsapp_send_route_ts",
+      "target": "c_users_omagrawal_downloads_dashboardaistudio_app_api_whatsapp_send_route_ts",
       "confidence_score": 1.0
     },
     {
       "relation": "calls",
       "confidence": "EXTRACTED",
-      "source_file": "app\\api\\whatsapp\\send\\route.ts",
-      "source_location": "L34",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\whatsapp\\send\\route.ts",
+      "source_location": "L38",
       "weight": 1.0,
       "_src": "route_post",
       "_tgt": "route_gettwilioclient",
@@ -3668,6 +3809,30 @@
       "_tgt": "send_push_notification_sendleadnotification",
       "source": "route_post",
       "target": "send_push_notification_sendleadnotification"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\whatsapp\\send\\route.ts",
+      "source_location": "L19",
+      "weight": 1.0,
+      "_src": "route_post",
+      "_tgt": "meta_whatsapp_getmetacreds",
+      "source": "route_post",
+      "target": "meta_whatsapp_getmetacreds"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\whatsapp\\send\\route.ts",
+      "source_location": "L22",
+      "weight": 1.0,
+      "_src": "route_post",
+      "_tgt": "meta_whatsapp_sendtext",
+      "source": "route_post",
+      "target": "meta_whatsapp_sendtext"
     },
     {
       "relation": "contains",
@@ -3816,26 +3981,74 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "app\\api\\webhooks\\whatsapp\\route.ts",
-      "source_location": "L68",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L33",
       "weight": 1.0,
-      "_src": "app_api_webhooks_whatsapp_route_ts",
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_api_webhooks_whatsapp_route_ts",
       "_tgt": "route_get",
       "source": "route_get",
-      "target": "app_api_webhooks_whatsapp_route_ts",
+      "target": "c_users_omagrawal_downloads_dashboardaistudio_app_api_webhooks_whatsapp_route_ts",
       "confidence_score": 1.0
     },
     {
       "relation": "calls",
       "confidence": "EXTRACTED",
-      "source_file": "app\\api\\webhooks\\whatsapp\\route.ts",
-      "source_location": "L19",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L144",
+      "weight": 1.0,
+      "_src": "route_handlemetawebhook",
+      "_tgt": "route_get",
+      "source": "route_get",
+      "target": "route_handlemetawebhook",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L236",
+      "weight": 1.0,
+      "_src": "route_handletwiliowebhook",
+      "_tgt": "route_get",
+      "source": "route_get",
+      "target": "route_handletwiliowebhook",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L319",
       "weight": 1.0,
       "_src": "route_gettwilioclient",
       "_tgt": "route_get",
       "source": "route_get",
       "target": "route_gettwilioclient",
       "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L361",
+      "weight": 1.0,
+      "_src": "route_runchatbotflow",
+      "_tgt": "route_get",
+      "source": "route_get",
+      "target": "route_runchatbotflow",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_src": "meta_whatsapp_getmetacreds",
+      "_tgt": "route_get",
+      "source": "route_get",
+      "target": "meta_whatsapp_getmetacreds"
     },
     {
       "relation": "calls",
@@ -3984,74 +4197,338 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "app\\api\\webhooks\\whatsapp\\route.ts",
-      "source_location": "L18",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L61",
       "weight": 1.0,
-      "_src": "app_api_webhooks_whatsapp_route_ts",
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_api_webhooks_whatsapp_route_ts",
+      "_tgt": "route_getresponsekey",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_app_api_webhooks_whatsapp_route_ts",
+      "target": "route_getresponsekey",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L66",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_api_webhooks_whatsapp_route_ts",
+      "_tgt": "route_logmessage",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_app_api_webhooks_whatsapp_route_ts",
+      "target": "route_logmessage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L85",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_api_webhooks_whatsapp_route_ts",
+      "_tgt": "route_createlead",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_app_api_webhooks_whatsapp_route_ts",
+      "target": "route_createlead",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L121",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_api_webhooks_whatsapp_route_ts",
+      "_tgt": "route_handlemetawebhook",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_app_api_webhooks_whatsapp_route_ts",
+      "target": "route_handlemetawebhook",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L199",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_api_webhooks_whatsapp_route_ts",
+      "_tgt": "route_sendandlog",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_app_api_webhooks_whatsapp_route_ts",
+      "target": "route_sendandlog",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L212",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_api_webhooks_whatsapp_route_ts",
+      "_tgt": "route_sendquestionandlog",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_app_api_webhooks_whatsapp_route_ts",
+      "target": "route_sendquestionandlog",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L233",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_api_webhooks_whatsapp_route_ts",
+      "_tgt": "route_handletwiliowebhook",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_app_api_webhooks_whatsapp_route_ts",
+      "target": "route_handletwiliowebhook",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L313",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_api_webhooks_whatsapp_route_ts",
+      "_tgt": "route_buildtwiliochoicemessage",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_app_api_webhooks_whatsapp_route_ts",
+      "target": "route_buildtwiliochoicemessage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L318",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_api_webhooks_whatsapp_route_ts",
       "_tgt": "route_gettwilioclient",
-      "source": "app_api_webhooks_whatsapp_route_ts",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_app_api_webhooks_whatsapp_route_ts",
       "target": "route_gettwilioclient",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "app\\api\\webhooks\\whatsapp\\route.ts",
-      "source_location": "L36",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L346",
       "weight": 1.0,
-      "_src": "app_api_webhooks_whatsapp_route_ts",
-      "_tgt": "route_sendmessage",
-      "source": "app_api_webhooks_whatsapp_route_ts",
-      "target": "route_sendmessage",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "app\\api\\webhooks\\whatsapp\\route.ts",
-      "source_location": "L58",
-      "weight": 1.0,
-      "_src": "app_api_webhooks_whatsapp_route_ts",
-      "_tgt": "route_buildchoicemessage",
-      "source": "app_api_webhooks_whatsapp_route_ts",
-      "target": "route_buildchoicemessage",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "app\\api\\webhooks\\whatsapp\\route.ts",
-      "source_location": "L63",
-      "weight": 1.0,
-      "_src": "app_api_webhooks_whatsapp_route_ts",
-      "_tgt": "route_getresponsekey",
-      "source": "app_api_webhooks_whatsapp_route_ts",
-      "target": "route_getresponsekey",
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_api_webhooks_whatsapp_route_ts",
+      "_tgt": "route_runchatbotflow",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_app_api_webhooks_whatsapp_route_ts",
+      "target": "route_runchatbotflow",
       "confidence_score": 1.0
     },
     {
       "relation": "calls",
       "confidence": "EXTRACTED",
-      "source_file": "app\\api\\webhooks\\whatsapp\\route.ts",
-      "source_location": "L37",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L433",
       "weight": 1.0,
-      "_src": "route_sendmessage",
+      "_src": "route_runchatbotflow",
+      "_tgt": "route_getresponsekey",
+      "source": "route_getresponsekey",
+      "target": "route_runchatbotflow",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L174",
+      "weight": 1.0,
+      "_src": "route_handlemetawebhook",
+      "_tgt": "route_logmessage",
+      "source": "route_logmessage",
+      "target": "route_handlemetawebhook",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L207",
+      "weight": 1.0,
+      "_src": "route_sendandlog",
+      "_tgt": "route_logmessage",
+      "source": "route_logmessage",
+      "target": "route_sendandlog",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L224",
+      "weight": 1.0,
+      "_src": "route_sendquestionandlog",
+      "_tgt": "route_logmessage",
+      "source": "route_logmessage",
+      "target": "route_sendquestionandlog",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L256",
+      "weight": 1.0,
+      "_src": "route_handletwiliowebhook",
+      "_tgt": "route_logmessage",
+      "source": "route_logmessage",
+      "target": "route_handletwiliowebhook",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L443",
+      "weight": 1.0,
+      "_src": "route_runchatbotflow",
+      "_tgt": "route_createlead",
+      "source": "route_createlead",
+      "target": "route_runchatbotflow",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L90",
+      "weight": 1.0,
+      "_src": "route_createlead",
+      "_tgt": "round_robin_getnextassignee",
+      "source": "route_createlead",
+      "target": "round_robin_getnextassignee"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L176",
+      "weight": 1.0,
+      "_src": "route_handlemetawebhook",
+      "_tgt": "route_runchatbotflow",
+      "source": "route_handlemetawebhook",
+      "target": "route_runchatbotflow",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L159",
+      "weight": 1.0,
+      "_src": "route_handlemetawebhook",
+      "_tgt": "meta_whatsapp_getmetacreds",
+      "source": "route_handlemetawebhook",
+      "target": "meta_whatsapp_getmetacreds"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L166",
+      "weight": 1.0,
+      "_src": "route_handlemetawebhook",
+      "_tgt": "meta_whatsapp_markread",
+      "source": "route_handlemetawebhook",
+      "target": "meta_whatsapp_markread"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L169",
+      "weight": 1.0,
+      "_src": "route_handlemetawebhook",
+      "_tgt": "meta_whatsapp_extractmetamessage",
+      "source": "route_handlemetawebhook",
+      "target": "meta_whatsapp_extractmetamessage"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L206",
+      "weight": 1.0,
+      "_src": "route_sendandlog",
+      "_tgt": "meta_whatsapp_sendtext",
+      "source": "route_sendandlog",
+      "target": "meta_whatsapp_sendtext"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L219",
+      "weight": 1.0,
+      "_src": "route_sendquestionandlog",
+      "_tgt": "meta_whatsapp_sendchoicequestion",
+      "source": "route_sendquestionandlog",
+      "target": "meta_whatsapp_sendchoicequestion"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L258",
+      "weight": 1.0,
+      "_src": "route_handletwiliowebhook",
       "_tgt": "route_gettwilioclient",
-      "source": "route_gettwilioclient",
-      "target": "route_sendmessage",
+      "source": "route_handletwiliowebhook",
+      "target": "route_gettwilioclient",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L261",
+      "weight": 1.0,
+      "_src": "route_handletwiliowebhook",
+      "_tgt": "route_runchatbotflow",
+      "source": "route_handletwiliowebhook",
+      "target": "route_runchatbotflow",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "app\\api\\whatsapp\\send\\route.ts",
-      "source_location": "L7",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\whatsapp\\send\\route.ts",
+      "source_location": "L70",
       "weight": 1.0,
-      "_src": "app_api_whatsapp_send_route_ts",
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_api_whatsapp_send_route_ts",
       "_tgt": "route_gettwilioclient",
       "source": "route_gettwilioclient",
-      "target": "app_api_whatsapp_send_route_ts",
+      "target": "c_users_omagrawal_downloads_dashboardaistudio_app_api_whatsapp_send_route_ts",
       "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L382",
+      "weight": 1.0,
+      "_src": "route_runchatbotflow",
+      "_tgt": "page_set",
+      "source": "route_runchatbotflow",
+      "target": "page_set"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
+      "source_location": "L397",
+      "weight": 1.0,
+      "_src": "route_runchatbotflow",
+      "_tgt": "page_update",
+      "source": "route_runchatbotflow",
+      "target": "page_update"
     },
     {
       "relation": "contains",
@@ -6463,6 +6940,234 @@
       "_tgt": "invoice_template_generateinvoicehtml",
       "source": "lib_invoice_template_ts",
       "target": "invoice_template_generateinvoicehtml",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_lib_meta_whatsapp_ts",
+      "_tgt": "meta_whatsapp_getmetacreds",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_lib_meta_whatsapp_ts",
+      "target": "meta_whatsapp_getmetacreds",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
+      "source_location": "L33",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_lib_meta_whatsapp_ts",
+      "_tgt": "meta_whatsapp_metapost",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_lib_meta_whatsapp_ts",
+      "target": "meta_whatsapp_metapost",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
+      "source_location": "L49",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_lib_meta_whatsapp_ts",
+      "_tgt": "meta_whatsapp_sendtext",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_lib_meta_whatsapp_ts",
+      "target": "meta_whatsapp_sendtext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
+      "source_location": "L58",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_lib_meta_whatsapp_ts",
+      "_tgt": "meta_whatsapp_sendbuttons",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_lib_meta_whatsapp_ts",
+      "target": "meta_whatsapp_sendbuttons",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
+      "source_location": "L84",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_lib_meta_whatsapp_ts",
+      "_tgt": "meta_whatsapp_sendlist",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_lib_meta_whatsapp_ts",
+      "target": "meta_whatsapp_sendlist",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
+      "source_location": "L120",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_lib_meta_whatsapp_ts",
+      "_tgt": "meta_whatsapp_sendchoicequestion",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_lib_meta_whatsapp_ts",
+      "target": "meta_whatsapp_sendchoicequestion",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
+      "source_location": "L141",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_lib_meta_whatsapp_ts",
+      "_tgt": "meta_whatsapp_sendimage",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_lib_meta_whatsapp_ts",
+      "target": "meta_whatsapp_sendimage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
+      "source_location": "L154",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_lib_meta_whatsapp_ts",
+      "_tgt": "meta_whatsapp_senddocument",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_lib_meta_whatsapp_ts",
+      "target": "meta_whatsapp_senddocument",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
+      "source_location": "L169",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_lib_meta_whatsapp_ts",
+      "_tgt": "meta_whatsapp_markread",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_lib_meta_whatsapp_ts",
+      "target": "meta_whatsapp_markread",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
+      "source_location": "L181",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_lib_meta_whatsapp_ts",
+      "_tgt": "meta_whatsapp_extractmetamessage",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_lib_meta_whatsapp_ts",
+      "target": "meta_whatsapp_extractmetamessage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
+      "source_location": "L50",
+      "weight": 1.0,
+      "_src": "meta_whatsapp_sendtext",
+      "_tgt": "meta_whatsapp_metapost",
+      "source": "meta_whatsapp_metapost",
+      "target": "meta_whatsapp_sendtext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
+      "source_location": "L64",
+      "weight": 1.0,
+      "_src": "meta_whatsapp_sendbuttons",
+      "_tgt": "meta_whatsapp_metapost",
+      "source": "meta_whatsapp_metapost",
+      "target": "meta_whatsapp_sendbuttons",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
+      "source_location": "L91",
+      "weight": 1.0,
+      "_src": "meta_whatsapp_sendlist",
+      "_tgt": "meta_whatsapp_metapost",
+      "source": "meta_whatsapp_metapost",
+      "target": "meta_whatsapp_sendlist",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
+      "source_location": "L147",
+      "weight": 1.0,
+      "_src": "meta_whatsapp_sendimage",
+      "_tgt": "meta_whatsapp_metapost",
+      "source": "meta_whatsapp_metapost",
+      "target": "meta_whatsapp_sendimage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
+      "source_location": "L161",
+      "weight": 1.0,
+      "_src": "meta_whatsapp_senddocument",
+      "_tgt": "meta_whatsapp_metapost",
+      "source": "meta_whatsapp_metapost",
+      "target": "meta_whatsapp_senddocument",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
+      "source_location": "L170",
+      "weight": 1.0,
+      "_src": "meta_whatsapp_markread",
+      "_tgt": "meta_whatsapp_metapost",
+      "source": "meta_whatsapp_metapost",
+      "target": "meta_whatsapp_markread",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
+      "source_location": "L128",
+      "weight": 1.0,
+      "_src": "meta_whatsapp_sendchoicequestion",
+      "_tgt": "meta_whatsapp_sendtext",
+      "source": "meta_whatsapp_sendtext",
+      "target": "meta_whatsapp_sendchoicequestion",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
+      "source_location": "L131",
+      "weight": 1.0,
+      "_src": "meta_whatsapp_sendchoicequestion",
+      "_tgt": "meta_whatsapp_sendbuttons",
+      "source": "meta_whatsapp_sendbuttons",
+      "target": "meta_whatsapp_sendchoicequestion",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
+      "source_location": "L134",
+      "weight": 1.0,
+      "_src": "meta_whatsapp_sendchoicequestion",
+      "_tgt": "meta_whatsapp_sendlist",
+      "source": "meta_whatsapp_sendlist",
+      "target": "meta_whatsapp_sendchoicequestion",
       "confidence_score": 1.0
     },
     {
