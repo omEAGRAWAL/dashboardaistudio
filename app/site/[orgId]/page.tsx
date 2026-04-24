@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, getDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import {
   MapPin, Clock, ArrowRight, Phone, Mail, MessageCircle,
@@ -26,6 +26,33 @@ export default function PublicSitePage() {
   const [packages, setPackages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [scrolled, setScrolled] = useState(false);
+
+  const [formData, setFormData] = useState({ name: '', phone: '', email: '', destination: '', message: '' });
+  const [formState, setFormState] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+
+  const handleContact = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormState('submitting');
+    try {
+      await addDoc(collection(db, 'leads'), {
+        name: formData.name.trim(),
+        phone: formData.phone.trim(),
+        email: formData.email.trim() || null,
+        latestRemark: [formData.destination && `Destination: ${formData.destination}`, formData.message].filter(Boolean).join(' | ') || null,
+        source: 'Website',
+        status: 'New Enquiry',
+        category: 'None',
+        pax: 1,
+        orgId,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+      setFormState('success');
+      setFormData({ name: '', phone: '', email: '', destination: '', message: '' });
+    } catch {
+      setFormState('error');
+    }
+  };
 
   useEffect(() => {
     if (!orgId) return;
@@ -132,36 +159,45 @@ export default function PublicSitePage() {
       </nav>
 
       {/* Hero */}
-      <section className="relative h-[40vh] md:min-h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative h-[50vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img src={heroImage} alt="Hero" className="w-full h-full object-cover" />
           <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${overlayOpacity})` }} />
-          <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black/30 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/30 to-transparent" />
         </div>
-        <div className="relative z-10 text-center px-4 max-w-5xl mx-auto pt-24">
+        <div className="relative z-10 text-center px-4 max-w-3xl mx-auto w-full" style={{ paddingTop: 'calc(72px + 1.5rem)' }}>
           {settings?.agencyTagline && (
-            <p className="text-xs font-bold tracking-[0.3em] uppercase text-white/70 mb-6">
+            <p className="text-[10px] sm:text-xs font-bold tracking-[0.25em] uppercase text-white/65 mb-2 sm:mb-3">
               — {settings.agencyTagline} —
             </p>
           )}
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white mb-6 leading-[1.05] tracking-tight drop-shadow-2xl"
-            style={{ fontFamily: headingFont }}>
+          <h1
+            className="text-2xl sm:text-4xl md:text-5xl font-black text-white mb-2 sm:mb-3 leading-tight tracking-tight drop-shadow-xl"
+            style={{ fontFamily: headingFont }}
+          >
             {settings?.heroTitle || 'Discover Your Next Adventure'}
           </h1>
-          <p className="text-lg md:text-xl text-white/80 mb-10 font-light max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xs sm:text-sm md:text-base text-white/75 mb-4 sm:mb-5 font-normal max-w-xl mx-auto leading-relaxed">
             {settings?.heroSubtitle || 'Explore the world with our curated travel packages.'}
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a href="#packages" className="inline-flex items-center gap-3 px-10 py-4 rounded-full text-white font-bold text-lg shadow-2xl hover:scale-105 transition-all" style={{ backgroundColor: tc }}>
-              {settings?.heroCta || 'Explore Packages'} <ArrowRight className="w-5 h-5" />
+          <div className="flex items-center justify-center gap-2.5">
+            <a
+              href="#packages"
+              className="inline-flex items-center gap-2 px-5 py-2 sm:px-7 sm:py-2.5 rounded-full text-white font-semibold text-sm shadow-lg hover:scale-105 transition-all"
+              style={{ backgroundColor: tc }}
+            >
+              {settings?.heroCta || 'Explore Packages'} <ArrowRight className="w-4 h-4" />
             </a>
-            <a href="#contact" className="inline-flex items-center gap-3 px-10 py-4 rounded-full text-white font-bold text-lg border-2 border-white/50 hover:bg-white/10 transition-all backdrop-blur-sm">
+            <a
+              href="#contact"
+              className="inline-flex items-center gap-2 px-5 py-2 sm:px-7 sm:py-2.5 rounded-full text-white font-semibold text-sm border border-white/50 hover:bg-white/10 transition-all backdrop-blur-sm"
+            >
               Contact Us
             </a>
           </div>
         </div>
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 animate-bounce">
-          <ChevronDown className="w-8 h-8 text-white/60" />
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 animate-bounce">
+          <ChevronDown className="w-6 h-6 text-white/50" />
         </div>
       </section>
 
@@ -373,33 +409,47 @@ export default function PublicSitePage() {
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
             <div className="lg:col-span-3">
               <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
-                <form className="space-y-5" onSubmit={e => { e.preventDefault(); alert('Thank you! We will get back to you soon.'); }}>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Full Name *</label>
-                      <input type="text" required className="w-full px-4 py-3.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 bg-gray-50 text-sm" placeholder="John Doe" />
+                {formState === 'success' ? (
+                  <div className="flex flex-col items-center justify-center py-16 text-center">
+                    <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: `${tc}20` }}>
+                      <Send className="w-7 h-7" style={{ color: tc }} />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Enquiry Received!</h3>
+                    <p className="text-gray-500 text-sm mb-6">We'll get back to you shortly.</p>
+                    <button onClick={() => setFormState('idle')} className="text-sm font-semibold underline" style={{ color: tc }}>Send another</button>
+                  </div>
+                ) : (
+                  <form className="space-y-5" onSubmit={handleContact}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Full Name *</label>
+                        <input type="text" required value={formData.name} onChange={e => setFormData(p => ({ ...p, name: e.target.value }))} className="w-full px-4 py-3.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 bg-gray-50 text-sm" placeholder="John Doe" />
+                      </div>
+                      <div>
+                        <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Phone *</label>
+                        <input type="tel" required value={formData.phone} onChange={e => setFormData(p => ({ ...p, phone: e.target.value }))} className="w-full px-4 py-3.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 bg-gray-50 text-sm" placeholder="+91 98765 43210" />
+                      </div>
                     </div>
                     <div>
-                      <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Phone *</label>
-                      <input type="tel" required className="w-full px-4 py-3.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 bg-gray-50 text-sm" placeholder="+91 98765 43210" />
+                      <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Email</label>
+                      <input type="email" value={formData.email} onChange={e => setFormData(p => ({ ...p, email: e.target.value }))} className="w-full px-4 py-3.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 bg-gray-50 text-sm" placeholder="you@email.com" />
                     </div>
-                  </div>
-                  <div>
-                    <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Email</label>
-                    <input type="email" className="w-full px-4 py-3.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 bg-gray-50 text-sm" placeholder="you@email.com" />
-                  </div>
-                  <div>
-                    <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Destination Interest</label>
-                    <input type="text" className="w-full px-4 py-3.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 bg-gray-50 text-sm" placeholder="e.g. Bali, Europe, etc." />
-                  </div>
-                  <div>
-                    <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Message</label>
-                    <textarea rows={4} className="w-full px-4 py-3.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 bg-gray-50 text-sm resize-none" placeholder="Tell us about your travel plans..." />
-                  </div>
-                  <button type="submit" className="w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl text-white font-bold text-base shadow-md hover:shadow-xl hover:scale-[1.02] transition-all" style={{ backgroundColor: tc }}>
-                    <Send className="w-5 h-5" /> Send Enquiry
-                  </button>
-                </form>
+                    <div>
+                      <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Destination Interest</label>
+                      <input type="text" value={formData.destination} onChange={e => setFormData(p => ({ ...p, destination: e.target.value }))} className="w-full px-4 py-3.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 bg-gray-50 text-sm" placeholder="e.g. Bali, Europe, etc." />
+                    </div>
+                    <div>
+                      <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Message</label>
+                      <textarea rows={4} value={formData.message} onChange={e => setFormData(p => ({ ...p, message: e.target.value }))} className="w-full px-4 py-3.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 bg-gray-50 text-sm resize-none" placeholder="Tell us about your travel plans..." />
+                    </div>
+                    {formState === 'error' && (
+                      <p className="text-sm text-red-500">Something went wrong. Please try again.</p>
+                    )}
+                    <button type="submit" disabled={formState === 'submitting'} className="w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl text-white font-bold text-base shadow-md hover:shadow-xl hover:scale-[1.02] transition-all disabled:opacity-60 disabled:cursor-not-allowed disabled:scale-100" style={{ backgroundColor: tc }}>
+                      <Send className="w-5 h-5" /> {formState === 'submitting' ? 'Sending...' : 'Send Enquiry'}
+                    </button>
+                  </form>
+                )}
               </div>
             </div>
             <div className="lg:col-span-2 space-y-4">
