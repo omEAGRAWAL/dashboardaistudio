@@ -185,7 +185,7 @@ export default function PackageDetailsPage() {
           order_id: orderData.orderId,
           name: settings?.agencyName || 'Travel Agency',
           description: pkg?.title || 'Package Booking',
-          image: settings?.logoUrl || undefined,
+          image: settings?.logoUrl ? toHttps(settings.logoUrl) : undefined,
           theme: { color: settings?.themeColor || '#4f46e5' },
           handler: async (response: any) => {
             try {
@@ -239,7 +239,8 @@ export default function PackageDetailsPage() {
   const isSerif = settings?.fontStyle === 'serif';
   const headingFont = isSerif ? "Georgia,'Times New Roman',serif" : 'inherit';
 
-  const allImages: string[] = pkg.images?.length ? pkg.images : pkg.imageUrl ? [pkg.imageUrl] : ['https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=2070&auto=format&fit=crop'];
+  const toHttps = (url: string) => url.replace(/^http:\/\//i, 'https://');
+  const allImages: string[] = (pkg.images?.length ? pkg.images : pkg.imageUrl ? [pkg.imageUrl] : ['https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=2070&auto=format&fit=crop']).map(toHttps);
   const highlights: string[] = pkg.highlights || [];
   const inclusions: string[] = pkg.inclusions || [];
   const exclusions: string[] = pkg.exclusions || [];
