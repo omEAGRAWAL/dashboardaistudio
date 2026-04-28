@@ -1,9 +1,5 @@
 import type { Metadata } from 'next';
-import './globals.css';
-import { AuthProvider } from '@/components/AuthProvider';
-import { OrgProvider } from '@/components/OrgProvider';
-import { SidebarProvider } from '@/components/SidebarContext';
-import { Analytics } from '@vercel/analytics/next';
+import SchemaMarkup from '@/components/SchemaMarkup';
 
 const BASE_URL = 'https://travelycrm.reviu.store';
 
@@ -14,7 +10,7 @@ export const metadata: Metadata = {
     default: 'Yatrik — #1 Travel CRM Software for Indian Agencies',
   },
   description:
-    'Yatrik is travel CRM software for Indian travel agencies. Manage leads from Meta Ads, automate WhatsApp follow-ups, handle bookings, and build your agency website. Plans from ₹999/month.',
+    'Yatrik is the best travel CRM software in India. Capture Meta Ads leads, automate WhatsApp follow-ups, manage bookings & build your agency website. Plans from ₹999/month.',
   keywords: [
     'travel CRM software India',
     'travel agency CRM',
@@ -22,6 +18,7 @@ export const metadata: Metadata = {
     'travel lead management software',
     'WhatsApp bot for travel agency',
     'tour operator CRM India',
+    'travel booking management software',
   ],
   authors: [{ name: 'Yatrik', url: BASE_URL }],
   creator: 'Yatrik',
@@ -65,25 +62,13 @@ export const metadata: Metadata = {
   alternates: {
     canonical: BASE_URL,
   },
-  manifest: '/manifest.json',
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'default',
-    title: 'Yatrik CRM',
-  },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function LandingLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body suppressHydrationWarning>
-        <AuthProvider>
-          <OrgProvider>
-            <SidebarProvider>{children}</SidebarProvider>
-          </OrgProvider>
-        </AuthProvider>
-        <Analytics />
-      </body>
-    </html>
+    <>
+      <SchemaMarkup />
+      {children}
+    </>
   );
 }
