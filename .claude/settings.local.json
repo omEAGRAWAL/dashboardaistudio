@@ -1,4 +1,13 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"const p = require\\('pdfmake/src/printer'\\); console.log\\(typeof p\\)\")",
+      "Bash(node -e \"const p = require\\('pdfmake/js/printer'\\); console.log\\(typeof p, Object.keys\\(p\\).slice\\(0,5\\)\\)\")",
+      "Bash(node -e \"const m = require\\('pdfmake/js/Printer'\\); const P = m.default || m; const inst = new P\\({Roboto:{normal:Buffer.alloc\\(0\\),bold:Buffer.alloc\\(0\\),italics:Buffer.alloc\\(0\\),bolditalics:Buffer.alloc\\(0\\)}}\\); console.log\\(typeof inst.createPdfKitDocument\\)\")",
+      "Bash(node -e \"const vfs = require\\('pdfmake/build/vfs_fonts'\\); const v = vfs.pdfMake?.vfs ?? vfs; console.log\\(typeof v['Roboto-Regular.ttf'], Object.keys\\(v\\).slice\\(0,4\\)\\)\")",
+      "Bash(npm run *)"
+    ]
+  },
   "enabledPlugins": {
     "firebase@firebase": true
   }

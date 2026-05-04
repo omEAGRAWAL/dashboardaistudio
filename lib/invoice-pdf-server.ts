@@ -1,7 +1,9 @@
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const PdfPrinter = require('pdfmake/src/printer') as new (fonts: Record<string, unknown>) => {
-  createPdfKitDocument(docDefinition: unknown, options?: unknown): NodeJS.EventEmitter & { end(): void };
-};
+const PdfPrinter = (require('pdfmake/js/Printer') as {
+  default: new (fonts: Record<string, unknown>) => {
+    createPdfKitDocument(docDefinition: unknown, options?: unknown): NodeJS.EventEmitter & { end(): void };
+  };
+}).default;
 import type { TDocumentDefinitions, Content, TableCell } from 'pdfmake/interfaces';
 import type { InvoiceBooking, BusinessProfile } from './invoice-template';
 
