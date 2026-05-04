@@ -10,8 +10,9 @@ import { useAuth } from './AuthProvider';
 import { format, isToday, formatDistanceToNow } from 'date-fns';
 import {
   Phone, MessageCircle, Plus, MoreHorizontal, Check, Users,
-  BarChart3, Trash2, ChevronDown, UserCheck, X, UserPlus
+  BarChart3, Trash2, ChevronDown, UserCheck, X, UserPlus, Bell
 } from 'lucide-react';
+import { ReminderModal } from './ReminderModal';
 import { Stats } from './Stats';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -91,6 +92,7 @@ export function LeadTable() {
   const [activeStatusDropdownId, setActiveStatusDropdownId] = useState<string | null>(null);
   const [activeAssigneeDropdownId, setActiveAssigneeDropdownId] = useState<string | null>(null);
   const [whatsappLead, setWhatsappLead] = useState<any | null>(null);
+  const [reminderLead, setReminderLead] = useState<any | null>(null);
   const [showAnalytics, setShowAnalytics] = useState(false);
   // Fixed-position dropdown coordinates
   const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number; direction: 'down' | 'up' }>({ top: 0, left: 0, direction: 'down' });
@@ -493,6 +495,7 @@ export function LeadTable() {
                 <span className="font-medium text-gray-700 text-xs">{lead.phone}</span>
                 <a href={`tel:${lead.phone}`} className="p-1.5 bg-blue-50 text-blue-500 rounded-lg"><Phone className="w-3.5 h-3.5" /></a>
                 <button onClick={() => setWhatsappLead(lead)} className="p-1.5 bg-green-50 text-green-500 rounded-lg"><MessageCircle className="w-3.5 h-3.5" /></button>
+                <button onClick={() => setReminderLead(lead)} title="Set Reminder" className="p-1.5 bg-indigo-50 text-indigo-500 rounded-lg"><Bell className="w-3.5 h-3.5" /></button>
                 <span className="text-[11px] text-gray-400 flex items-center gap-0.5"><Users className="w-3 h-3" />{lead.pax || 1} pax</span>
                 {lead.travelDate && <span className="text-[11px] text-gray-400">· {lead.travelDate}</span>}
               </div>
@@ -678,6 +681,10 @@ export function LeadTable() {
                         className="text-blue-500 hover:text-blue-600 transition-colors flex-shrink-0">
                         <Phone className="w-3.5 h-3.5" />
                       </a>
+                      <button onClick={() => setReminderLead(lead)} title="Set Reminder"
+                        className="text-gray-400 hover:text-indigo-600 transition-colors flex-shrink-0">
+                        <Bell className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                     <div className="flex items-center gap-2 text-[11px] text-gray-400">
                       <span className="flex items-center gap-0.5"><Users className="w-3 h-3" />{lead.pax || 1} pax</span>
@@ -837,6 +844,7 @@ export function LeadTable() {
     </div>
 
     {whatsappLead && <WhatsAppModal lead={whatsappLead} onClose={() => setWhatsappLead(null)} />}
+    {reminderLead && <ReminderModal lead={reminderLead} onClose={() => setReminderLead(null)} />}
     </>
   );
 }

@@ -171,7 +171,7 @@
       "source_file": "eslint.config.mjs",
       "source_location": "L1",
       "id": "eslint_config_mjs",
-      "community": 37,
+      "community": 38,
       "norm_label": "eslint.config.mjs"
     },
     {
@@ -207,7 +207,7 @@
       "source_file": "next-env.d.ts",
       "source_location": "L1",
       "id": "next_env_d_ts",
-      "community": 38,
+      "community": 39,
       "norm_label": "next-env.d.ts"
     },
     {
@@ -216,7 +216,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\next.config.ts",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_next_config_ts",
-      "community": 39,
+      "community": 40,
       "norm_label": "next.config.ts"
     },
     {
@@ -225,7 +225,7 @@
       "source_file": "postcss.config.mjs",
       "source_location": "L1",
       "id": "postcss_config_mjs",
-      "community": 40,
+      "community": 41,
       "norm_label": "postcss.config.mjs"
     },
     {
@@ -234,7 +234,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\layout.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_layout_tsx",
-      "community": 20,
+      "community": 21,
       "norm_label": "layout.tsx"
     },
     {
@@ -243,7 +243,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\layout.tsx",
       "source_location": "L76",
       "id": "layout_rootlayout",
-      "community": 20,
+      "community": 21,
       "norm_label": "rootlayout()"
     },
     {
@@ -252,7 +252,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\page.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_page_tsx",
-      "community": 21,
+      "community": 22,
       "norm_label": "page.tsx"
     },
     {
@@ -261,7 +261,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\page.tsx",
       "source_location": "L133",
       "id": "page_rootpage",
-      "community": 21,
+      "community": 22,
       "norm_label": "rootpage()"
     },
     {
@@ -270,7 +270,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\robots.ts",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_robots_ts",
-      "community": 22,
+      "community": 23,
       "norm_label": "robots.ts"
     },
     {
@@ -279,7 +279,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\robots.ts",
       "source_location": "L5",
       "id": "robots_robots",
-      "community": 22,
+      "community": 23,
       "norm_label": "robots()"
     },
     {
@@ -288,7 +288,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\sitemap.ts",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_sitemap_ts",
-      "community": 23,
+      "community": 24,
       "norm_label": "sitemap.ts"
     },
     {
@@ -297,7 +297,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\sitemap.ts",
       "source_location": "L10",
       "id": "sitemap_sitemap",
-      "community": 23,
+      "community": 24,
       "norm_label": "sitemap()"
     },
     {
@@ -306,7 +306,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\(landing)\\layout.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_landing_layout_tsx",
-      "community": 24,
+      "community": 25,
       "norm_label": "layout.tsx"
     },
     {
@@ -315,7 +315,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\(landing)\\layout.tsx",
       "source_location": "L67",
       "id": "layout_landinglayout",
-      "community": 24,
+      "community": 25,
       "norm_label": "landinglayout()"
     },
     {
@@ -324,7 +324,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\(landing)\\blog\\page.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_landing_blog_page_tsx",
-      "community": 25,
+      "community": 26,
       "norm_label": "page.tsx"
     },
     {
@@ -333,7 +333,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\(landing)\\blog\\page.tsx",
       "source_location": "L46",
       "id": "page_blogpage",
-      "community": 25,
+      "community": 26,
       "norm_label": "blogpage()"
     },
     {
@@ -342,7 +342,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\(landing)\\features\\page.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_landing_features_page_tsx",
-      "community": 26,
+      "community": 27,
       "norm_label": "page.tsx"
     },
     {
@@ -351,7 +351,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\(landing)\\features\\page.tsx",
       "source_location": "L53",
       "id": "page_featurespage",
-      "community": 26,
+      "community": 27,
       "norm_label": "featurespage()"
     },
     {
@@ -360,7 +360,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\(landing)\\pricing\\page.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_landing_pricing_page_tsx",
-      "community": 41,
+      "community": 42,
       "norm_label": "page.tsx"
     },
     {
@@ -369,7 +369,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\(landing)\\travel-crm-vs-leadsquared\\page.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_landing_travel_crm_vs_leadsquared_page_tsx",
-      "community": 27,
+      "community": 28,
       "norm_label": "page.tsx"
     },
     {
@@ -378,7 +378,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\(landing)\\travel-crm-vs-leadsquared\\page.tsx",
       "source_location": "L23",
       "id": "page_vsleadsquaredpage",
-      "community": 27,
+      "community": 28,
       "norm_label": "vsleadsquaredpage()"
     },
     {
@@ -387,7 +387,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\(landing)\\travel-crm-vs-spreadsheets\\page.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_landing_travel_crm_vs_spreadsheets_page_tsx",
-      "community": 42,
+      "community": 43,
       "norm_label": "page.tsx"
     },
     {
@@ -396,7 +396,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\(landing)\\travel-crm-[city]\\page.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_landing_travel_crm_city_page_tsx",
-      "community": 14,
+      "community": 15,
       "norm_label": "page.tsx"
     },
     {
@@ -405,7 +405,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\(landing)\\travel-crm-[city]\\page.tsx",
       "source_location": "L71",
       "id": "page_generatestaticparams",
-      "community": 14,
+      "community": 15,
       "norm_label": "generatestaticparams()"
     },
     {
@@ -414,7 +414,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\(landing)\\travel-crm-[city]\\page.tsx",
       "source_location": "L75",
       "id": "page_generatemetadata",
-      "community": 14,
+      "community": 15,
       "norm_label": "generatemetadata()"
     },
     {
@@ -423,7 +423,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\(landing)\\travel-crm-[city]\\page.tsx",
       "source_location": "L95",
       "id": "page_citypage",
-      "community": 14,
+      "community": 15,
       "norm_label": "citypage()"
     },
     {
@@ -432,7 +432,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\(landing)\\travel-lead-management\\page.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_landing_travel_lead_management_page_tsx",
-      "community": 43,
+      "community": 44,
       "norm_label": "page.tsx"
     },
     {
@@ -441,7 +441,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\(landing)\\whatsapp-bot-travel-agency\\page.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_landing_whatsapp_bot_travel_agency_page_tsx",
-      "community": 44,
+      "community": 45,
       "norm_label": "page.tsx"
     },
     {
@@ -639,6 +639,42 @@
       "source_file": "app\\api\\admin\\update-org-subscription\\route.ts",
       "source_location": "L1",
       "id": "app_api_admin_update_org_subscription_route_ts",
+      "community": 0,
+      "norm_label": "route.ts"
+    },
+    {
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\email-marketing\\send\\route.ts",
+      "source_location": "L1",
+      "id": "c_users_omagrawal_downloads_dashboardaistudio_app_api_email_marketing_send_route_ts",
+      "community": 0,
+      "norm_label": "route.ts"
+    },
+    {
+      "label": "substitute()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\email-marketing\\send\\route.ts",
+      "source_location": "L8",
+      "id": "route_substitute",
+      "community": 0,
+      "norm_label": "substitute()"
+    },
+    {
+      "label": "concurrencyLimit()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\email-marketing\\send\\route.ts",
+      "source_location": "L12",
+      "id": "route_concurrencylimit",
+      "community": 0,
+      "norm_label": "concurrencylimit()"
+    },
+    {
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\email-marketing\\test\\route.ts",
+      "source_location": "L1",
+      "id": "c_users_omagrawal_downloads_dashboardaistudio_app_api_email_marketing_test_route_ts",
       "community": 0,
       "norm_label": "route.ts"
     },
@@ -1305,7 +1341,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\campaign\\[orgId]\\page.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_campaign_orgid_page_tsx",
-      "community": 13,
+      "community": 14,
       "norm_label": "page.tsx"
     },
     {
@@ -1314,7 +1350,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\campaign\\[orgId]\\page.tsx",
       "source_location": "L180",
       "id": "page_gettickettypes",
-      "community": 13,
+      "community": 14,
       "norm_label": "gettickettypes()"
     },
     {
@@ -1323,7 +1359,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\campaign\\[orgId]\\page.tsx",
       "source_location": "L186",
       "id": "page_calctotal",
-      "community": 13,
+      "community": 14,
       "norm_label": "calctotal()"
     },
     {
@@ -1332,7 +1368,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\campaign\\[orgId]\\page.tsx",
       "source_location": "L189",
       "id": "page_openbooking",
-      "community": 13,
+      "community": 14,
       "norm_label": "openbooking()"
     },
     {
@@ -1341,7 +1377,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\campaign\\[orgId]\\page.tsx",
       "source_location": "L200",
       "id": "page_handlebookingsubmit",
-      "community": 13,
+      "community": 14,
       "norm_label": "handlebookingsubmit()"
     },
     {
@@ -1377,7 +1413,7 @@
       "source_file": "app\\chatbot\\page.tsx",
       "source_location": "L1",
       "id": "app_chatbot_page_tsx",
-      "community": 7,
+      "community": 8,
       "norm_label": "page.tsx"
     },
     {
@@ -1386,7 +1422,7 @@
       "source_file": "app\\chatbot\\page.tsx",
       "source_location": "L36",
       "id": "page_newquestion",
-      "community": 7,
+      "community": 8,
       "norm_label": "newquestion()"
     },
     {
@@ -1395,7 +1431,7 @@
       "source_file": "app\\chatbot\\page.tsx",
       "source_location": "L76",
       "id": "page_addquestion",
-      "community": 7,
+      "community": 8,
       "norm_label": "addquestion()"
     },
     {
@@ -1404,7 +1440,7 @@
       "source_file": "app\\chatbot\\page.tsx",
       "source_location": "L80",
       "id": "page_removequestion",
-      "community": 7,
+      "community": 8,
       "norm_label": "removequestion()"
     },
     {
@@ -1413,7 +1449,7 @@
       "source_file": "app\\chatbot\\page.tsx",
       "source_location": "L86",
       "id": "page_updatequestion",
-      "community": 7,
+      "community": 8,
       "norm_label": "updatequestion()"
     },
     {
@@ -1422,7 +1458,7 @@
       "source_file": "app\\chatbot\\page.tsx",
       "source_location": "L90",
       "id": "page_movequestion",
-      "community": 7,
+      "community": 8,
       "norm_label": "movequestion()"
     },
     {
@@ -1431,7 +1467,7 @@
       "source_file": "app\\chatbot\\page.tsx",
       "source_location": "L102",
       "id": "page_addchoice",
-      "community": 7,
+      "community": 8,
       "norm_label": "addchoice()"
     },
     {
@@ -1440,7 +1476,7 @@
       "source_file": "app\\chatbot\\page.tsx",
       "source_location": "L108",
       "id": "page_updatechoice",
-      "community": 7,
+      "community": 8,
       "norm_label": "updatechoice()"
     },
     {
@@ -1449,7 +1485,7 @@
       "source_file": "app\\chatbot\\page.tsx",
       "source_location": "L116",
       "id": "page_removechoice",
-      "community": 7,
+      "community": 8,
       "norm_label": "removechoice()"
     },
     {
@@ -1458,8 +1494,125 @@
       "source_file": "app\\chatbot\\page.tsx",
       "source_location": "L123",
       "id": "page_save",
-      "community": 7,
+      "community": 8,
       "norm_label": "save()"
+    },
+    {
+      "label": "page.tsx",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
+      "source_location": "L1",
+      "id": "c_users_omagrawal_downloads_dashboardaistudio_app_email_marketing_page_tsx",
+      "community": 7,
+      "norm_label": "page.tsx"
+    },
+    {
+      "label": "substitute()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
+      "source_location": "L61",
+      "id": "page_substitute",
+      "community": 7,
+      "norm_label": "substitute()"
+    },
+    {
+      "label": "saveSmtp()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
+      "source_location": "L181",
+      "id": "page_savesmtp",
+      "community": 7,
+      "norm_label": "savesmtp()"
+    },
+    {
+      "label": "testSmtp()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
+      "source_location": "L195",
+      "id": "page_testsmtp",
+      "community": 7,
+      "norm_label": "testsmtp()"
+    },
+    {
+      "label": "saveTemplate()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
+      "source_location": "L216",
+      "id": "page_savetemplate",
+      "community": 7,
+      "norm_label": "savetemplate()"
+    },
+    {
+      "label": "deleteTemplate()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
+      "source_location": "L231",
+      "id": "page_deletetemplate",
+      "community": 7,
+      "norm_label": "deletetemplate()"
+    },
+    {
+      "label": "openNewTemplate()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
+      "source_location": "L238",
+      "id": "page_opennewtemplate",
+      "community": 7,
+      "norm_label": "opennewtemplate()"
+    },
+    {
+      "label": "openEditTemplate()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
+      "source_location": "L243",
+      "id": "page_openedittemplate",
+      "community": 7,
+      "norm_label": "openedittemplate()"
+    },
+    {
+      "label": "closeTemplateModal()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
+      "source_location": "L248",
+      "id": "page_closetemplatemodal",
+      "community": 7,
+      "norm_label": "closetemplatemodal()"
+    },
+    {
+      "label": "sendCampaign()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
+      "source_location": "L253",
+      "id": "page_sendcampaign",
+      "community": 7,
+      "norm_label": "sendcampaign()"
+    },
+    {
+      "label": "closeNewCampaign()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
+      "source_location": "L278",
+      "id": "page_closenewcampaign",
+      "community": 7,
+      "norm_label": "closenewcampaign()"
+    },
+    {
+      "label": "applyTemplate()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
+      "source_location": "L286",
+      "id": "page_applytemplate",
+      "community": 7,
+      "norm_label": "applytemplate()"
+    },
+    {
+      "label": "insertVar()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
+      "source_location": "L292",
+      "id": "page_insertvar",
+      "community": 7,
+      "norm_label": "insertvar()"
     },
     {
       "label": "page.tsx",
@@ -1503,7 +1656,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\marketing\\page.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_marketing_page_tsx",
-      "community": 28,
+      "community": 29,
       "norm_label": "page.tsx"
     },
     {
@@ -1512,7 +1665,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\marketing\\page.tsx",
       "source_location": "L32",
       "id": "page_marketingpage",
-      "community": 28,
+      "community": 29,
       "norm_label": "marketingpage()"
     },
     {
@@ -1521,7 +1674,7 @@
       "source_file": "app\\onboarding\\page.tsx",
       "source_location": "L1",
       "id": "app_onboarding_page_tsx",
-      "community": 29,
+      "community": 30,
       "norm_label": "page.tsx"
     },
     {
@@ -1530,7 +1683,7 @@
       "source_file": "app\\onboarding\\page.tsx",
       "source_location": "L32",
       "id": "page_handlecreateorg",
-      "community": 29,
+      "community": 30,
       "norm_label": "handlecreateorg()"
     },
     {
@@ -1683,7 +1836,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\site\\[orgId]\\page.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_site_orgid_page_tsx",
-      "community": 30,
+      "community": 31,
       "norm_label": "page.tsx"
     },
     {
@@ -1692,7 +1845,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\site\\[orgId]\\page.tsx",
       "source_location": "L59",
       "id": "page_fetchdata",
-      "community": 30,
+      "community": 31,
       "norm_label": "fetchdata()"
     },
     {
@@ -1701,7 +1854,7 @@
       "source_file": "app\\site\\[orgId]\\about-us\\page.tsx",
       "source_location": "L1",
       "id": "app_site_orgid_about_us_page_tsx",
-      "community": 45,
+      "community": 46,
       "norm_label": "page.tsx"
     },
     {
@@ -1710,7 +1863,7 @@
       "source_file": "app\\site\\[orgId]\\cancellation-refund\\page.tsx",
       "source_location": "L1",
       "id": "app_site_orgid_cancellation_refund_page_tsx",
-      "community": 46,
+      "community": 47,
       "norm_label": "page.tsx"
     },
     {
@@ -1719,7 +1872,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\site\\[orgId]\\package\\[packageId]\\page.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_site_orgid_package_packageid_page_tsx",
-      "community": 47,
+      "community": 48,
       "norm_label": "page.tsx"
     },
     {
@@ -1728,7 +1881,7 @@
       "source_file": "app\\site\\[orgId]\\privacy-policy\\page.tsx",
       "source_location": "L1",
       "id": "app_site_orgid_privacy_policy_page_tsx",
-      "community": 48,
+      "community": 49,
       "norm_label": "page.tsx"
     },
     {
@@ -1737,7 +1890,7 @@
       "source_file": "app\\site\\[orgId]\\terms-conditions\\page.tsx",
       "source_location": "L1",
       "id": "app_site_orgid_terms_conditions_page_tsx",
-      "community": 49,
+      "community": 50,
       "norm_label": "page.tsx"
     },
     {
@@ -1746,7 +1899,7 @@
       "source_file": "app\\team\\page.tsx",
       "source_location": "L1",
       "id": "app_team_page_tsx",
-      "community": 11,
+      "community": 12,
       "norm_label": "page.tsx"
     },
     {
@@ -1755,7 +1908,7 @@
       "source_file": "app\\team\\page.tsx",
       "source_location": "L48",
       "id": "page_sendrolenotification",
-      "community": 11,
+      "community": 12,
       "norm_label": "sendrolenotification()"
     },
     {
@@ -1764,7 +1917,7 @@
       "source_file": "app\\team\\page.tsx",
       "source_location": "L60",
       "id": "page_handleinvite",
-      "community": 11,
+      "community": 12,
       "norm_label": "handleinvite()"
     },
     {
@@ -1773,7 +1926,7 @@
       "source_file": "app\\team\\page.tsx",
       "source_location": "L101",
       "id": "page_handlerevokeinvite",
-      "community": 11,
+      "community": 12,
       "norm_label": "handlerevokeinvite()"
     },
     {
@@ -1782,7 +1935,7 @@
       "source_file": "app\\team\\page.tsx",
       "source_location": "L109",
       "id": "page_handlerolechange",
-      "community": 11,
+      "community": 12,
       "norm_label": "handlerolechange()"
     },
     {
@@ -1791,7 +1944,7 @@
       "source_file": "app\\team\\page.tsx",
       "source_location": "L119",
       "id": "page_handletoggleassignment",
-      "community": 11,
+      "community": 12,
       "norm_label": "handletoggleassignment()"
     },
     {
@@ -1800,7 +1953,7 @@
       "source_file": "app\\team\\page.tsx",
       "source_location": "L128",
       "id": "page_handleremovemember",
-      "community": 11,
+      "community": 12,
       "norm_label": "handleremovemember()"
     },
     {
@@ -1908,7 +2061,7 @@
       "source_file": "components\\CreateLeadModal.tsx",
       "source_location": "L1",
       "id": "components_createleadmodal_tsx",
-      "community": 31,
+      "community": 32,
       "norm_label": "createleadmodal.tsx"
     },
     {
@@ -1917,7 +2070,7 @@
       "source_file": "components\\CreateLeadModal.tsx",
       "source_location": "L20",
       "id": "createleadmodal_handlesubmit",
-      "community": 31,
+      "community": 32,
       "norm_label": "handlesubmit()"
     },
     {
@@ -1926,7 +2079,7 @@
       "source_file": "components\\Header.tsx",
       "source_location": "L1",
       "id": "components_header_tsx",
-      "community": 50,
+      "community": 51,
       "norm_label": "header.tsx"
     },
     {
@@ -1935,7 +2088,7 @@
       "source_file": "components\\ImageUploadGrid.tsx",
       "source_location": "L1",
       "id": "components_imageuploadgrid_tsx",
-      "community": 18,
+      "community": 19,
       "norm_label": "imageuploadgrid.tsx"
     },
     {
@@ -1944,7 +2097,7 @@
       "source_file": "components\\ImageUploadGrid.tsx",
       "source_location": "L16",
       "id": "imageuploadgrid_handleupload",
-      "community": 18,
+      "community": 19,
       "norm_label": "handleupload()"
     },
     {
@@ -1953,7 +2106,7 @@
       "source_file": "components\\ImageUploadGrid.tsx",
       "source_location": "L55",
       "id": "imageuploadgrid_handleremove",
-      "community": 18,
+      "community": 19,
       "norm_label": "handleremove()"
     },
     {
@@ -1962,7 +2115,7 @@
       "source_file": "components\\ImportLeads.tsx",
       "source_location": "L1",
       "id": "components_importleads_tsx",
-      "community": 32,
+      "community": 33,
       "norm_label": "importleads.tsx"
     },
     {
@@ -1971,7 +2124,7 @@
       "source_file": "components\\ImportLeads.tsx",
       "source_location": "L16",
       "id": "importleads_handlefileupload",
-      "community": 32,
+      "community": 33,
       "norm_label": "handlefileupload()"
     },
     {
@@ -2169,7 +2322,7 @@
       "source_file": "components\\MobilePreview.tsx",
       "source_location": "L1",
       "id": "components_mobilepreview_tsx",
-      "community": 51,
+      "community": 52,
       "norm_label": "mobilepreview.tsx"
     },
     {
@@ -2178,7 +2331,7 @@
       "source_file": "components\\NotificationBanner.tsx",
       "source_location": "L1",
       "id": "components_notificationbanner_tsx",
-      "community": 8,
+      "community": 9,
       "norm_label": "notificationbanner.tsx"
     },
     {
@@ -2187,7 +2340,7 @@
       "source_file": "components\\NotificationBanner.tsx",
       "source_location": "L21",
       "id": "notificationbanner_isios",
-      "community": 8,
+      "community": 9,
       "norm_label": "isios()"
     },
     {
@@ -2196,7 +2349,7 @@
       "source_file": "components\\NotificationBanner.tsx",
       "source_location": "L26",
       "id": "notificationbanner_isstandalone",
-      "community": 8,
+      "community": 9,
       "norm_label": "isstandalone()"
     },
     {
@@ -2205,7 +2358,7 @@
       "source_file": "components\\NotificationBanner.tsx",
       "source_location": "L66",
       "id": "notificationbanner_handleenable",
-      "community": 8,
+      "community": 9,
       "norm_label": "handleenable()"
     },
     {
@@ -2214,7 +2367,7 @@
       "source_file": "components\\NotificationBanner.tsx",
       "source_location": "L84",
       "id": "notificationbanner_handledismiss",
-      "community": 8,
+      "community": 9,
       "norm_label": "handledismiss()"
     },
     {
@@ -2277,7 +2430,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\components\\SchemaMarkup.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_components_schemamarkup_tsx",
-      "community": 33,
+      "community": 34,
       "norm_label": "schemamarkup.tsx"
     },
     {
@@ -2286,7 +2439,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\components\\SchemaMarkup.tsx",
       "source_location": "L104",
       "id": "schemamarkup_schemamarkup",
-      "community": 33,
+      "community": 34,
       "norm_label": "schemamarkup()"
     },
     {
@@ -2322,7 +2475,7 @@
       "source_file": "components\\SidebarContext.tsx",
       "source_location": "L1",
       "id": "components_sidebarcontext_tsx",
-      "community": 19,
+      "community": 20,
       "norm_label": "sidebarcontext.tsx"
     },
     {
@@ -2331,7 +2484,7 @@
       "source_file": "components\\SidebarContext.tsx",
       "source_location": "L10",
       "id": "sidebarcontext_sidebarprovider",
-      "community": 19,
+      "community": 20,
       "norm_label": "sidebarprovider()"
     },
     {
@@ -2340,7 +2493,7 @@
       "source_file": "components\\SidebarContext.tsx",
       "source_location": "L19",
       "id": "sidebarcontext_usesidebar",
-      "community": 19,
+      "community": 20,
       "norm_label": "usesidebar()"
     },
     {
@@ -2349,7 +2502,7 @@
       "source_file": "components\\SiteFooter.tsx",
       "source_location": "L1",
       "id": "components_sitefooter_tsx",
-      "community": 52,
+      "community": 53,
       "norm_label": "sitefooter.tsx"
     },
     {
@@ -2358,7 +2511,7 @@
       "source_file": "components\\Stats.tsx",
       "source_location": "L1",
       "id": "components_stats_tsx",
-      "community": 34,
+      "community": 35,
       "norm_label": "stats.tsx"
     },
     {
@@ -2367,7 +2520,7 @@
       "source_file": "components\\Stats.tsx",
       "source_location": "L10",
       "id": "stats_stats",
-      "community": 34,
+      "community": 35,
       "norm_label": "stats()"
     },
     {
@@ -2376,7 +2529,7 @@
       "source_file": "components\\WhatsAppModal.tsx",
       "source_location": "L1",
       "id": "components_whatsappmodal_tsx",
-      "community": 10,
+      "community": 11,
       "norm_label": "whatsappmodal.tsx"
     },
     {
@@ -2385,7 +2538,7 @@
       "source_file": "components\\WhatsAppModal.tsx",
       "source_location": "L26",
       "id": "whatsappmodal_parseinline",
-      "community": 10,
+      "community": 11,
       "norm_label": "parseinline()"
     },
     {
@@ -2394,7 +2547,7 @@
       "source_file": "components\\WhatsAppModal.tsx",
       "source_location": "L69",
       "id": "whatsappmodal_resolvevars",
-      "community": 10,
+      "community": 11,
       "norm_label": "resolvevars()"
     },
     {
@@ -2403,7 +2556,7 @@
       "source_file": "components\\WhatsAppModal.tsx",
       "source_location": "L77",
       "id": "whatsappmodal_wrapselection",
-      "community": 10,
+      "community": 11,
       "norm_label": "wrapselection()"
     },
     {
@@ -2412,7 +2565,7 @@
       "source_file": "components\\WhatsAppModal.tsx",
       "source_location": "L90",
       "id": "whatsappmodal_insertvar",
-      "community": 10,
+      "community": 11,
       "norm_label": "insertvar()"
     },
     {
@@ -2421,7 +2574,7 @@
       "source_file": "components\\WhatsAppModal.tsx",
       "source_location": "L98",
       "id": "whatsappmodal_handlesave",
-      "community": 10,
+      "community": 11,
       "norm_label": "handlesave()"
     },
     {
@@ -2430,7 +2583,7 @@
       "source_file": "components\\WhatsAppModal.tsx",
       "source_location": "L121",
       "id": "whatsappmodal_handledelete",
-      "community": 10,
+      "community": 11,
       "norm_label": "handledelete()"
     },
     {
@@ -2439,7 +2592,7 @@
       "source_file": "components\\WhatsAppModal.tsx",
       "source_location": "L126",
       "id": "whatsappmodal_handlesend",
-      "community": 10,
+      "community": 11,
       "norm_label": "handlesend()"
     },
     {
@@ -2448,7 +2601,7 @@
       "source_file": "components\\WhatsAppModal.tsx",
       "source_location": "L135",
       "id": "whatsappmodal_opencompose",
-      "community": 10,
+      "community": 11,
       "norm_label": "opencompose()"
     },
     {
@@ -2457,7 +2610,7 @@
       "source_file": "hooks\\use-mobile.ts",
       "source_location": "L1",
       "id": "hooks_use_mobile_ts",
-      "community": 35,
+      "community": 36,
       "norm_label": "use-mobile.ts"
     },
     {
@@ -2466,7 +2619,7 @@
       "source_file": "hooks\\use-mobile.ts",
       "source_location": "L5",
       "id": "use_mobile_useismobile",
-      "community": 35,
+      "community": 36,
       "norm_label": "useismobile()"
     },
     {
@@ -2482,7 +2635,7 @@
       "label": "getDefaultFeatures()",
       "file_type": "code",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\features.ts",
-      "source_location": "L91",
+      "source_location": "L94",
       "id": "features_getdefaultfeatures",
       "community": 4,
       "norm_label": "getdefaultfeatures()"
@@ -2491,7 +2644,7 @@
       "label": "featuresFromPlan()",
       "file_type": "code",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\features.ts",
-      "source_location": "L98",
+      "source_location": "L101",
       "id": "features_featuresfromplan",
       "community": 4,
       "norm_label": "featuresfromplan()"
@@ -2500,7 +2653,7 @@
       "label": "trialDaysLeft()",
       "file_type": "code",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\features.ts",
-      "source_location": "L106",
+      "source_location": "L109",
       "id": "features_trialdaysleft",
       "community": 4,
       "norm_label": "trialdaysleft()"
@@ -2511,7 +2664,7 @@
       "source_file": "lib\\firebase-admin.ts",
       "source_location": "L1",
       "id": "lib_firebase_admin_ts",
-      "community": 53,
+      "community": 54,
       "norm_label": "firebase-admin.ts"
     },
     {
@@ -2520,7 +2673,7 @@
       "source_file": "lib\\firebase-messaging.ts",
       "source_location": "L1",
       "id": "lib_firebase_messaging_ts",
-      "community": 8,
+      "community": 9,
       "norm_label": "firebase-messaging.ts"
     },
     {
@@ -2529,7 +2682,7 @@
       "source_file": "lib\\firebase-messaging.ts",
       "source_location": "L10",
       "id": "firebase_messaging_getmessaginginstance",
-      "community": 8,
+      "community": 9,
       "norm_label": "getmessaginginstance()"
     },
     {
@@ -2538,7 +2691,7 @@
       "source_file": "lib\\firebase-messaging.ts",
       "source_location": "L24",
       "id": "firebase_messaging_requestnotificationpermission",
-      "community": 8,
+      "community": 9,
       "norm_label": "requestnotificationpermission()"
     },
     {
@@ -2547,7 +2700,7 @@
       "source_file": "lib\\firebase-messaging.ts",
       "source_location": "L74",
       "id": "firebase_messaging_silenttokenrefresh",
-      "community": 8,
+      "community": 9,
       "norm_label": "silenttokenrefresh()"
     },
     {
@@ -2556,7 +2709,7 @@
       "source_file": "lib\\firebase-messaging.ts",
       "source_location": "L90",
       "id": "firebase_messaging_setupforegroundhandler",
-      "community": 8,
+      "community": 9,
       "norm_label": "setupforegroundhandler()"
     },
     {
@@ -2565,7 +2718,7 @@
       "source_file": "lib\\firebase.ts",
       "source_location": "L1",
       "id": "lib_firebase_ts",
-      "community": 54,
+      "community": 55,
       "norm_label": "firebase.ts"
     },
     {
@@ -2574,7 +2727,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\invoice-pdf-server.ts",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_lib_invoice_pdf_server_ts",
-      "community": 15,
+      "community": 18,
       "norm_label": "invoice-pdf-server.ts"
     },
     {
@@ -2583,7 +2736,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\invoice-pdf-server.ts",
       "source_location": "L13",
       "id": "invoice_pdf_server_ensurefonts",
-      "community": 15,
+      "community": 18,
       "norm_label": "ensurefonts()"
     },
     {
@@ -2592,7 +2745,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\invoice-pdf-server.ts",
       "source_location": "L27",
       "id": "invoice_pdf_server_fmt",
-      "community": 15,
+      "community": 18,
       "norm_label": "fmt()"
     },
     {
@@ -2601,7 +2754,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\invoice-pdf-server.ts",
       "source_location": "L29",
       "id": "invoice_pdf_server_generateinvoicepdfbuffer",
-      "community": 15,
+      "community": 18,
       "norm_label": "generateinvoicepdfbuffer()"
     },
     {
@@ -2628,7 +2781,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_lib_meta_whatsapp_ts",
-      "community": 9,
+      "community": 10,
       "norm_label": "meta-whatsapp.ts"
     },
     {
@@ -2646,7 +2799,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
       "source_location": "L33",
       "id": "meta_whatsapp_metapost",
-      "community": 9,
+      "community": 10,
       "norm_label": "metapost()"
     },
     {
@@ -2655,7 +2808,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
       "source_location": "L49",
       "id": "meta_whatsapp_sendtext",
-      "community": 9,
+      "community": 10,
       "norm_label": "sendtext()"
     },
     {
@@ -2664,7 +2817,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
       "source_location": "L58",
       "id": "meta_whatsapp_sendbuttons",
-      "community": 9,
+      "community": 10,
       "norm_label": "sendbuttons()"
     },
     {
@@ -2673,7 +2826,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
       "source_location": "L84",
       "id": "meta_whatsapp_sendlist",
-      "community": 9,
+      "community": 10,
       "norm_label": "sendlist()"
     },
     {
@@ -2682,7 +2835,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
       "source_location": "L120",
       "id": "meta_whatsapp_sendchoicequestion",
-      "community": 9,
+      "community": 10,
       "norm_label": "sendchoicequestion()"
     },
     {
@@ -2691,7 +2844,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
       "source_location": "L141",
       "id": "meta_whatsapp_sendimage",
-      "community": 9,
+      "community": 10,
       "norm_label": "sendimage()"
     },
     {
@@ -2700,7 +2853,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
       "source_location": "L154",
       "id": "meta_whatsapp_senddocument",
-      "community": 9,
+      "community": 10,
       "norm_label": "senddocument()"
     },
     {
@@ -2709,7 +2862,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
       "source_location": "L169",
       "id": "meta_whatsapp_markread",
-      "community": 9,
+      "community": 10,
       "norm_label": "markread()"
     },
     {
@@ -2718,7 +2871,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\meta-whatsapp.ts",
       "source_location": "L181",
       "id": "meta_whatsapp_extractmetamessage",
-      "community": 9,
+      "community": 10,
       "norm_label": "extractmetamessage()"
     },
     {
@@ -2763,7 +2916,7 @@
       "source_file": "lib\\utils.ts",
       "source_location": "L1",
       "id": "lib_utils_ts",
-      "community": 36,
+      "community": 37,
       "norm_label": "utils.ts"
     },
     {
@@ -2772,7 +2925,7 @@
       "source_file": "lib\\utils.ts",
       "source_location": "L4",
       "id": "utils_cn",
-      "community": 36,
+      "community": 37,
       "norm_label": "cn()"
     },
     {
@@ -2781,7 +2934,7 @@
       "source_file": "public\\firebase-messaging-sw.js",
       "source_location": "L1",
       "id": "public_firebase_messaging_sw_js",
-      "community": 55,
+      "community": 56,
       "norm_label": "firebase-messaging-sw.js"
     },
     {
@@ -2790,7 +2943,7 @@
       "source_file": "types\\html2pdf.d.ts",
       "source_location": "L1",
       "id": "types_html2pdf_d_ts",
-      "community": 56,
+      "community": 57,
       "norm_label": "html2pdf.d.ts"
     },
     {
@@ -2802,7 +2955,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 12,
+      "community": 13,
       "norm_label": "ai studio app",
       "id": "readme_ai_studio_app"
     },
@@ -2815,7 +2968,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 12,
+      "community": 13,
       "norm_label": "node.js",
       "id": "readme_nodejs"
     },
@@ -2828,7 +2981,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 12,
+      "community": 13,
       "norm_label": "gemini_api_key",
       "id": "readme_gemini_api_key"
     },
@@ -2841,7 +2994,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 12,
+      "community": 13,
       "norm_label": ".env.local",
       "id": "readme_env_local"
     },
@@ -2854,7 +3007,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 12,
+      "community": 13,
       "norm_label": "npm install",
       "id": "readme_npm_install"
     },
@@ -2867,7 +3020,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 12,
+      "community": 13,
       "norm_label": "npm run dev",
       "id": "readme_npm_run_dev"
     },
@@ -2880,7 +3033,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 12,
+      "community": 13,
       "norm_label": "github banner image",
       "id": "readme_gh_banner"
     }
@@ -3837,6 +3990,42 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\email-marketing\\send\\route.ts",
+      "source_location": "L29",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_api_email_marketing_send_route_ts",
+      "_tgt": "route_post",
+      "source": "route_post",
+      "target": "c_users_omagrawal_downloads_dashboardaistudio_app_api_email_marketing_send_route_ts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\email-marketing\\send\\route.ts",
+      "source_location": "L74",
+      "weight": 1.0,
+      "_src": "route_post",
+      "_tgt": "route_concurrencylimit",
+      "source": "route_post",
+      "target": "route_concurrencylimit",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\email-marketing\\test\\route.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_api_email_marketing_test_route_ts",
+      "_tgt": "route_post",
+      "source": "route_post",
+      "target": "c_users_omagrawal_downloads_dashboardaistudio_app_api_email_marketing_test_route_ts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "app\\api\\leads\\create\\route.ts",
       "source_location": "L7",
       "weight": 1.0,
@@ -4588,6 +4777,30 @@
       "_tgt": "route_generateuniquecode",
       "source": "app_api_admin_manage_referral_code_route_ts",
       "target": "route_generateuniquecode",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\email-marketing\\send\\route.ts",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_api_email_marketing_send_route_ts",
+      "_tgt": "route_substitute",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_app_api_email_marketing_send_route_ts",
+      "target": "route_substitute",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\email-marketing\\send\\route.ts",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_api_email_marketing_send_route_ts",
+      "_tgt": "route_concurrencylimit",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_app_api_email_marketing_send_route_ts",
+      "target": "route_concurrencylimit",
       "confidence_score": 1.0
     },
     {
@@ -6045,6 +6258,162 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
+      "source_location": "L61",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_email_marketing_page_tsx",
+      "_tgt": "page_substitute",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_app_email_marketing_page_tsx",
+      "target": "page_substitute",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
+      "source_location": "L181",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_email_marketing_page_tsx",
+      "_tgt": "page_savesmtp",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_app_email_marketing_page_tsx",
+      "target": "page_savesmtp",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
+      "source_location": "L195",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_email_marketing_page_tsx",
+      "_tgt": "page_testsmtp",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_app_email_marketing_page_tsx",
+      "target": "page_testsmtp",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
+      "source_location": "L216",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_email_marketing_page_tsx",
+      "_tgt": "page_savetemplate",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_app_email_marketing_page_tsx",
+      "target": "page_savetemplate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
+      "source_location": "L231",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_email_marketing_page_tsx",
+      "_tgt": "page_deletetemplate",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_app_email_marketing_page_tsx",
+      "target": "page_deletetemplate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
+      "source_location": "L238",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_email_marketing_page_tsx",
+      "_tgt": "page_opennewtemplate",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_app_email_marketing_page_tsx",
+      "target": "page_opennewtemplate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
+      "source_location": "L243",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_email_marketing_page_tsx",
+      "_tgt": "page_openedittemplate",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_app_email_marketing_page_tsx",
+      "target": "page_openedittemplate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
+      "source_location": "L248",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_email_marketing_page_tsx",
+      "_tgt": "page_closetemplatemodal",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_app_email_marketing_page_tsx",
+      "target": "page_closetemplatemodal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
+      "source_location": "L253",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_email_marketing_page_tsx",
+      "_tgt": "page_sendcampaign",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_app_email_marketing_page_tsx",
+      "target": "page_sendcampaign",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
+      "source_location": "L278",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_email_marketing_page_tsx",
+      "_tgt": "page_closenewcampaign",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_app_email_marketing_page_tsx",
+      "target": "page_closenewcampaign",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
+      "source_location": "L286",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_email_marketing_page_tsx",
+      "_tgt": "page_applytemplate",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_app_email_marketing_page_tsx",
+      "target": "page_applytemplate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
+      "source_location": "L292",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_email_marketing_page_tsx",
+      "_tgt": "page_insertvar",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_app_email_marketing_page_tsx",
+      "target": "page_insertvar",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
+      "source_location": "L225",
+      "weight": 1.0,
+      "_src": "page_savetemplate",
+      "_tgt": "page_closetemplatemodal",
+      "source": "page_savetemplate",
+      "target": "page_closetemplatemodal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "app\\home\\page.tsx",
       "source_location": "L13",
       "weight": 1.0,
@@ -7330,7 +7699,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\features.ts",
-      "source_location": "L91",
+      "source_location": "L94",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_lib_features_ts",
       "_tgt": "features_getdefaultfeatures",
@@ -7342,7 +7711,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\features.ts",
-      "source_location": "L98",
+      "source_location": "L101",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_lib_features_ts",
       "_tgt": "features_featuresfromplan",
@@ -7354,7 +7723,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\features.ts",
-      "source_location": "L106",
+      "source_location": "L109",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_lib_features_ts",
       "_tgt": "features_trialdaysleft",

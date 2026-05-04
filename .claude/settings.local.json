@@ -9,7 +9,13 @@
       "Bash(node -e ' *)",
       "Bash(node --import tsx/esm -e ' *)",
       "Bash(node -e \"const OD = require\\('pdfmake/js/OutputDocument'\\); console.log\\(typeof OD.default, Object.getOwnPropertyNames\\(OD.default.prototype\\)\\)\")",
-      "Bash(npx firebase *)"
+      "Bash(npx firebase *)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\OmAgrawal\\\\Downloads\\\\dashboardaistudio\" -Recurse -Filter \"*.ts\" -o Name)",
+      "Bash(Select-String -Pattern \"whatsapp|chatbot\")",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); deps={**d.get\\('dependencies',{}\\), **d.get\\('devDependencies',{}\\)}; [print\\(k,v\\) for k,v in deps.items\\(\\)]\")",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\OmAgrawal\\\\Downloads\\\\dashboardaistudio\\\\app\\\\api\" -Recurse -File)",
+      "Bash(Select-Object FullName)",
+      "Bash(Sort-Object FullName)"
     ]
   },
   "enabledPlugins": {
