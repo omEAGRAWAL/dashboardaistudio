@@ -3,7 +3,7 @@
 import {
   LayoutDashboard, Users, Settings, LogOut, Shield, Package, CalendarCheck,
   Globe, ClipboardList, Smartphone, X, MessageSquare, Bot, ShieldCheck,
-  Building2, Lock, AlertTriangle,
+  Building2, Lock, AlertTriangle, Megaphone,
 } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import { useOrg } from './OrgProvider';
@@ -112,7 +112,8 @@ export function Sidebar() {
           <NavItem href="/home"             icon={LayoutDashboard} label="Leads"            featureKey={FEATURES.LEADS_CRM}        onClick={handleNav} />
           <NavItem href="/bookings"         icon={CalendarCheck}   label="Bookings"         featureKey={FEATURES.BOOKINGS}         onClick={handleNav} />
           <NavItem href="/packages"         icon={Package}         label="Packages"         featureKey={FEATURES.PACKAGES}         onClick={handleNav} />
-          <NavItem href="/whatsapp"         icon={MessageSquare}   label="WhatsApp Inbox"   featureKey={FEATURES.WHATSAPP_INBOX}   onClick={handleNav} />
+          <NavItem href="/whatsapp"         icon={MessageSquare}   label="WhatsApp Inbox"     featureKey={FEATURES.WHATSAPP_INBOX}      onClick={handleNav} />
+          <NavItem href="/broadcasts"       icon={Megaphone}       label="WA Broadcasts"      featureKey={FEATURES.WHATSAPP_BROADCAST}  requiredRole="org_admin" onClick={handleNav} />
           <NavItem href="/team"             icon={Users}           label="Team"             featureKey={FEATURES.TEAM_MANAGEMENT}  requiredRole="org_admin" onClick={handleNav} />
           <NavItem href="/website-builder"  icon={Globe}           label="Website Builder"  featureKey={FEATURES.WEBSITE_BUILDER}  requiredRole="org_admin" onClick={handleNav} />
           <NavItem href="/booking-form"     icon={ClipboardList}   label="Booking Form"     featureKey={FEATURES.BOOKING_FORM}     requiredRole="org_admin" onClick={handleNav} />

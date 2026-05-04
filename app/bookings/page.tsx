@@ -581,36 +581,15 @@ export default function BookingsPage() {
     try {
       const invoiceNum = incrementInvoiceCounter(orgId);
       const invoiceBooking = buildInvoiceBooking(invoiceModalBooking);
-      const profileForInvoice = { ...businessProfile };
-      if (businessProfile.logoUrl) {
-        profileForInvoice.logoUrl = await getLogoDataUrl(businessProfile.logoUrl);
-      }
-      const html = generateInvoiceHTML(invoiceBooking, profileForInvoice, invoiceNum);
-      const blob = await generatePdfBlob(html);
-      
-      // Convert blob to base64
-      const reader = new FileReader();
-      const base64Promise = new Promise<string>((resolve) => {
-        reader.onloadend = () => {
-          const base64 = (reader.result as string).split(',')[1];
-          resolve(base64);
-        };
-      });
-      reader.readAsDataURL(blob);
-      const pdfBase64 = await base64Promise;
 
-      // Send to API
+      // Server generates PDF from booking data — no blob or upload needed
       const res = await fetch('/api/send-invoice', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          customerEmail: invoiceModalBooking.customerEmail,
-          customerName: invoiceModalBooking.customerName,
+          booking: invoiceBooking,
+          profile: businessProfile,
           invoiceNumber: invoiceNum,
-          packageTitle: invoiceModalBooking.packageTitle,
-          agencyName: businessProfile.agencyName,
-          pdfBase64,
-          invoiceHtml: html,
         }),
       });
 

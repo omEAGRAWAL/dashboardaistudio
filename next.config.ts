@@ -1,6 +1,7 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ['pdfmake'],
   reactStrictMode: true,
   eslint: {
     ignoreDuringBuilds: true,

@@ -3,7 +3,7 @@
 import { useAuth } from '@/components/AuthProvider';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
-import { Settings as SettingsIcon, Webhook, Copy, CheckCircle2, MessageSquare, Phone, AlertCircle, Loader2, ExternalLink, Globe, Link2, RefreshCw, Trash2, CreditCard, Eye, EyeOff, Gift } from 'lucide-react';
+import { Settings as SettingsIcon, Webhook, Copy, CheckCircle2, MessageSquare, Phone, AlertCircle, Loader2, ExternalLink, Globe, Link2, RefreshCw, Trash2, CreditCard, Eye, EyeOff, Gift, Zap, ChevronDown } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
@@ -33,13 +33,37 @@ export default function SettingsPage() {
 
   const platformHost = process.env.NEXT_PUBLIC_PLATFORM_HOST ?? 'yourapp.vercel.app';
 
-  // Self-serve WhatsApp connection form
+  // WhatsApp provider tab
+  const [waProviderTab, setWaProviderTab] = useState<'twilio' | 'meta'>('twilio');
+
+  // Self-serve WhatsApp connection form (Twilio)
   const [selfPhoneNumber, setSelfPhoneNumber] = useState('');
   const [selfAccountSid, setSelfAccountSid] = useState('');
   const [selfAuthToken, setSelfAuthToken] = useState('');
   const [connecting, setConnecting] = useState(false);
   const [connectError, setConnectError] = useState('');
   const [connectSuccess, setConnectSuccess] = useState('');
+
+  // Meta connection state (loaded from Firestore)
+  const [waVerifiedName, setWaVerifiedName] = useState<string | null>(null);
+  const [waTokenExpiresAt, setWaTokenExpiresAt] = useState<string | null>(null);
+
+  // Embedded Signup: data captured from the Meta popup message event
+  const [metaSignupPhoneId, setMetaSignupPhoneId] = useState('');
+  const [metaSignupWabaId, setMetaSignupWabaId] = useState('');
+
+  // Embedded Signup: exchange in progress
+  const [metaExchanging, setMetaExchanging] = useState(false);
+  const [metaExchangeError, setMetaExchangeError] = useState('');
+
+  // Manual fallback form
+  const [showManualMeta, setShowManualMeta] = useState(false);
+  const [metaPhoneNumberId, setMetaPhoneNumberId] = useState('');
+  const [metaAccessToken, setMetaAccessToken] = useState('');
+  const [metaConnecting, setMetaConnecting] = useState(false);
+  const [metaConnectError, setMetaConnectError] = useState('');
+  const [metaConnectSuccess, setMetaConnectSuccess] = useState('');
+  const [showMetaToken, setShowMetaToken] = useState(false);
 
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
   const webhookUrl = orgId && origin ? `${origin}/api/webhooks/meta-leads?orgId=${orgId}` : '';
@@ -91,8 +115,11 @@ export default function SettingsPage() {
     if (!orgId) return;
     getDoc(doc(db, 'whatsapp_numbers', orgId)).then((snap) => {
       if (snap.exists()) {
-        setWaNumber(snap.data().phoneNumber);
-        setWaSource(snap.data().source || 'om');
+        const d = snap.data();
+        setWaNumber(d.phoneNumber ?? null);
+        setWaSource(d.source || 'om');
+        setWaVerifiedName(d.verifiedName ?? null);
+        setWaTokenExpiresAt(d.tokenExpiresAt ?? null);
       }
     });
     // Load existing domain config
@@ -199,6 +226,136 @@ export default function SettingsPage() {
       setConnectError(e.message);
     } finally {
       setConnecting(false);
+    }
+  };
+
+  // Load Facebook JS SDK and listen for the Embedded Signup message
+  useEffect(() => {
+    if (waProviderTab !== 'meta' || typeof window === 'undefined') return;
+
+    (window as any).fbAsyncInit = function () {
+      (window as any).FB?.init({
+        appId: process.env.NEXT_PUBLIC_META_APP_ID,
+        version: 'v19.0',
+        xfbml: false,
+        cookie: false,
+      });
+    };
+
+    if (!document.getElementById('fb-jssdk')) {
+      const s = document.createElement('script');
+      s.id = 'fb-jssdk';
+      s.src = 'https://connect.facebook.net/en_US/sdk.js';
+      s.async = true;
+      document.head.appendChild(s);
+    } else {
+      // SDK already present — re-init if needed
+      (window as any).FB?.init({
+        appId: process.env.NEXT_PUBLIC_META_APP_ID,
+        version: 'v19.0',
+        xfbml: false,
+        cookie: false,
+      });
+    }
+
+    // Capture phone_number_id + waba_id sent by the Embedded Signup popup
+    const handleMessage = (event: MessageEvent) => {
+      if (event.origin !== 'https://www.facebook.com') return;
+      try {
+        const msg = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        if (msg?.type === 'WA_EMBEDDED_SIGNUP' && msg.event === 'FINISH') {
+          const { phone_number_id, waba_id } = msg.data ?? {};
+          if (phone_number_id) setMetaSignupPhoneId(phone_number_id);
+          if (waba_id)        setMetaSignupWabaId(waba_id);
+        }
+      } catch { /* ignore non-JSON messages */ }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [waProviderTab]);
+
+  const launchEmbeddedSignup = () => {
+    setMetaExchangeError('');
+    setMetaSignupPhoneId('');
+    setMetaSignupWabaId('');
+
+    const FB = (window as any).FB;
+    if (!FB) { setMetaExchangeError('Facebook SDK not loaded yet. Please wait a moment and try again.'); return; }
+
+    const configId = process.env.NEXT_PUBLIC_META_CONFIG_ID;
+    if (!configId) { setMetaExchangeError('Meta Config ID not set. Add NEXT_PUBLIC_META_CONFIG_ID to your environment variables.'); return; }
+
+    FB.login(
+      async (response: any) => {
+        if (response.authResponse?.code) {
+          await exchangeMetaCode(response.authResponse.code);
+        } else {
+          setMetaExchangeError('Meta login was cancelled or not authorised.');
+        }
+      },
+      {
+        config_id: configId,
+        response_type: 'code',
+        override_default_response_type: true,
+        extras: { sessionInfoVersion: '2' },
+      },
+    );
+  };
+
+  const exchangeMetaCode = async (code: string) => {
+    if (!orgId) return;
+    setMetaExchanging(true);
+    setMetaExchangeError('');
+    try {
+      const res = await fetch('/api/whatsapp/meta-exchange', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orgId,
+          code,
+          phoneNumberId: metaSignupPhoneId,
+          wabaId: metaSignupWabaId || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setWaNumber(data.phoneNumber);
+      setWaSource('meta_agency');
+      setWaVerifiedName(data.verifiedName || null);
+      setWaTokenExpiresAt(data.tokenExpiresAt || null);
+    } catch (e: any) {
+      setMetaExchangeError(e.message ?? 'Failed to connect. Please try again.');
+    } finally {
+      setMetaExchanging(false);
+    }
+  };
+
+  const handleConnectMetaNumber = async () => {
+    if (!orgId || !metaPhoneNumberId || !metaAccessToken) return;
+    setMetaConnecting(true);
+    setMetaConnectError('');
+    setMetaConnectSuccess('');
+    try {
+      const res = await fetch('/api/whatsapp/connect-meta-number', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orgId,
+          phoneNumberId: metaPhoneNumberId.trim(),
+          accessToken: metaAccessToken.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setWaNumber(data.phoneNumber || metaPhoneNumberId);
+      setWaSource('meta_agency');
+      setMetaConnectSuccess(`Connected: ${data.verifiedName || data.phoneNumber}`);
+      setMetaPhoneNumberId('');
+      setMetaAccessToken('');
+    } catch (e: any) {
+      setMetaConnectError(e.message);
+    } finally {
+      setMetaConnecting(false);
     }
   };
 
@@ -420,7 +577,9 @@ export default function SettingsPage() {
                       <div className="flex-1">
                         <p className="text-sm font-semibold text-gray-900">{waNumber}</p>
                         <p className="text-xs text-green-600">
-                          {waSource === 'agency' ? 'Connected via your own Twilio account' : 'Connected via admin-assigned number'}
+                          {waSource === 'agency' ? 'Connected via your own Twilio account'
+                            : waSource === 'meta_agency' ? 'Connected via Meta Cloud API'
+                            : 'Connected via admin-assigned number'}
                           {' — chatbot and inbox are active'}
                         </p>
                       </div>
@@ -438,68 +597,253 @@ export default function SettingsPage() {
                     </div>
                   )}
 
-                  {/* Self-serve: connect own Twilio number */}
+                  {/* Provider tabs */}
                   <div className="border border-gray-200 rounded-xl overflow-hidden">
-                    <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
+                    <div className="px-4 py-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
                       <p className="text-sm font-semibold text-gray-800">Connect Your Own WhatsApp Number</p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        Have your own Twilio account with a WhatsApp-enabled number?{' '}
-                        <a href="https://console.twilio.com" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline inline-flex items-center gap-0.5">
-                          Twilio Console <ExternalLink className="w-3 h-3" />
-                        </a>
-                      </p>
-                    </div>
-                    <div className="p-4 space-y-3">
-                      <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Your WhatsApp Phone Number</label>
-                        <input type="text" placeholder="+919xxxxxxxxx" value={selfPhoneNumber}
-                          onChange={(e) => setSelfPhoneNumber(e.target.value)}
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
+                      <div className="flex gap-1 p-0.5 bg-gray-200 rounded-lg">
+                        {(['twilio', 'meta'] as const).map((tab) => (
+                          <button
+                            key={tab}
+                            onClick={() => setWaProviderTab(tab)}
+                            className={`px-3 py-1 rounded-md text-xs font-semibold transition-colors ${
+                              waProviderTab === tab ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'
+                            }`}
+                          >
+                            {tab === 'twilio' ? 'Twilio' : 'Meta Cloud API'}
+                          </button>
+                        ))}
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-xs font-medium text-gray-600 mb-1">Twilio Account SID</label>
-                          <input type="text" placeholder="ACxxxxxxxx" value={selfAccountSid}
-                            onChange={(e) => setSelfAccountSid(e.target.value)}
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-green-500" />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-medium text-gray-600 mb-1">Auth Token</label>
-                          <input type="password" placeholder="••••••••" value={selfAuthToken}
-                            onChange={(e) => setSelfAuthToken(e.target.value)}
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-green-500" />
-                        </div>
-                      </div>
-                      <p className="text-xs text-gray-400">Your credentials are stored securely server-side and never exposed to clients.</p>
-
-                      {connectError && (
-                        <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-                          <AlertCircle className="w-4 h-4 shrink-0" /> {connectError}
-                        </div>
-                      )}
-                      {connectSuccess && (
-                        <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
-                          <CheckCircle2 className="w-4 h-4 shrink-0" /> {connectSuccess}
-                        </div>
-                      )}
-
-                      <button
-                        onClick={handleConnectOwnNumber}
-                        disabled={connecting || !selfPhoneNumber || !selfAccountSid || !selfAuthToken}
-                        className="flex items-center gap-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
-                      >
-                        {connecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Phone className="w-4 h-4" />}
-                        {connecting ? 'Connecting…' : 'Connect Number'}
-                      </button>
                     </div>
+
+                    {/* ── Twilio tab ── */}
+                    {waProviderTab === 'twilio' && (
+                      <div className="p-4 space-y-3">
+                        <p className="text-xs text-gray-500">
+                          Have your own Twilio account with a WhatsApp-enabled number?{' '}
+                          <a href="https://console.twilio.com" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline inline-flex items-center gap-0.5">
+                            Twilio Console <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </p>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">Your WhatsApp Phone Number</label>
+                          <input type="text" placeholder="+919xxxxxxxxx" value={selfPhoneNumber}
+                            onChange={(e) => setSelfPhoneNumber(e.target.value)}
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Twilio Account SID</label>
+                            <input type="text" placeholder="ACxxxxxxxx" value={selfAccountSid}
+                              onChange={(e) => setSelfAccountSid(e.target.value)}
+                              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-green-500" />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Auth Token</label>
+                            <input type="password" placeholder="••••••••" value={selfAuthToken}
+                              onChange={(e) => setSelfAuthToken(e.target.value)}
+                              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-green-500" />
+                          </div>
+                        </div>
+                        <p className="text-xs text-gray-400">Credentials are stored securely server-side and never exposed to clients.</p>
+
+                        {connectError && (
+                          <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                            <AlertCircle className="w-4 h-4 shrink-0" /> {connectError}
+                          </div>
+                        )}
+                        {connectSuccess && (
+                          <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+                            <CheckCircle2 className="w-4 h-4 shrink-0" /> {connectSuccess}
+                          </div>
+                        )}
+
+                        <button
+                          onClick={handleConnectOwnNumber}
+                          disabled={connecting || !selfPhoneNumber || !selfAccountSid || !selfAuthToken}
+                          className="flex items-center gap-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+                        >
+                          {connecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Phone className="w-4 h-4" />}
+                          {connecting ? 'Connecting…' : 'Connect Number'}
+                        </button>
+
+                        <p className="text-xs text-gray-400 pt-1">
+                          Webhook URL for Twilio console:{' '}
+                          <code className="bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">
+                            {origin}/api/webhooks/whatsapp
+                          </code>
+                        </p>
+                      </div>
+                    )}
+
+                    {/* ── Meta Cloud API tab ── */}
+                    {waProviderTab === 'meta' && (
+                      <div className="p-4 space-y-4">
+
+                        {/* Already connected via Meta — show health card */}
+                        {waSource === 'meta_agency' && waNumber && (() => {
+                          const daysLeft = waTokenExpiresAt
+                            ? Math.ceil((new Date(waTokenExpiresAt).getTime() - Date.now()) / 86_400_000)
+                            : null;
+                          const expiredOrSoon = daysLeft !== null && daysLeft <= 7;
+                          return (
+                            <div className={`rounded-xl border p-4 space-y-3 ${expiredOrSoon ? 'bg-amber-50 border-amber-200' : 'bg-green-50 border-green-200'}`}>
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="flex items-center gap-3">
+                                  <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${expiredOrSoon ? 'bg-amber-100' : 'bg-green-100'}`}>
+                                    <Zap className={`w-4 h-4 ${expiredOrSoon ? 'text-amber-600' : 'text-green-600'}`} />
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-semibold text-gray-900">{waNumber}</p>
+                                    {waVerifiedName && <p className="text-xs text-gray-500">{waVerifiedName}</p>}
+                                  </div>
+                                </div>
+                                <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${expiredOrSoon ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'}`}>
+                                  Meta API
+                                </span>
+                              </div>
+
+                              {/* Token expiry info */}
+                              {daysLeft !== null ? (
+                                <div className={`flex items-center gap-2 text-xs rounded-lg px-3 py-2 ${
+                                  daysLeft <= 0
+                                    ? 'bg-red-100 text-red-700'
+                                    : daysLeft <= 7
+                                    ? 'bg-amber-100 text-amber-700'
+                                    : 'bg-white/60 text-gray-600'
+                                }`}>
+                                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                                  {daysLeft <= 0
+                                    ? 'Token expired — reconnect now to restore messaging.'
+                                    : daysLeft <= 7
+                                    ? `Token expires in ${daysLeft} day${daysLeft === 1 ? '' : 's'} — reconnect soon.`
+                                    : `Token valid for ${daysLeft} more days (until ${new Date(waTokenExpiresAt!).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}).`
+                                  }
+                                </div>
+                              ) : (
+                                <p className="text-xs text-gray-500">Token expiry unknown — reconnect via Embedded Signup to start tracking.</p>
+                              )}
+
+                              {/* Reconnect button */}
+                              <button
+                                onClick={launchEmbeddedSignup}
+                                disabled={metaExchanging}
+                                className="flex items-center gap-2 bg-white border border-green-300 hover:bg-green-50 disabled:opacity-50 text-green-700 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
+                              >
+                                {metaExchanging ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
+                                {metaExchanging ? 'Reconnecting…' : 'Reconnect / Refresh Token'}
+                              </button>
+                            </div>
+                          );
+                        })()}
+
+                        {/* Not yet connected — primary Embedded Signup CTA */}
+                        {waSource !== 'meta_agency' && (
+                          <div className="space-y-3">
+                            <div className="flex items-start gap-2 text-xs text-indigo-800 bg-indigo-50 border border-indigo-100 rounded-lg p-3">
+                              <Zap className="w-3.5 h-3.5 shrink-0 mt-0.5 text-indigo-500" />
+                              <span>
+                                Meta Cloud API is cheaper (~₹0.4/msg) and enables interactive tap-to-reply buttons.
+                                Click below — your agency logs into Facebook, selects their WhatsApp Business number,
+                                and Yatrik handles the rest automatically.
+                              </span>
+                            </div>
+
+                            <button
+                              onClick={launchEmbeddedSignup}
+                              disabled={metaExchanging}
+                              className="w-full flex items-center justify-center gap-2 bg-[#1877F2] hover:bg-[#166FE5] disabled:opacity-50 text-white text-sm font-semibold px-4 py-3 rounded-xl transition-colors"
+                            >
+                              {metaExchanging
+                                ? <><Loader2 className="w-4 h-4 animate-spin" /> Connecting…</>
+                                : <><Zap className="w-4 h-4" /> Connect WhatsApp via Meta</>
+                              }
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Errors */}
+                        {metaExchangeError && (
+                          <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                            <AlertCircle className="w-4 h-4 shrink-0" /> {metaExchangeError}
+                          </div>
+                        )}
+
+                        {/* Webhook info */}
+                        <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-600 space-y-1">
+                          <p className="font-semibold text-gray-700">Webhook URL (set once in your Meta App):</p>
+                          <code suppressHydrationWarning className="block text-gray-700 break-all">{origin}/api/webhooks/whatsapp</code>
+                          <p className="text-gray-400">
+                            Verify token: <code className="bg-gray-100 px-1 rounded">WHATSAPP_VERIFY_TOKEN</code> from your .env
+                            · Subscribe to: <code className="bg-gray-100 px-1 rounded">messages</code>
+                          </p>
+                        </div>
+
+                        {/* Manual fallback — collapsed by default */}
+                        <div className="border border-gray-200 rounded-lg overflow-hidden">
+                          <button
+                            type="button"
+                            onClick={() => setShowManualMeta((v) => !v)}
+                            className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-gray-500 hover:bg-gray-50 transition-colors"
+                          >
+                            <span>Advanced: paste credentials manually</span>
+                            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showManualMeta ? 'rotate-180' : ''}`} />
+                          </button>
+
+                          {showManualMeta && (
+                            <div className="p-3 space-y-3 border-t border-gray-100">
+                              <p className="text-xs text-gray-400">Use a System User token (never expires) from Meta Business Manager for a permanent connection.</p>
+                              <div>
+                                <label className="block text-xs font-medium text-gray-600 mb-1">Phone Number ID</label>
+                                <input
+                                  type="text"
+                                  placeholder="1234567890123456"
+                                  value={metaPhoneNumberId}
+                                  onChange={(e) => setMetaPhoneNumberId(e.target.value)}
+                                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-green-500"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-medium text-gray-600 mb-1">Access Token</label>
+                                <div className="relative">
+                                  <input
+                                    type={showMetaToken ? 'text' : 'password'}
+                                    placeholder="EAAxxxxxxxxxxxxx"
+                                    value={metaAccessToken}
+                                    onChange={(e) => setMetaAccessToken(e.target.value)}
+                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-green-500"
+                                  />
+                                  <button type="button" onClick={() => setShowMetaToken((v) => !v)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                    {showMetaToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                  </button>
+                                </div>
+                              </div>
+                              {metaConnectError && (
+                                <div className="flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-100 rounded-lg px-2.5 py-1.5">
+                                  <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {metaConnectError}
+                                </div>
+                              )}
+                              {metaConnectSuccess && (
+                                <div className="flex items-center gap-2 text-xs text-green-600 bg-green-50 border border-green-100 rounded-lg px-2.5 py-1.5">
+                                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> {metaConnectSuccess}
+                                </div>
+                              )}
+                              <button
+                                onClick={handleConnectMetaNumber}
+                                disabled={metaConnecting || !metaPhoneNumberId || !metaAccessToken}
+                                className="flex items-center gap-2 bg-gray-800 hover:bg-gray-900 disabled:opacity-50 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
+                              >
+                                {metaConnecting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
+                                {metaConnecting ? 'Verifying…' : 'Connect manually'}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                      </div>
+                    )}
                   </div>
-
-                  <p className="text-xs text-gray-400">
-                    Twilio webhook URL (set this in your Twilio console):{' '}
-                    <code className="bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">
-                      {origin}/api/webhooks/whatsapp
-                    </code>
-                  </p>
                 </div>
               </div>
 
