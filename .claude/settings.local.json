@@ -8,7 +8,8 @@
       "Bash(npm run *)",
       "Bash(node -e ' *)",
       "Bash(node --import tsx/esm -e ' *)",
-      "Bash(node -e \"const OD = require\\('pdfmake/js/OutputDocument'\\); console.log\\(typeof OD.default, Object.getOwnPropertyNames\\(OD.default.prototype\\)\\)\")"
+      "Bash(node -e \"const OD = require\\('pdfmake/js/OutputDocument'\\); console.log\\(typeof OD.default, Object.getOwnPropertyNames\\(OD.default.prototype\\)\\)\")",
+      "Bash(npx firebase *)"
     ]
   },
   "enabledPlugins": {

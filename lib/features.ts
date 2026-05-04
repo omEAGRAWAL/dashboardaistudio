@@ -13,6 +13,7 @@ export const FEATURES = {
   ANALYTICS:         'analytics',
   RAZORPAY_PAYMENTS: 'razorpay_payments',
   API_WEBHOOKS:      'api_webhooks',
+  EMAIL_MARKETING:   'email_marketing',
 } as const;
 
 export type FeatureKey = typeof FEATURES[keyof typeof FEATURES];
@@ -39,6 +40,7 @@ export const PLAN_FEATURES: Record<string, FeatureKey[]> = {
     FEATURES.TEAM_MANAGEMENT,
     FEATURES.CUSTOM_DOMAIN,
     FEATURES.ANALYTICS,
+    FEATURES.EMAIL_MARKETING,
   ],
   enterprise: Object.values(FEATURES) as FeatureKey[],
 };
@@ -72,6 +74,7 @@ export const FEATURE_LABELS: Record<FeatureKey, string> = {
   analytics:         'Analytics',
   razorpay_payments: 'Razorpay Payments',
   api_webhooks:      'API & Webhooks',
+  email_marketing:   'Email Marketing',
 };
 
 export type SubscriptionStatus = 'trialing' | 'active' | 'past_due' | 'suspended' | 'cancelled';

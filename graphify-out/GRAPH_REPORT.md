@@ -1,7 +1,7 @@
 # Graph Report - C:\Users\OmAgrawal\Downloads\dashboardaistudio  (2026-05-04)
 
 ## Corpus Check
-- 99 files · ~108,845 words
+- 99 files · ~108,828 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -159,7 +159,7 @@ Nodes (0):
 
 ### Community 15 - "Community 15"
 Cohesion: 0.83
-Nodes (3): fmt(), generateInvoicePdfBuffer(), getPrinter()
+Nodes (3): ensureFonts(), fmt(), generateInvoicePdfBuffer()
 
 ### Community 16 - "Community 16"
 Cohesion: 0.67

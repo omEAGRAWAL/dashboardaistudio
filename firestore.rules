@@ -299,6 +299,17 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Email marketing settings (SMTP config + saved templates) — org admin only
+    match /email_settings/{orgId} {
+      allow read, write: if isAuthenticated() && (isSuperAdmin() || getUserOrgId() == orgId);
+    }
+
+    // Email campaign history — read/write by org admin; created by server via Admin SDK
+    match /email_campaigns/{orgId}/items/{campaignId} {
+      allow read: if isAuthenticated() && (isSuperAdmin() || getUserOrgId() == orgId);
+      allow write: if false; // Admin SDK only
+    }
+
     // WhatsApp message log
     match /whatsapp_messages/{messageId} {
       allow read: if isAuthenticated() && (isSuperAdmin() || resource.data.orgId == getUserOrgId());
