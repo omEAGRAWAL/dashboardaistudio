@@ -1,28 +1,27 @@
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const PdfPrinter = (require('pdfmake/js/Printer') as {
-  default: new (fonts: Record<string, unknown>) => {
-    createPdfKitDocument(docDefinition: unknown, options?: unknown): NodeJS.EventEmitter & { end(): void };
-  };
-}).default;
+const pdfmakeInstance = require('pdfmake') as {
+  virtualfs: { writeFileSync(name: string, data: Buffer): void };
+  addFonts(fonts: Record<string, unknown>): void;
+  setUrlAccessPolicy(fn: () => boolean): void;
+  createPdf(doc: unknown): { getBuffer(): Promise<Buffer> };
+};
 import type { TDocumentDefinitions, Content, TableCell } from 'pdfmake/interfaces';
 import type { InvoiceBooking, BusinessProfile } from './invoice-template';
 
-let _printer: InstanceType<typeof PdfPrinter> | null = null;
+let _fontsLoaded = false;
 
-function getPrinter(): InstanceType<typeof PdfPrinter> {
-  if (_printer) return _printer;
+function ensureFonts() {
+  if (_fontsLoaded) return;
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const vfsFonts = require('pdfmake/build/vfs_fonts');
-  const vfs: Record<string, string> = vfsFonts.pdfMake?.vfs ?? vfsFonts;
-  _printer = new PdfPrinter({
-    Roboto: {
-      normal:      Buffer.from(vfs['Roboto-Regular.ttf'],       'base64'),
-      bold:        Buffer.from(vfs['Roboto-Medium.ttf'],        'base64'),
-      italics:     Buffer.from(vfs['Roboto-Italic.ttf'],        'base64'),
-      bolditalics: Buffer.from(vfs['Roboto-MediumItalic.ttf'], 'base64'),
-    },
-  });
-  return _printer;
+  const vfsData = require('pdfmake/build/vfs_fonts');
+  const vfs: Record<string, string> = vfsData.pdfMake?.vfs ?? vfsData;
+  pdfmakeInstance.virtualfs.writeFileSync('Roboto-Regular.ttf',      Buffer.from(vfs['Roboto-Regular.ttf'],      'base64'));
+  pdfmakeInstance.virtualfs.writeFileSync('Roboto-Medium.ttf',       Buffer.from(vfs['Roboto-Medium.ttf'],       'base64'));
+  pdfmakeInstance.virtualfs.writeFileSync('Roboto-Italic.ttf',       Buffer.from(vfs['Roboto-Italic.ttf'],       'base64'));
+  pdfmakeInstance.virtualfs.writeFileSync('Roboto-MediumItalic.ttf', Buffer.from(vfs['Roboto-MediumItalic.ttf'], 'base64'));
+  pdfmakeInstance.addFonts({ Roboto: { normal: 'Roboto-Regular.ttf', bold: 'Roboto-Medium.ttf', italics: 'Roboto-Italic.ttf', bolditalics: 'Roboto-MediumItalic.ttf' } });
+  pdfmakeInstance.setUrlAccessPolicy(() => false); // block external URL fetching
+  _fontsLoaded = true;
 }
 
 const fmt = (n: number) => n.toLocaleString('en-IN');
@@ -335,14 +334,6 @@ export async function generateInvoicePdfBuffer(
     }),
   };
 
-  const printer = getPrinter();
-  const pdfDoc  = printer.createPdfKitDocument(doc);
-
-  return new Promise<Buffer>((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    pdfDoc.on('data',  (c: Buffer) => chunks.push(c));
-    pdfDoc.on('end',   ()          => resolve(Buffer.concat(chunks)));
-    pdfDoc.on('error', reject);
-    pdfDoc.end();
-  });
+  ensureFonts();
+  return pdfmakeInstance.createPdf(doc).getBuffer();
 }
