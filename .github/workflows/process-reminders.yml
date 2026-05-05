@@ -1,0 +1,25 @@
+name: Process Reminders
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch: # allow manual trigger from GitHub UI
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - name: Trigger reminder processing
+        run: |
+          curl -s -o response.json -w "%{http_code}" -X POST \
+            "${{ secrets.APP_URL }}/api/reminders/process" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" > status_code.txt
+          STATUS=$(cat status_code.txt)
+          echo "HTTP status: $STATUS"
+          cat response.json
+          if [ "$STATUS" != "200" ]; then
+            echo "::error::Reminder processing failed with status $STATUS"
+            exit 1
+          fi
