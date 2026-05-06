@@ -165,14 +165,13 @@ export async function POST(req: NextRequest) {
         const usersSnap = await adminDb
           .collection('users')
           .where('orgId', '==', reminder.orgId)
-          .where('status', '!=', 'suspended')
           .get();
         recipientIds = usersSnap.docs
-          .map(d => d.id)
-          .filter(id => {
-            const data = usersSnap.docs.find(d => d.id === id)?.data();
-            return data?.role !== 'superadmin';
-          });
+          .filter(d => {
+            const data = d.data();
+            return data?.role !== 'superadmin' && data?.status !== 'suspended';
+          })
+          .map(d => d.id);
       }
 
       if (!recipientIds.length) {
