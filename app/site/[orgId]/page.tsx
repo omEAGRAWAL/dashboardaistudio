@@ -1,15 +1,14 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
-import { collection, query, where, getDocs, doc, getDoc, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import Image from 'next/image';
+import Link from 'next/link';
 import {
   MapPin, Clock, ArrowRight, Phone, Mail, MessageCircle,
-  Instagram, Star, Send, Award, Shield, Users, Globe,
-  ChevronDown
+  Instagram, Star, Award, Shield, Users, Globe,
 } from 'lucide-react';
-import Link from 'next/link';
+import { adminDb } from '@/lib/firebase-admin';
+import { NavbarClient } from './NavbarClient';
+import { ContactForm } from './ContactForm';
+
+export const revalidate = 60;
 
 const FEAT_ICONS = [
   <Award key="a" className="w-7 h-7" />,
@@ -18,70 +17,16 @@ const FEAT_ICONS = [
   <Globe key="d" className="w-7 h-7" />,
 ];
 
-export default function PublicSitePage() {
-  const params = useParams();
-  const orgId = params.orgId as string;
+export default async function PublicSitePage({ params }: { params: Promise<{ orgId: string }> }) {
+  const { orgId } = await params;
 
-  const [settings, setSettings] = useState<any>(null);
-  const [packages, setPackages] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [scrolled, setScrolled] = useState(false);
+  const [settingsSnap, pkgsSnap] = await Promise.all([
+    adminDb.doc(`website_settings/${orgId}`).get(),
+    adminDb.collection('packages').where('orgId', '==', orgId).get(),
+  ]);
 
-  const [formData, setFormData] = useState({ name: '', phone: '', email: '', destination: '', message: '' });
-  const [formState, setFormState] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
-
-  const handleContact = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormState('submitting');
-    try {
-      await addDoc(collection(db, 'leads'), {
-        name: formData.name.trim(),
-        phone: formData.phone.trim(),
-        email: formData.email.trim() || null,
-        latestRemark: [formData.destination && `Destination: ${formData.destination}`, formData.message].filter(Boolean).join(' | ') || null,
-        source: 'Website',
-        status: 'New Enquiry',
-        category: 'None',
-        pax: 1,
-        orgId,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
-      setFormState('success');
-      setFormData({ name: '', phone: '', email: '', destination: '', message: '' });
-    } catch {
-      setFormState('error');
-    }
-  };
-
-  useEffect(() => {
-    if (!orgId) return;
-    const fetchData = async () => {
-      try {
-        const settingsDoc = await getDoc(doc(db, 'website_settings', orgId));
-        if (settingsDoc.exists()) setSettings(settingsDoc.data());
-        const pkgsSnapshot = await getDocs(query(collection(db, 'packages'), where('orgId', '==', orgId)));
-        setPackages(pkgsSnapshot.docs.map(d => ({ id: d.id, ...d.data() })));
-      } catch (e) { console.error(e); }
-      finally { setLoading(false); }
-    };
-    fetchData();
-  }, [orgId]);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 80);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="text-center">
-        <div className="w-12 h-12 border-4 border-gray-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4" />
-        <p className="text-gray-400 font-medium">Loading...</p>
-      </div>
-    </div>
-  );
+  const settings = settingsSnap.exists ? (settingsSnap.data() as Record<string, any>) : null;
+  const packages = pkgsSnap.docs.map(d => ({ id: d.id, ...d.data() } as Record<string, any>));
 
   const tc = settings?.themeColor || '#4f46e5';
   const agencyName = settings?.agencyName || 'Travel Agency';
@@ -91,14 +36,14 @@ export default function PublicSitePage() {
   const isSerif = settings?.fontStyle === 'serif';
   const headingFont = isSerif ? "Georgia,'Times New Roman',serif" : 'inherit';
 
-  const featureItems: any[] = settings?.featureItems?.length > 0 ? settings.featureItems : [
+  const featureItems: any[] = settings?.featureItems?.length > 0 ? settings!.featureItems : [
     { title: 'Expert Local Guides', description: 'Professional guides ensuring authentic experiences at every destination.' },
     { title: 'Best Price Guarantee', description: 'Competitive pricing with handpicked hotels and exclusive group deals.' },
     { title: '24/7 Travel Support', description: 'Round-the-clock assistance before, during, and after your trip.' },
     { title: 'Custom Packages', description: 'Tailored itineraries built around your unique travel preferences.' },
   ];
 
-  const statItems: any[] = settings?.statItems?.length > 0 ? settings.statItems : [
+  const statItems: any[] = settings?.statItems?.length > 0 ? settings!.statItems : [
     { value: '10+', label: 'Years Experience' },
     { value: '500+', label: 'Trips Organized' },
     { value: '1000+', label: 'Happy Travelers' },
@@ -127,41 +72,30 @@ export default function PublicSitePage() {
         </div>
       )}
 
-      {/* Navbar */}
-      <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-xl shadow-sm border-b border-gray-100' : 'bg-transparent'}`}
-        style={{ top: settings?.announcementBarEnabled && settings?.announcementBarText ? '40px' : '0' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-[72px] items-center">
-            <div className="flex items-center gap-3">
-              {settings?.agencyLogo
-                ? <img src={settings.agencyLogo} alt={agencyName} className="h-10 w-auto rounded-lg object-cover" />
-                : <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-black text-xl" style={{ backgroundColor: tc }}>{agencyName.charAt(0)}</div>
-              }
-              <div>
-                <span className={`font-black text-xl tracking-tight ${scrolled ? 'text-gray-900' : 'text-white'}`}>{agencyName}</span>
-                {settings?.agencyTagline && (
-                  <p className={`text-[11px] leading-none mt-0.5 ${scrolled ? 'text-gray-400' : 'text-white/60'}`}>{settings.agencyTagline}</p>
-                )}
-              </div>
-            </div>
-            <div className="hidden md:flex gap-8 items-center">
-              {navLinks.map(link => (
-                <a key={link.href} href={link.href} className={`text-sm font-semibold transition-colors hover:opacity-70 ${scrolled ? 'text-gray-700' : 'text-white/90'}`}>
-                  {link.label}
-                </a>
-              ))}
-              <a href="#contact" className="text-sm font-bold px-6 py-2.5 rounded-full text-white shadow-lg hover:opacity-90 hover:shadow-xl transition-all" style={{ backgroundColor: tc }}>
-                Book Now
-              </a>
-            </div>
-          </div>
-        </div>
-      </nav>
+      {/* Navbar — client for scroll effect */}
+      <NavbarClient
+        settings={settings ? {
+          agencyLogo: settings.agencyLogo ?? null,
+          agencyTagline: settings.agencyTagline ?? null,
+          announcementBarEnabled: settings.announcementBarEnabled ?? false,
+          announcementBarText: settings.announcementBarText ?? null,
+        } : null}
+        tc={tc}
+        agencyName={agencyName}
+        navLinks={navLinks}
+      />
 
       {/* Hero */}
       <section className="relative h-[50vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <img src={heroImage} alt="Hero" className="w-full h-full object-cover" />
+          <Image
+            src={heroImage}
+            alt="Hero"
+            fill
+            className="object-cover"
+            priority
+            sizes="100vw"
+          />
           <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${overlayOpacity})` }} />
           <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/30 to-transparent" />
         </div>
@@ -197,7 +131,7 @@ export default function PublicSitePage() {
           </div>
         </div>
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 animate-bounce">
-          <ChevronDown className="w-6 h-6 text-white/50" />
+          <svg className="w-6 h-6 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
         </div>
       </section>
 
@@ -242,13 +176,19 @@ export default function PublicSitePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {packages.map(pkg => {
                 const coverImage = pkg.images?.[0] || pkg.imageUrl || 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=800&auto=format&fit=crop';
-                const prices = [pkg.priceDouble, pkg.priceTriple, pkg.priceQuad].filter(p => p > 0);
+                const prices = [pkg.priceDouble, pkg.priceTriple, pkg.priceQuad].filter((p: any) => p > 0);
                 const minPrice = prices.length ? Math.min(...prices) : null;
                 return (
                   <Link href={`/package/${pkg.id}`} key={pkg.id} className="group block">
                     <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 h-full flex flex-col">
                       <div className="relative overflow-hidden h-60">
-                        <img src={coverImage} alt={pkg.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                        <Image
+                          src={coverImage}
+                          alt={pkg.title}
+                          fill
+                          className="object-cover group-hover:scale-110 transition-transform duration-700"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                         {minPrice && (
                           <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md">
@@ -277,7 +217,7 @@ export default function PublicSitePage() {
                         <p className="text-gray-500 text-sm leading-relaxed line-clamp-2 flex-1 mb-5">{pkg.description}</p>
                         <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                           <div className="flex gap-4">
-                            {[{ label: 'Dbl', price: pkg.priceDouble }, { label: 'Tri', price: pkg.priceTriple }, { label: 'Quad', price: pkg.priceQuad }].map(t => (
+                            {[{ label: 'Dbl', price: pkg.priceDouble }, { label: 'Tri', price: pkg.priceTriple }, { label: 'Quad', price: pkg.priceQuad }].map((t: any) => (
                               <div key={t.label} className="text-center">
                                 <p className="text-[9px] text-gray-400 uppercase font-bold tracking-wider">{t.label}</p>
                                 <p className="text-sm font-black text-gray-900">₹{t.price || '—'}</p>
@@ -307,12 +247,19 @@ export default function PublicSitePage() {
               <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-5" style={{ fontFamily: headingFont }}>
                 {settings?.galleryTitle || 'Our Destinations'}
               </h2>
-              <p className="text-lg text-gray-500 max-w-2xl mx-auto">Stunning places we've explored and curated for you.</p>
+              <p className="text-lg text-gray-500 max-w-2xl mx-auto">Stunning places we&apos;ve explored and curated for you.</p>
             </div>
             <div className="columns-2 md:columns-3 gap-4 space-y-4">
               {galleryImages.map((img: string, i: number) => (
                 <div key={i} className="break-inside-avoid rounded-2xl overflow-hidden group relative">
-                  <img src={img} alt={`Destination ${i + 1}`} className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-700" />
+                  <Image
+                    src={img}
+                    alt={`Destination ${i + 1}`}
+                    width={800}
+                    height={600}
+                    className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-700"
+                    sizes="(max-width: 768px) 50vw, 33vw"
+                  />
                   <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </div>
               ))}
@@ -344,8 +291,14 @@ export default function PublicSitePage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
               {settings.aboutImage && (
                 <div className="relative">
-                  <div className="rounded-3xl overflow-hidden shadow-2xl aspect-[4/5]">
-                    <img src={settings.aboutImage} alt="About" className="w-full h-full object-cover" />
+                  <div className="rounded-3xl overflow-hidden shadow-2xl aspect-[4/5] relative">
+                    <Image
+                      src={settings.aboutImage}
+                      alt="About"
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 1024px) 100vw, 50vw"
+                    />
                   </div>
                   <div className="absolute -bottom-6 -right-6 w-48 h-48 rounded-3xl -z-10 opacity-20" style={{ backgroundColor: tc }} />
                 </div>
@@ -380,10 +333,10 @@ export default function PublicSitePage() {
                       <Star key={j} className="w-4 h-4 fill-amber-400 text-amber-400" />
                     ))}
                   </div>
-                  <p className="text-gray-600 text-base leading-relaxed italic mb-6 flex-1">"{t.quote}"</p>
+                  <p className="text-gray-600 text-base leading-relaxed italic mb-6 flex-1">&quot;{t.quote}&quot;</p>
                   <div className="flex items-center gap-3 pt-4 border-t border-gray-200">
                     {t.avatar
-                      ? <img src={t.avatar} alt={t.name} className="w-12 h-12 rounded-full object-cover" />
+                      ? <Image src={t.avatar} alt={t.name} width={48} height={48} className="w-12 h-12 rounded-full object-cover" />
                       : <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-xl" style={{ backgroundColor: tc }}>{t.name?.charAt(0)}</div>
                     }
                     <div>
@@ -403,53 +356,13 @@ export default function PublicSitePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <p className="text-xs font-bold tracking-[0.25em] uppercase mb-3" style={{ color: tc }}>Get In Touch</p>
-            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-5" style={{ fontFamily: headingFont }}>Let's Plan Your Trip</h2>
-            <p className="text-lg text-gray-500 max-w-2xl mx-auto">Have questions? We'd love to hear from you.</p>
+            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-5" style={{ fontFamily: headingFont }}>Let&apos;s Plan Your Trip</h2>
+            <p className="text-lg text-gray-500 max-w-2xl mx-auto">Have questions? We&apos;d love to hear from you.</p>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
             <div className="lg:col-span-3">
               <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
-                {formState === 'success' ? (
-                  <div className="flex flex-col items-center justify-center py-16 text-center">
-                    <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: `${tc}20` }}>
-                      <Send className="w-7 h-7" style={{ color: tc }} />
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">Enquiry Received!</h3>
-                    <p className="text-gray-500 text-sm mb-6">We'll get back to you shortly.</p>
-                    <button onClick={() => setFormState('idle')} className="text-sm font-semibold underline" style={{ color: tc }}>Send another</button>
-                  </div>
-                ) : (
-                  <form className="space-y-5" onSubmit={handleContact}>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Full Name *</label>
-                        <input type="text" required value={formData.name} onChange={e => setFormData(p => ({ ...p, name: e.target.value }))} className="w-full px-4 py-3.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 bg-gray-50 text-sm" placeholder="John Doe" />
-                      </div>
-                      <div>
-                        <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Phone *</label>
-                        <input type="tel" required value={formData.phone} onChange={e => setFormData(p => ({ ...p, phone: e.target.value }))} className="w-full px-4 py-3.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 bg-gray-50 text-sm" placeholder="+91 98765 43210" />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Email</label>
-                      <input type="email" value={formData.email} onChange={e => setFormData(p => ({ ...p, email: e.target.value }))} className="w-full px-4 py-3.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 bg-gray-50 text-sm" placeholder="you@email.com" />
-                    </div>
-                    <div>
-                      <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Destination Interest</label>
-                      <input type="text" value={formData.destination} onChange={e => setFormData(p => ({ ...p, destination: e.target.value }))} className="w-full px-4 py-3.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 bg-gray-50 text-sm" placeholder="e.g. Bali, Europe, etc." />
-                    </div>
-                    <div>
-                      <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Message</label>
-                      <textarea rows={4} value={formData.message} onChange={e => setFormData(p => ({ ...p, message: e.target.value }))} className="w-full px-4 py-3.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 bg-gray-50 text-sm resize-none" placeholder="Tell us about your travel plans..." />
-                    </div>
-                    {formState === 'error' && (
-                      <p className="text-sm text-red-500">Something went wrong. Please try again.</p>
-                    )}
-                    <button type="submit" disabled={formState === 'submitting'} className="w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl text-white font-bold text-base shadow-md hover:shadow-xl hover:scale-[1.02] transition-all disabled:opacity-60 disabled:cursor-not-allowed disabled:scale-100" style={{ backgroundColor: tc }}>
-                      <Send className="w-5 h-5" /> {formState === 'submitting' ? 'Sending...' : 'Send Enquiry'}
-                    </button>
-                  </form>
-                )}
+                <ContactForm orgId={orgId} tc={tc} />
               </div>
             </div>
             <div className="lg:col-span-2 space-y-4">
@@ -488,7 +401,6 @@ export default function PublicSitePage() {
                   </div>
                 </div>
               )}
-
             </div>
           </div>
         </div>
@@ -501,7 +413,7 @@ export default function PublicSitePage() {
             <div className="lg:col-span-2">
               <div className="flex items-center gap-3 mb-4">
                 {settings?.agencyLogo
-                  ? <img src={settings.agencyLogo} alt={agencyName} className="h-9 w-auto rounded-lg" />
+                  ? <Image src={settings.agencyLogo} alt={agencyName} width={200} height={36} className="h-9 w-auto rounded-lg" />
                   : <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold" style={{ backgroundColor: tc }}>{agencyName.charAt(0)}</div>
                 }
                 <span className="font-bold text-lg">{agencyName}</span>

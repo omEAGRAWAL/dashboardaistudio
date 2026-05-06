@@ -3,10 +3,15 @@
 import { useAuth } from '@/components/AuthProvider';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
-import { MobilePreview } from '@/components/MobilePreview';
-import { ImageUploadGrid } from '@/components/ImageUploadGrid';
 import { useEffect, useState, useRef } from 'react';
 import React from 'react';
+import dynamic from 'next/dynamic';
+
+const MobilePreview = dynamic(() => import('@/components/MobilePreview').then(m => ({ default: m.MobilePreview })), {
+  ssr: false,
+  loading: () => <div className="flex-1 flex items-center justify-center bg-gray-50 rounded-xl"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" /></div>,
+});
+const ImageUploadGrid = dynamic(() => import('@/components/ImageUploadGrid').then(m => ({ default: m.ImageUploadGrid })), { ssr: false });
 import { doc, getDoc, setDoc, serverTimestamp, collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import {

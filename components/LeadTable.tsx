@@ -107,6 +107,10 @@ export function LeadTable() {
   const [showAnalytics, setShowAnalytics] = useState(false);
   // Fixed-position dropdown coordinates
   const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number; direction: 'down' | 'up' }>({ top: 0, left: 0, direction: 'down' });
+  // Pagination
+  const PAGE_SIZE = 25;
+  const [currentPage, setCurrentPage] = useState(1);
+
   // Batch selection
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [batchAssignOpen, setBatchAssignOpen] = useState(false);
@@ -140,8 +144,8 @@ export function LeadTable() {
     setActiveActionLeadId(leadId);
   };
 
-  // Clear selections on filter change
-  useEffect(() => { setSelectedIds(new Set()); }, [activeTab, activeCategory, activeAssignee, activeSource]);
+  // Reset page + selections on filter change
+  useEffect(() => { setCurrentPage(1); setSelectedIds(new Set()); }, [activeTab, activeCategory, activeAssignee, activeSource]);
 
   useEffect(() => {
     if (!user || (!orgId && role !== 'superadmin')) return;
@@ -178,7 +182,7 @@ export function LeadTable() {
   useEffect(() => {
     const el = selectAllRef.current;
     if (!el) return;
-    el.indeterminate = selectedIds.size > 0 && selectedIds.size < filteredLeads.length;
+    el.indeterminate = somePageSelected;
   });
 
   const handleStatusChange = async (leadId: string, newStatus: string) => {
@@ -287,7 +291,15 @@ export function LeadTable() {
 
   if (loading) return <div className="p-8 text-center text-gray-500">Loading leads...</div>;
 
-  const allSelected = filteredLeads.length > 0 && selectedIds.size === filteredLeads.length;
+  const totalPages = Math.max(1, Math.ceil(filteredLeads.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const pagedLeads = filteredLeads.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  const pageStart = filteredLeads.length === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1;
+  const pageEnd = Math.min(safePage * PAGE_SIZE, filteredLeads.length);
+
+  const allPageSelected = pagedLeads.length > 0 && pagedLeads.every(l => selectedIds.has(l.id));
+  const somePageSelected = pagedLeads.some(l => selectedIds.has(l.id)) && !allPageSelected;
+  const allSelected = allPageSelected;
 
   return (
     <>
@@ -446,7 +458,7 @@ export function LeadTable() {
             Delete
           </button>
 
-          <span className="ml-auto text-[10px] text-indigo-400">Select all to apply to all {filteredLeads.length} leads</span>
+          <span className="ml-auto text-[10px] text-indigo-400">{selectedIds.size} of {filteredLeads.length} leads selected</span>
         </div>
       )}
 
@@ -457,7 +469,7 @@ export function LeadTable() {
             <Users className="w-8 h-8 text-gray-200 mx-auto mb-2" />
             <p className="text-sm text-gray-400">No leads found</p>
           </div>
-        ) : filteredLeads.map(lead => {
+        ) : pagedLeads.map(lead => {
           const s = STATUS_STYLES[lead.status];
           const isSelected = selectedIds.has(lead.id);
           const assignee = users.find(u => u.uid === lead.assigneeId);
@@ -629,8 +641,13 @@ export function LeadTable() {
             <tr>
               <th className="pl-4 pr-2 py-2.5 w-10">
                 <input ref={selectAllRef} type="checkbox"
-                  checked={allSelected}
-                  onChange={() => setSelectedIds(allSelected ? new Set() : new Set(filteredLeads.map(l => l.id)))}
+                  checked={allPageSelected}
+                  onChange={() => {
+                    const next = new Set(selectedIds);
+                    if (allPageSelected) { pagedLeads.forEach(l => next.delete(l.id)); }
+                    else { pagedLeads.forEach(l => next.add(l.id)); }
+                    setSelectedIds(next);
+                  }}
                   className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" />
               </th>
               <th className="px-3 py-2.5">Lead</th>
@@ -649,7 +666,7 @@ export function LeadTable() {
                   <p className="text-sm text-gray-400">No leads found</p>
                 </td>
               </tr>
-            ) : filteredLeads.map(lead => {
+            ) : pagedLeads.map(lead => {
               const s = STATUS_STYLES[lead.status];
               const isSelected = selectedIds.has(lead.id);
               const assignee = users.find(u => u.uid === lead.assigneeId);
@@ -847,15 +864,62 @@ export function LeadTable() {
         </table>
       </div>
 
-      {/* ── Table footer ── */}
-      {filteredLeads.length > 0 && (
-        <div className="px-4 py-2.5 border-t border-gray-100 flex items-center justify-between bg-gray-50/50">
-          <span className="text-xs text-gray-400">Showing {filteredLeads.length} of {leads.length} leads</span>
-          {selectedIds.size > 0 && (
-            <span className="text-xs font-semibold text-indigo-600">{selectedIds.size} selected</span>
-          )}
-        </div>
-      )}
+      {/* ── Pagination footer ── */}
+      <div className="px-4 py-2.5 border-t border-gray-100 flex items-center justify-between gap-4 bg-gray-50/50 flex-wrap">
+        {/* Count */}
+        <span className="text-xs text-gray-400 whitespace-nowrap">
+          {filteredLeads.length === 0
+            ? `0 of ${leads.length} leads`
+            : `Showing ${pageStart}–${pageEnd} of ${filteredLeads.length}${filteredLeads.length < leads.length ? ` filtered (${leads.length} total)` : ' leads'}`
+          }
+        </span>
+
+        {/* Page controls */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={safePage === 1}
+              className="px-2 py-1 text-xs font-medium rounded-md border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              ←
+            </button>
+            {(() => {
+              const pages: (number | '…')[] = [];
+              if (totalPages <= 7) {
+                for (let i = 1; i <= totalPages; i++) pages.push(i);
+              } else {
+                pages.push(1);
+                if (safePage > 3) pages.push('…');
+                for (let i = Math.max(2, safePage - 1); i <= Math.min(totalPages - 1, safePage + 1); i++) pages.push(i);
+                if (safePage < totalPages - 2) pages.push('…');
+                pages.push(totalPages);
+              }
+              return pages.map((p, i) =>
+                p === '…'
+                  ? <span key={`e${i}`} className="px-1.5 text-xs text-gray-300">…</span>
+                  : <button key={p} onClick={() => setCurrentPage(p as number)}
+                      className={`min-w-[28px] px-2 py-1 text-xs font-medium rounded-md border transition-colors ${safePage === p ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}>
+                      {p}
+                    </button>
+              );
+            })()}
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={safePage === totalPages}
+              className="px-2 py-1 text-xs font-medium rounded-md border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              →
+            </button>
+          </div>
+        )}
+
+        {/* Selection count */}
+        {selectedIds.size > 0
+          ? <span className="text-xs font-semibold text-indigo-600 whitespace-nowrap">{selectedIds.size} selected</span>
+          : <span className="w-0 md:w-auto" />
+        }
+      </div>
     </div>
 
     {whatsappLead && <WhatsAppModal lead={whatsappLead} onClose={() => setWhatsappLead(null)} />}
