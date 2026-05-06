@@ -3,12 +3,21 @@
 import { useAuth } from '@/components/AuthProvider';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
-import { LeadTable } from '@/components/LeadTable';
 import { ImportLeads } from '@/components/ImportLeads';
 import { CreateLeadModal } from '@/components/CreateLeadModal';
 import { NotificationBanner } from '@/components/NotificationBanner';
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
+
+// Lazy load heavy components
+const LeadTable = dynamic(() => import('@/components/LeadTable').then(mod => ({ default: mod.LeadTable })), {
+  loading: () => (
+    <div className="flex items-center justify-center p-8">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+    </div>
+  ),
+});
 
 export default function HomePage() {
   const { user, orgId, role, status, loading, logOut } = useAuth();
@@ -75,7 +84,13 @@ export default function HomePage() {
                 <CreateLeadModal />
               </div>
             </div>
-            <LeadTable />
+            <Suspense fallback={
+              <div className="flex items-center justify-center p-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+              </div>
+            }>
+              <LeadTable />
+            </Suspense>
           </div>
         </main>
       </div>
