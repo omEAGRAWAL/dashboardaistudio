@@ -106,7 +106,7 @@ export function LeadTable() {
   const [reminderLead, setReminderLead] = useState<any | null>(null);
   const [showAnalytics, setShowAnalytics] = useState(false);
   // Fixed-position dropdown coordinates
-  const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number; direction: 'down' | 'up' }>({ top: 0, left: 0, direction: 'down' });
+  const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number; maxHeight: number; direction: 'down' | 'up' }>({ top: 0, left: 0, maxHeight: 320, direction: 'down' });
   // Pagination
   const PAGE_SIZE = 25;
   const [currentPage, setCurrentPage] = useState(1);
@@ -116,14 +116,20 @@ export function LeadTable() {
   const [batchAssignOpen, setBatchAssignOpen] = useState(false);
   const selectAllRef = useRef<HTMLInputElement>(null);
 
-  // Compute fixed position for a dropdown relative to the trigger button
-  const calcDropdownPos = (el: HTMLElement, dropdownHeight = 320, align: 'left' | 'right' = 'left', dropdownWidth = 208) => {
+  // Compute fixed position + maxHeight for a dropdown relative to the trigger button
+  const calcDropdownPos = (el: HTMLElement, preferredHeight = 320, align: 'left' | 'right' = 'left', dropdownWidth = 208) => {
     const rect = el.getBoundingClientRect();
-    const spaceBelow = window.innerHeight - rect.bottom;
-    const direction: 'down' | 'up' = spaceBelow < dropdownHeight ? 'up' : 'down';
-    const top = direction === 'down' ? rect.bottom + 4 : rect.top - dropdownHeight - 4;
-    const left = align === 'right' ? Math.max(4, rect.right - dropdownWidth) : rect.left;
-    return { top, left, direction };
+    const GAP = 4;
+    const EDGE = 8;
+    const spaceBelow = window.innerHeight - rect.bottom - GAP - EDGE;
+    const spaceAbove = rect.top - GAP - EDGE;
+    const direction: 'down' | 'up' = spaceBelow >= Math.min(preferredHeight, 160) || spaceBelow >= spaceAbove ? 'down' : 'up';
+    const maxHeight = direction === 'down'
+      ? Math.max(80, Math.min(preferredHeight, spaceBelow))
+      : Math.max(80, Math.min(preferredHeight, spaceAbove));
+    const top = direction === 'down' ? rect.bottom + GAP : rect.top - maxHeight - GAP;
+    const left = align === 'right' ? Math.max(EDGE, rect.right - dropdownWidth) : Math.min(rect.left, window.innerWidth - dropdownWidth - EDGE);
+    return { top, left, maxHeight, direction };
   };
 
   const openStatusDropdown = (leadId: string, e: React.MouseEvent) => {
@@ -542,7 +548,7 @@ export function LeadTable() {
                     {isStatusOpen && (
                       <>
                         <div className="fixed inset-0 z-10" onClick={() => setActiveStatusDropdownId(null)} />
-                        <div className="fixed z-[9999] w-52 bg-white border border-gray-200 rounded-xl shadow-xl py-1 max-h-[60vh] overflow-y-auto" style={{ top: dropdownPos.top, left: dropdownPos.left }}>
+                        <div className="fixed z-[9999] w-52 bg-white border border-gray-200 rounded-xl shadow-xl py-1 overflow-y-auto" style={{ top: dropdownPos.top, left: dropdownPos.left, maxHeight: dropdownPos.maxHeight }}>
                           {STATUSES.map(status => {
                             const opt = STATUS_STYLES[status];
                             const isCurrent = lead.status === status;
@@ -578,7 +584,7 @@ export function LeadTable() {
                   {isAssigneeOpen && (
                     <>
                       <div className="fixed inset-0 z-10" onClick={() => setActiveAssigneeDropdownId(null)} />
-                      <div className="fixed z-[9999] w-52 bg-white border border-gray-200 rounded-xl shadow-xl py-1.5 max-h-[60vh] overflow-y-auto" style={{ top: dropdownPos.top, left: dropdownPos.left }}>
+                      <div className="fixed z-[9999] w-52 bg-white border border-gray-200 rounded-xl shadow-xl py-1.5 overflow-y-auto" style={{ top: dropdownPos.top, left: dropdownPos.left, maxHeight: dropdownPos.maxHeight }}>
                         <div className="px-3 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wide border-b border-gray-100">Assign to</div>
                         <button onClick={() => { handleAssigneeChange(lead.id, ''); setActiveAssigneeDropdownId(null); }}
                           className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-gray-600 hover:bg-gray-50 transition-colors">
@@ -767,7 +773,7 @@ export function LeadTable() {
                         {isStatusOpen && (
                           <>
                             <div className="fixed inset-0 z-10" onClick={() => setActiveStatusDropdownId(null)} />
-                            <div className="fixed z-[9999] w-52 bg-white border border-gray-200 rounded-xl shadow-xl py-1 max-h-[60vh] overflow-y-auto" style={{ top: dropdownPos.top, left: dropdownPos.left }}>
+                            <div className="fixed z-[9999] w-52 bg-white border border-gray-200 rounded-xl shadow-xl py-1 overflow-y-auto" style={{ top: dropdownPos.top, left: dropdownPos.left, maxHeight: dropdownPos.maxHeight }}>
                               {STATUSES.map(status => {
                                 const opt = STATUS_STYLES[status];
                                 const isCurrent = lead.status === status;
@@ -812,7 +818,7 @@ export function LeadTable() {
                     {isAssigneeOpen && (
                       <>
                         <div className="fixed inset-0 z-10" onClick={() => setActiveAssigneeDropdownId(null)} />
-                        <div className="fixed z-[9999] w-52 bg-white border border-gray-200 rounded-xl shadow-xl py-1.5 max-h-[60vh] overflow-y-auto" style={{ top: dropdownPos.top, left: dropdownPos.left }}>
+                        <div className="fixed z-[9999] w-52 bg-white border border-gray-200 rounded-xl shadow-xl py-1.5 overflow-y-auto" style={{ top: dropdownPos.top, left: dropdownPos.left, maxHeight: dropdownPos.maxHeight }}>
                           <div className="px-3 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wide border-b border-gray-100">Assign to</div>
                           <button onClick={() => { handleAssigneeChange(lead.id, ''); setActiveAssigneeDropdownId(null); }}
                             className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-gray-600 hover:bg-gray-50 transition-colors">

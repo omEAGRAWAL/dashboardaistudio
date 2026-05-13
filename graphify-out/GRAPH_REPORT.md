@@ -1,11 +1,11 @@
 # Graph Report - C:\Users\OmAgrawal\Downloads\dashboardaistudio  (2026-05-06)
 
 ## Corpus Check
-- 108 files · ~117,290 words
+- 110 files · ~117,977 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 344 nodes · 448 edges · 59 communities detected
+- 347 nodes · 449 edges · 61 communities detected
 - Extraction: 87% EXTRACTED · 13% INFERRED · 0% AMBIGUOUS · INFERRED: 57 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -69,6 +69,8 @@
 - [[_COMMUNITY_Community 56|Community 56]]
 - [[_COMMUNITY_Community 57|Community 57]]
 - [[_COMMUNITY_Community 58|Community 58]]
+- [[_COMMUNITY_Community 59|Community 59]]
+- [[_COMMUNITY_Community 60|Community 60]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `POST()` - 48 edges
@@ -335,6 +337,14 @@ Nodes (0):
 Cohesion: 1.0
 Nodes (0): 
 
+### Community 59 - "Community 59"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 60 - "Community 60"
+Cohesion: 1.0
+Nodes (0): 
+
 ## Knowledge Gaps
 - **9 isolated node(s):** `====================================================  INDIA TRAVEL AGENCY LEAD`, `Scrape travel agencies from Justdial for a given city.`, `Scrape travel agencies from IndiaMART directory.`, `Scrape travel agencies from Google Maps using Playwright (headless browser).`, `Attempt to find a contact email from a website's homepage or contact page.` (+4 more)
   These have ≤1 connection - possible missing edges or undocumented components.
@@ -358,29 +368,29 @@ Nodes (0):
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 31`** (2 nodes): `page.tsx`, `handleCreateOrg()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 32`** (2 nodes): `page.tsx`, `fetchData()`
+- **Thin community `Community 32`** (2 nodes): `ContactForm.tsx`, `handleContact()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 33`** (2 nodes): `CreateLeadModal.tsx`, `handleSubmit()`
+- **Thin community `Community 33`** (2 nodes): `NavbarClient.tsx`, `NavbarClient()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 34`** (2 nodes): `ImportLeads.tsx`, `handleFileUpload()`
+- **Thin community `Community 34`** (2 nodes): `CreateLeadModal.tsx`, `handleSubmit()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 35`** (2 nodes): `SchemaMarkup.tsx`, `SchemaMarkup()`
+- **Thin community `Community 35`** (2 nodes): `ImportLeads.tsx`, `handleFileUpload()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 36`** (2 nodes): `Stats.tsx`, `Stats()`
+- **Thin community `Community 36`** (2 nodes): `SchemaMarkup.tsx`, `SchemaMarkup()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 37`** (2 nodes): `use-mobile.ts`, `useIsMobile()`
+- **Thin community `Community 37`** (2 nodes): `Stats.tsx`, `Stats()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 38`** (2 nodes): `utils.ts`, `cn()`
+- **Thin community `Community 38`** (2 nodes): `use-mobile.ts`, `useIsMobile()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 39`** (1 nodes): `eslint.config.mjs`
+- **Thin community `Community 39`** (2 nodes): `utils.ts`, `cn()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 40`** (1 nodes): `next-env.d.ts`
+- **Thin community `Community 40`** (1 nodes): `eslint.config.mjs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 41`** (1 nodes): `next.config.ts`
+- **Thin community `Community 41`** (1 nodes): `next-env.d.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 42`** (1 nodes): `postcss.config.mjs`
+- **Thin community `Community 42`** (1 nodes): `next.config.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 43`** (1 nodes): `page.tsx`
+- **Thin community `Community 43`** (1 nodes): `postcss.config.mjs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 44`** (1 nodes): `page.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
@@ -398,30 +408,34 @@ Nodes (0):
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 51`** (1 nodes): `page.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 52`** (1 nodes): `Header.tsx`
+- **Thin community `Community 52`** (1 nodes): `page.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 53`** (1 nodes): `MobilePreview.tsx`
+- **Thin community `Community 53`** (1 nodes): `page.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 54`** (1 nodes): `SiteFooter.tsx`
+- **Thin community `Community 54`** (1 nodes): `Header.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 55`** (1 nodes): `firebase-admin.ts`
+- **Thin community `Community 55`** (1 nodes): `MobilePreview.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 56`** (1 nodes): `firebase.ts`
+- **Thin community `Community 56`** (1 nodes): `SiteFooter.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 57`** (1 nodes): `firebase-messaging-sw.js`
+- **Thin community `Community 57`** (1 nodes): `firebase-admin.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 58`** (1 nodes): `html2pdf.d.ts`
+- **Thin community `Community 58`** (1 nodes): `firebase.ts`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 59`** (1 nodes): `firebase-messaging-sw.js`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 60`** (1 nodes): `html2pdf.d.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `POST()` connect `Community 0` to `Community 2`, `Community 3`, `Community 4`, `Community 5`, `Community 10`, `Community 19`?**
-  _High betweenness centrality (0.218) - this node is a cross-community bridge._
+  _High betweenness centrality (0.214) - this node is a cross-community bridge._
 - **Why does `toDate()` connect `Community 5` to `Community 0`, `Community 1`, `Community 3`?**
-  _High betweenness centrality (0.169) - this node is a cross-community bridge._
+  _High betweenness centrality (0.166) - this node is a cross-community bridge._
 - **Why does `buildInvoiceBooking()` connect `Community 1` to `Community 5`?**
-  _High betweenness centrality (0.060) - this node is a cross-community bridge._
+  _High betweenness centrality (0.059) - this node is a cross-community bridge._
 - **Are the 9 inferred relationships involving `POST()` (e.g. with `set()` and `update()`) actually correct?**
   _`POST()` has 9 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 11 inferred relationships involving `GET()` (e.g. with `scrape_justdial()` and `scrape_indiamart()`) actually correct?**

@@ -6,7 +6,7 @@ import { Header } from '@/components/Header';
 import { useEffect, useState, useCallback } from 'react';
 import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc, addDoc, serverTimestamp, getDoc, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { CalendarCheck, Search, Filter, Trash2, Edit2, Plus, Minus, Eye, FileText, Mail, Download, Loader2, X, History, Link, Copy, CheckCircle2, CreditCard, Banknote, Smartphone } from 'lucide-react';
+import { CalendarCheck, Search, Filter, Trash2, Edit2, Plus, Minus, Eye, FileText, Mail, Download, Loader2, X, History, Link, Copy, CheckCircle2, CreditCard, Banknote, Smartphone, Phone, MessageCircle, Users, ChevronDown } from 'lucide-react';
 import { format } from 'date-fns';
 import { generateInvoiceHTML, type BusinessProfile, type InvoiceBooking } from '@/lib/invoice-template';
 import { getAuth } from 'firebase/auth';
@@ -53,6 +53,13 @@ export default function BookingsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
+  const [packageFilter, setPackageFilter] = useState('All');
+  const [travelDateFrom, setTravelDateFrom] = useState('');
+  const [travelDateTo, setTravelDateTo] = useState('');
+  const [bookingDateFrom, setBookingDateFrom] = useState('');
+  const [bookingDateTo, setBookingDateTo] = useState('');
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState('All');
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -165,15 +172,42 @@ export default function BookingsPage() {
   }, [orgId]);
 
   const filteredBookings = bookings.filter(booking => {
-    const matchesSearch = 
+    const matchesSearch =
       booking.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       booking.customerEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.customerPhone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       booking.packageTitle?.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesStatus = statusFilter === 'All' || booking.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
+    const matchesPackage = packageFilter === 'All' || booking.packageId === packageFilter;
+    const matchesPaymentStatus = paymentStatusFilter === 'All' || booking.paymentStatus === paymentStatusFilter;
+
+    // Travel date filter
+    let matchesTravelDate = true;
+    if (travelDateFrom || travelDateTo) {
+      const td = booking.travelDate ? new Date(booking.travelDate) : null;
+      if (!td) { matchesTravelDate = false; }
+      else {
+        if (travelDateFrom && td < new Date(travelDateFrom)) matchesTravelDate = false;
+        if (travelDateTo && td > new Date(travelDateTo)) matchesTravelDate = false;
+      }
+    }
+
+    // Booking (created) date filter
+    let matchesBookingDate = true;
+    if (bookingDateFrom || bookingDateTo) {
+      const bd = booking.createdAt ? booking.createdAt.toDate() : null;
+      if (!bd) { matchesBookingDate = false; }
+      else {
+        if (bookingDateFrom && bd < new Date(bookingDateFrom)) matchesBookingDate = false;
+        if (bookingDateTo && bd > new Date(bookingDateTo + 'T23:59:59')) matchesBookingDate = false;
+      }
+    }
+
+    return matchesSearch && matchesStatus && matchesPackage && matchesPaymentStatus && matchesTravelDate && matchesBookingDate;
   });
+
+  const activeFilterCount = [statusFilter !== 'All', packageFilter !== 'All', paymentStatusFilter !== 'All', !!travelDateFrom || !!travelDateTo, !!bookingDateFrom || !!bookingDateTo].filter(Boolean).length;
 
   const handleOpenEdit = (booking: any) => {
     setEditingBooking(booking);
@@ -673,29 +707,113 @@ export default function BookingsPage() {
             )}
 
             {/* Search and Filter */}
-            <div className="flex flex-wrap gap-2 mb-4">
-              <div className="relative flex-1 min-w-[160px]">
-                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search bookings..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-full text-sm"
-                />
-              </div>
-              <div className="relative">
-                <Filter className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="pl-9 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none bg-white text-sm"
+            <div className="mb-4 space-y-2">
+              <div className="flex flex-wrap gap-2">
+                <div className="relative flex-1 min-w-[160px]">
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search name, phone, email, package..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-full text-sm"
+                  />
+                </div>
+                {/* Booking Status */}
+                <div className="relative">
+                  <Filter className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="pl-9 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none bg-white text-sm"
+                  >
+                    <option value="All">All Statuses</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Confirmed">Confirmed</option>
+                    <option value="Cancelled">Cancelled</option>
+                  </select>
+                </div>
+                {/* Payment Status */}
+                <div className="relative">
+                  <select
+                    value={paymentStatusFilter}
+                    onChange={(e) => setPaymentStatusFilter(e.target.value)}
+                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-sm"
+                  >
+                    <option value="All">All Payments</option>
+                    <option value="payment_pending">Payment Pending</option>
+                    <option value="advance_payment_done">Advance Paid</option>
+                    <option value="cash_collected">Cash Collected</option>
+                    <option value="upi_collected">UPI Collected</option>
+                    <option value="payment_done">Fully Paid</option>
+                    <option value="payment_failed">Payment Failed</option>
+                  </select>
+                </div>
+                {/* Package filter */}
+                <div className="relative">
+                  <select
+                    value={packageFilter}
+                    onChange={(e) => setPackageFilter(e.target.value)}
+                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-sm max-w-[180px]"
+                  >
+                    <option value="All">All Packages</option>
+                    {packages.map(pkg => (
+                      <option key={pkg.id} value={pkg.id}>{pkg.title}</option>
+                    ))}
+                  </select>
+                </div>
+                <button
+                  onClick={() => setShowAdvancedFilters(v => !v)}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                    showAdvancedFilters || (travelDateFrom || travelDateTo || bookingDateFrom || bookingDateTo)
+                      ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
+                      : 'border-gray-300 text-gray-600 hover:bg-gray-50'
+                  }`}
                 >
-                  <option value="All">All Statuses</option>
-                  <option value="Pending">Pending</option>
-                  <option value="Confirmed">Confirmed</option>
-                  <option value="Cancelled">Cancelled</option>
-                </select>
+                  <CalendarCheck className="w-4 h-4" />
+                  Date Filters
+                  {(travelDateFrom || travelDateTo || bookingDateFrom || bookingDateTo) && (
+                    <span className="ml-1 bg-indigo-600 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">•</span>
+                  )}
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showAdvancedFilters ? 'rotate-180' : ''}`} />
+                </button>
+                {activeFilterCount > 0 && (
+                  <button
+                    onClick={() => {
+                      setStatusFilter('All'); setPackageFilter('All'); setPaymentStatusFilter('All');
+                      setTravelDateFrom(''); setTravelDateTo(''); setBookingDateFrom(''); setBookingDateTo('');
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-red-200 bg-red-50 text-red-600 text-sm font-medium hover:bg-red-100 transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                    Clear ({activeFilterCount})
+                  </button>
+                )}
+              </div>
+              {/* Advanced Date Filters */}
+              {showAdvancedFilters && (
+                <div className="flex flex-wrap gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200">
+                  <div className="flex items-center gap-2 flex-1 min-w-[260px]">
+                    <label className="text-xs font-semibold text-gray-500 whitespace-nowrap">Travel Date:</label>
+                    <input type="date" value={travelDateFrom} onChange={e => setTravelDateFrom(e.target.value)}
+                      className="px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 flex-1" />
+                    <span className="text-gray-400 text-xs">to</span>
+                    <input type="date" value={travelDateTo} onChange={e => setTravelDateTo(e.target.value)}
+                      className="px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 flex-1" />
+                  </div>
+                  <div className="flex items-center gap-2 flex-1 min-w-[260px]">
+                    <label className="text-xs font-semibold text-gray-500 whitespace-nowrap">Booking Date:</label>
+                    <input type="date" value={bookingDateFrom} onChange={e => setBookingDateFrom(e.target.value)}
+                      className="px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 flex-1" />
+                    <span className="text-gray-400 text-xs">to</span>
+                    <input type="date" value={bookingDateTo} onChange={e => setBookingDateTo(e.target.value)}
+                      className="px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 flex-1" />
+                  </div>
+                </div>
+              )}
+              {/* Results count */}
+              <div className="text-xs text-gray-400">
+                Showing <span className="font-semibold text-gray-600">{filteredBookings.length}</span> of <span className="font-semibold text-gray-600">{bookings.length}</span> bookings
               </div>
             </div>
 
@@ -756,6 +874,18 @@ export default function BookingsPage() {
                           ) : null}
                         </div>
                       )}
+                      <div className="flex items-center gap-1.5 pt-1 flex-wrap">
+                        <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                          <Users className="w-3.5 h-3.5 text-indigo-400" />
+                          <span className="font-semibold text-gray-700">{booking.numberOfPersons || 0} pax</span>
+                        </div>
+                        {booking.customerPhone && (
+                          <>
+                            <a href={`tel:${booking.customerPhone}`} className="p-1.5 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 transition-colors" title="Call"><Phone className="w-3.5 h-3.5" /></a>
+                            <a href={`https://wa.me/${booking.customerPhone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors" title="WhatsApp"><MessageCircle className="w-3.5 h-3.5" /></a>
+                          </>
+                        )}
+                      </div>
                       <div className="flex items-center gap-2 pt-1">
                         <button onClick={() => handleOpenView(booking)} className="flex-1 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-center">View</button>
                         {booking.status === 'Confirmed' && !noProfile && (
@@ -777,7 +907,7 @@ export default function BookingsPage() {
                       <tr className="bg-gray-50 border-b border-gray-200">
                         <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Customer</th>
                         <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Package</th>
-                        <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Details</th>
+                        <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Participants</th>
                         <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Price</th>
                         <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Payment</th>
                         <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
@@ -791,19 +921,38 @@ export default function BookingsPage() {
                           <td className="px-6 py-4">
                             <div className="font-medium text-gray-900">{booking.customerName}</div>
                             <div className="text-sm text-gray-500">{booking.customerEmail}</div>
-                            <div className="text-sm text-gray-500">{booking.customerPhone}</div>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-sm text-gray-500">{booking.customerPhone}</span>
+                              {booking.customerPhone && (
+                                <>
+                                  <a href={`tel:${booking.customerPhone}`} title="Call" className="p-1 rounded-full bg-green-50 hover:bg-green-100 text-green-600 transition-colors">
+                                    <Phone className="w-3.5 h-3.5" />
+                                  </a>
+                                  <a href={`https://wa.me/${booking.customerPhone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" title="WhatsApp" className="p-1 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-600 transition-colors">
+                                    <MessageCircle className="w-3.5 h-3.5" />
+                                  </a>
+                                </>
+                              )}
+                            </div>
                           </td>
                           <td className="px-6 py-4">
                             <div className="font-medium text-gray-900 line-clamp-1">{booking.packageTitle}</div>
                             <div className="text-sm text-gray-500">Source: {booking.source || 'Website'}</div>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="text-sm text-gray-900">
+                            <div className="flex items-center gap-1.5">
+                              <Users className="w-3.5 h-3.5 text-indigo-400" />
+                              <span className="font-semibold text-gray-900 text-sm">{booking.numberOfPersons || 0}</span>
+                              <span className="text-xs text-gray-400">pax</span>
+                            </div>
+                            <div className="text-xs text-gray-500 capitalize mt-0.5">
                               {booking.sharingType === 'double' && 'Double Sharing'}
                               {booking.sharingType === 'triple' && 'Triple Sharing'}
                               {booking.sharingType === 'quad' && 'Quad Sharing'}
                             </div>
-                            <div className="text-sm text-gray-500">{booking.numberOfPersons} Persons</div>
+                            {booking.travelDate && (
+                              <div className="text-xs text-indigo-600 mt-0.5 font-medium">✈ {booking.travelDate}</div>
+                            )}
                           </td>
                           <td className="px-6 py-4">
                             <div className="font-medium text-gray-900">₹{((booking.totalPrice || 0) - (booking.discountAmount || 0)).toLocaleString('en-IN')}</div>
