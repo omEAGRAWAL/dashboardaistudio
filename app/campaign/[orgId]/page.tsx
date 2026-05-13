@@ -8,7 +8,7 @@ import {
 import { db } from '@/lib/firebase';
 import {
   Instagram, MessageCircle, FileText, ChevronLeft, Minus, Plus,
-  Luggage, CheckCircle2, ChevronRight, Tag,
+  Luggage, CheckCircle2, ChevronRight, Tag, ShieldCheck, X,
 } from 'lucide-react';
 
 const INDIA_STATES = [
@@ -60,6 +60,12 @@ export default function CampaignPage() {
   const [acceptSlot, setAcceptSlot] = useState(false);
   const [acceptTnc, setAcceptTnc] = useState(false);
 
+  // Terms & Conditions
+  const [termsEnabled, setTermsEnabled] = useState(false);
+  const [termsMandatory, setTermsMandatory] = useState(true);
+  const [termsContent, setTermsContent] = useState('');
+  const [termsModalOpen, setTermsModalOpen] = useState(false);
+
   useEffect(() => {
     if (!orgId) return;
     (async () => {
@@ -68,11 +74,23 @@ export default function CampaignPage() {
           getDoc(doc(db, 'campaign_settings', orgId)),
           getDocs(query(collection(db, 'packages'), where('orgId', '==', orgId))),
         ]);
-        if (sSnap.exists()) setSettings(sSnap.data());
-        else {
+        if (sSnap.exists()) {
+          setSettings(sSnap.data());
+          // Load T&C from bookingForm settings
+          const bf = sSnap.data().bookingForm;
+          if (bf?.termsEnabled) setTermsEnabled(true);
+          if (bf?.termsMandatory !== undefined) setTermsMandatory(bf.termsMandatory);
+          if (bf?.termsContent) setTermsContent(bf.termsContent);
+        } else {
           // fallback to website_settings for agency name/social etc.
           const ws = await getDoc(doc(db, 'website_settings', orgId));
-          if (ws.exists()) setSettings(ws.data());
+          if (ws.exists()) {
+            setSettings(ws.data());
+            const bf = ws.data().bookingForm;
+            if (bf?.termsEnabled) setTermsEnabled(true);
+            if (bf?.termsMandatory !== undefined) setTermsMandatory(bf.termsMandatory);
+            if (bf?.termsContent) setTermsContent(bf.termsContent);
+          }
         }
         setPackages(pkgsSnap.docs.map(d => ({ id: d.id, ...d.data() })));
       } catch (e) { console.error(e); }
@@ -194,11 +212,17 @@ export default function CampaignPage() {
     setState(''); setCity(''); setSource('');
     setTicketQty({ double: 1, triple: 1, quad: 1 });
     setAcceptSlot(false); setAcceptTnc(false); setCouponCode('');
+    setTermsModalOpen(false);
     setBookingOpen(true);
   };
 
   const handleBookingSubmit = async () => {
     if (!selectedPkg || !orgId) return;
+    // Validate T&C if mandatory
+    if (termsEnabled && termsMandatory && !acceptTnc) {
+      alert('Please accept the Terms & Conditions to proceed.');
+      return;
+    }
     setSubmitting(true);
     try {
       const ticketTypes = getTicketTypes(selectedPkg);
@@ -252,6 +276,42 @@ export default function CampaignPage() {
     </div>
   );
 
+  // T&C Scrollable Modal
+  const TermsModal = () => (
+    <div className="fixed inset-0 z-[400] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+      <div className="w-full sm:w-[480px] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 flex-shrink-0">
+          <div className="w-9 h-9 bg-indigo-50 rounded-xl flex items-center justify-center">
+            <ShieldCheck className="w-5 h-5 text-indigo-600" />
+          </div>
+          <h2 className="font-bold text-gray-900 flex-1 text-[15px]">Terms & Conditions</h2>
+          <button onClick={() => setTermsModalOpen(false)}
+            className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors">
+            <X className="w-4 h-4 text-gray-500" />
+          </button>
+        </div>
+        <div className="overflow-y-auto flex-1 px-5 py-4">
+          <pre className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed font-sans">
+            {termsContent || 'No terms & conditions have been set by the agency.'}
+          </pre>
+        </div>
+        <div className="px-5 py-4 border-t border-gray-100 flex-shrink-0">
+          <button
+            onClick={() => { setAcceptTnc(true); setTermsModalOpen(false); }}
+            className="w-full py-3.5 rounded-2xl text-white font-bold text-sm shadow-md hover:brightness-110 transition-all"
+            style={{ backgroundColor: accentColor }}
+          >
+            I Accept the Terms & Conditions
+          </button>
+          <button onClick={() => setTermsModalOpen(false)}
+            className="w-full py-2.5 text-gray-400 text-sm mt-1 hover:text-gray-600 transition-colors">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   const bgStyle: React.CSSProperties = {
     background: `
       radial-gradient(ellipse 80% 55% at -5% 0%, rgba(255,89,65,0.42) 0%, transparent 55%),
@@ -282,6 +342,9 @@ export default function CampaignPage() {
           <CheckCircle2 className="w-4 h-4" /> Booking submitted! We'll reach out soon.
         </div>
       )}
+
+      {/* T&C Modal */}
+      {termsModalOpen && <TermsModal />}
 
       {/* ── Razorpay Payment Modal ── */}
       {showPaymentModal && pendingBookingId && rzpConfig && selectedPkg && (
@@ -550,13 +613,41 @@ export default function CampaignPage() {
                       Reserve your slot by paying ₹{overlayTotal.toLocaleString()}/-
                     </span>
                   </label>
-                  <label className="flex items-start gap-2 cursor-pointer">
-                    <input type="checkbox" checked={acceptTnc} onChange={e => setAcceptTnc(e.target.checked)}
-                      className="mt-0.5 flex-shrink-0" style={{ accentColor }} />
-                    <span className="text-xs text-gray-600">
-                      I have read and accept the Refunds, Cancellation Policy &amp; Terms &amp; Conditions
-                    </span>
-                  </label>
+
+                  {/* Dynamic T&C checkbox */}
+                  {termsEnabled ? (
+                    <div className={`flex items-start gap-2 p-3 rounded-xl border transition-all ${
+                      acceptTnc ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'
+                    }`}>
+                      <input
+                        type="checkbox"
+                        id="campaign-tnc"
+                        checked={acceptTnc}
+                        onChange={e => setAcceptTnc(e.target.checked)}
+                        className="mt-0.5 flex-shrink-0 w-4 h-4 cursor-pointer"
+                        style={{ accentColor }}
+                      />
+                      <label htmlFor="campaign-tnc" className="text-xs text-gray-600 leading-relaxed cursor-pointer flex-1">
+                        I have read and accept the Refunds, Cancellation Policy &amp; Terms &amp; Conditions
+                        {termsMandatory && <span className="text-red-500 ml-0.5">*</span>}
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setTermsModalOpen(true)}
+                        className="text-[10px] font-bold px-2.5 py-1 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors flex-shrink-0 mt-0.5"
+                      >
+                        Read T&amp;C
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex items-start gap-2 cursor-pointer">
+                      <input type="checkbox" checked={acceptTnc} onChange={e => setAcceptTnc(e.target.checked)}
+                        className="mt-0.5 flex-shrink-0" style={{ accentColor }} />
+                      <span className="text-xs text-gray-600">
+                        I have read and accept the Refunds, Cancellation Policy &amp; Terms &amp; Conditions
+                      </span>
+                    </label>
+                  )}
                 </div>
               </div>
 
@@ -573,9 +664,6 @@ export default function CampaignPage() {
                   style={{ backgroundColor: accentColor }}>
                   {submitting ? 'Submitting...' : 'Pay Now'}
                 </button>
-                <p className="text-center text-[10px] text-gray-400">
-                  🔒 secured by : {poweredByText}
-                </p>
               </div>
             </>
           )}
@@ -692,9 +780,6 @@ export default function CampaignPage() {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-xs text-gray-400 mt-10">
-          Powered by: {poweredByText}
-        </p>
       </div>
     </div>
   );

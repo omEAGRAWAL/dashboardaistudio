@@ -7,7 +7,7 @@ import { db } from '@/lib/firebase';
 import {
   MapPin, Clock, ArrowLeft, CheckCircle2, ChevronLeft, ChevronRight,
   Users, Flag, Zap, CheckCircle, XCircle, ChevronDown, ChevronUp,
-  Star, Calendar, Phone, MessageCircle, AlertCircle, X, Minus, Plus,
+  Star, Calendar, Phone, MessageCircle, AlertCircle, X, Minus, Plus, ShieldCheck,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -118,6 +118,13 @@ export default function PackageDetailsPage() {
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [paymentDone, setPaymentDone] = useState(false);
 
+  // Terms & Conditions state
+  const [termsEnabled, setTermsEnabled] = useState(false);
+  const [termsMandatory, setTermsMandatory] = useState(true);
+  const [termsContent, setTermsContent] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsModalOpen, setTermsModalOpen] = useState(false);
+
   useEffect(() => {
     if (!orgId || !packageId) return;
     (async () => {
@@ -134,6 +141,10 @@ export default function PackageDetailsPage() {
             if (data.bookingForm.fields?.length) {
               setBookingFields(data.bookingForm.fields.sort((a: BookingField, b: BookingField) => a.order - b.order));
             }
+            // Load T&C settings
+            if (data.bookingForm.termsEnabled) setTermsEnabled(true);
+            if (data.bookingForm.termsMandatory !== undefined) setTermsMandatory(data.bookingForm.termsMandatory);
+            if (data.bookingForm.termsContent) setTermsContent(data.bookingForm.termsContent);
           }
         }
         if (pSnap.exists()) setPkg({ id: pSnap.id, ...pSnap.data() });
@@ -279,6 +290,11 @@ export default function PackageDetailsPage() {
 
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Validate T&C if mandatory
+    if (termsEnabled && termsMandatory && !termsAccepted) {
+      alert('Please accept the Terms & Conditions to proceed.');
+      return;
+    }
     setSubmitting(true);
     try {
       const standardData: Record<string, any> = {};
@@ -337,6 +353,7 @@ export default function PackageDetailsPage() {
     setBookingSuccess(false);
     setFieldValues({});
     setTicketQty({ double: 1, triple: 1, quad: 1 });
+    setTermsAccepted(false);
     setBookingOpen(true);
   };
 
@@ -464,6 +481,36 @@ export default function PackageDetailsPage() {
                     color={bookingColor}
                   />
                 ))}
+
+              {/* T&C Checkbox */}
+              {termsEnabled && (
+                <div className={`flex items-start gap-3 p-3.5 rounded-xl border transition-all ${
+                  termsAccepted ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'
+                }`}>
+                  <div className="mt-0.5">
+                    <input
+                      type="checkbox"
+                      id="pkg-tnc-checkbox"
+                      checked={termsAccepted}
+                      onChange={e => setTermsAccepted(e.target.checked)}
+                      className="w-4 h-4 rounded cursor-pointer"
+                      style={{ accentColor: bookingColor }}
+                    />
+                  </div>
+                  <label htmlFor="pkg-tnc-checkbox" className="text-xs text-gray-700 leading-relaxed cursor-pointer">
+                    I have read and agree to the{' '}
+                    <button
+                      type="button"
+                      onClick={() => setTermsModalOpen(true)}
+                      className="font-semibold underline hover:opacity-80 transition-opacity"
+                      style={{ color: bookingColor }}
+                    >
+                      Terms & Conditions
+                    </button>
+                    {termsMandatory && <span className="text-red-500 ml-0.5">*</span>}
+                  </label>
+                </div>
+              )}
             </div>
 
             {/* Sticky footer */}
@@ -477,6 +524,42 @@ export default function PackageDetailsPage() {
             </div>
           </form>
         )}
+      </div>
+    </div>
+  );
+
+  // T&C Scrollable Modal
+  const TermsModal = () => (
+    <div className="fixed inset-0 z-[400] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+      <div className="w-full sm:w-[480px] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 flex-shrink-0">
+          <div className="w-9 h-9 bg-indigo-50 rounded-xl flex items-center justify-center">
+            <ShieldCheck className="w-5 h-5 text-indigo-600" />
+          </div>
+          <h2 className="font-bold text-gray-900 flex-1 text-[15px]">Terms & Conditions</h2>
+          <button onClick={() => setTermsModalOpen(false)}
+            className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors">
+            <X className="w-4 h-4 text-gray-500" />
+          </button>
+        </div>
+        <div className="overflow-y-auto flex-1 px-5 py-4">
+          <pre className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed font-sans">
+            {termsContent || 'No terms & conditions have been set by the agency.'}
+          </pre>
+        </div>
+        <div className="px-5 py-4 border-t border-gray-100 flex-shrink-0">
+          <button
+            onClick={() => { setTermsAccepted(true); setTermsModalOpen(false); }}
+            className="w-full py-3.5 rounded-2xl text-white font-bold text-sm shadow-md hover:brightness-110 transition-all"
+            style={{ backgroundColor: bookingColor }}
+          >
+            I Accept the Terms & Conditions
+          </button>
+          <button onClick={() => setTermsModalOpen(false)}
+            className="w-full py-2.5 text-gray-400 text-sm mt-1 hover:text-gray-600 transition-colors">
+            Close
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -540,6 +623,9 @@ export default function PackageDetailsPage() {
 
       {/* Booking Overlay */}
       {bookingOpen && <BookingOverlay />}
+
+      {/* T&C Modal */}
+      {termsModalOpen && <TermsModal />}
 
       {/* Payment Modal */}
       <PaymentModal />

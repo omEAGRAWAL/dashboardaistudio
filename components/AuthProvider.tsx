@@ -115,7 +115,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
 
           setRole(resolvedRole);
-          setOrgId(resolvedOrgId);
+          // Superadmin/agency users may have no orgId — fall back to their own uid
+          setOrgId(resolvedOrgId ?? (
+            (resolvedRole === 'superadmin' || resolvedRole === 'agency')
+              ? currentUser.uid
+              : null
+          ));
           setStatus(resolvedStatus);
         }
       } else {

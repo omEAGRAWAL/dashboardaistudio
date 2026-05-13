@@ -1,335 +1,92 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // ===============================================================
-    // Assumed Data Model
-    // ===============================================================
-    // Collection: users
-    // Document ID: {userId}
-    // Fields:
-    //   - uid: string (required)
-    //   - email: string (required)
-    //   - displayName: string (optional)
-    //   - photoURL: string (optional)
-    //   - role: string (required, 'admin' or 'agent')
-    //   - createdAt: timestamp (required)
-    //
-    // Collection: leads
-    // Document ID: {leadId}
-    // Fields:
-    //   - name: string (required)
-    //   - phone: string (required)
-    //   - source: string (optional)
-    //   - sourceId: string (optional)
-    //   - pax: number (optional)
-    //   - travelDate: string (optional)
-    //   - status: string (required)
-    //   - category: string (optional)
-    //   - assigneeId: string (optional)
-    //   - latestRemark: string (optional)
-    //   - createdAt: timestamp (required)
-    //   - updatedAt: timestamp (required)
-    //
-    // Collection: remarks
-    // Document ID: {remarkId}
-    // Fields:
-    //   - leadId: string (required)
-    //   - text: string (required)
-    //   - authorId: string (required)
-    //   - authorName: string (optional)
-    //   - createdAt: timestamp (required)
-    // ===============================================================
 
-    // Helper Functions
-    function isAuthenticated() {
+    function isSignedIn() {
       return request.auth != null;
     }
 
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
-    }
-
-    function getUserDoc() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid));
-    }
-
-    function getUserOrgId() {
-      let userDoc = getUserDoc();
-      return (userDoc != null && 'orgId' in userDoc.data) ? userDoc.data.orgId : null;
-    }
-
     function isAdmin() {
-      return isAuthenticated() && 
-        (getUserDoc().data.role in ['admin', 'superadmin', 'org_admin'] ||
-        (request.auth.token.email == "agrawalom711@gmail.com" && request.auth.token.email_verified == true));
+      return isSignedIn() && request.auth.token.role == 'admin';
     }
 
-    function isSuperAdmin() {
-      return isAuthenticated() && 
-        (getUserDoc().data.role in ['admin', 'superadmin'] ||
-        (request.auth.token.email == "agrawalom711@gmail.com" && request.auth.token.email_verified == true));
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
     }
 
-    function hasRequiredFields(fields) {
-      return request.resource.data.keys().hasAll(fields);
-    }
-
-    function hasOnlyAllowedFields(fields) {
-      return request.resource.data.keys().hasOnly(fields);
-    }
-
-    function isValidEmail(email) {
-      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
-    }
-
-    // Domain Validators
-    function isValidOrganization(data) {
-      return (!('id' in data)) &&
-             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
-             data.ownerId is string && data.ownerId.size() > 0 &&
-             data.createdAt is timestamp;
-    }
-
-    function isValidInvite(data) {
-      return (!('id' in data)) &&
-             data.email is string && isValidEmail(data.email) &&
-             data.orgId is string && data.orgId.size() > 0 &&
-             (!('role' in data) || data.role is string) &&
-             data.createdAt is timestamp;
-    }
-
-    function isValidUser(data) {
-      return (!('orgId' in data) || (data.orgId is string && data.orgId.size() < 100)) &&
-             data.uid is string && data.uid.size() > 0 && data.uid.size() < 100 &&
-             data.email is string && isValidEmail(data.email) &&
-             (!('displayName' in data) || (data.displayName is string && data.displayName.size() < 100)) &&
-             (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() < 500)) &&
-             (!('role' in data) || data.role is string) &&
-             (!('status' in data) || data.status is string) &&
-             (!('createdAt' in data) || data.createdAt is timestamp);
-    }
-
-    function isValidLead(data) {
-      return (!('orgId' in data) || (data.orgId is string && data.orgId.size() < 100)) &&
-             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
-             data.phone is string && data.phone.size() > 0 && data.phone.size() < 50 &&
-             (!('source' in data) || (data.source is string && data.source.size() < 100)) &&
-             (!('sourceId' in data) || (data.sourceId is string && data.sourceId.size() < 100)) &&
-             (!('pax' in data) || (data.pax is number && data.pax >= 0)) &&
-             (!('travelDate' in data) || (data.travelDate is string && data.travelDate.size() < 100)) &&
-             (!('status' in data) || data.status is string) &&
-             (!('category' in data) || data.category is string) &&
-             (!('assigneeId' in data) || (data.assigneeId is string && data.assigneeId.size() < 100)) &&
-             (!('latestRemark' in data) || (data.latestRemark is string && data.latestRemark.size() < 1000)) &&
-             (!('createdAt' in data) || data.createdAt is timestamp) &&
-             (!('updatedAt' in data) || data.updatedAt is timestamp);
-    }
-
-    function isValidRemark(data) {
-      return (!('orgId' in data) || (data.orgId is string && data.orgId.size() < 100)) &&
-             data.leadId is string && data.leadId.size() > 0 && data.leadId.size() < 100 &&
-             data.text is string && data.text.size() > 0 && data.text.size() < 2000 &&
-             data.authorId is string && data.authorId.size() > 0 && data.authorId.size() < 100 &&
-             (!('authorName' in data) || (data.authorName is string && data.authorName.size() < 100)) &&
-             (!('createdAt' in data) || data.createdAt is timestamp);
-    }
-
-    function isValidWebsiteSettings(data) {
-      return (!('orgId' in data) || (data.orgId is string && data.orgId.size() < 100));
-    }
-
-    function isValidPackage(data) {
-      return (!('orgId' in data) || (data.orgId is string && data.orgId.size() < 100));
-    }
-
-    function isValidBooking(data) {
-      return (!('orgId' in data) || (data.orgId is string && data.orgId.size() < 100));
-    }
-
-    // Rules
-    match /organizations/{orgId} {
-      allow read: if true; // webhook reads org name for greeting message
-      allow create: if isAuthenticated() && isValidOrganization(request.resource.data) && request.resource.data.ownerId == request.auth.uid;
-      // Superadmin can update any fields (subscription, features, metadata, etc.)
-      // Org owner can update basic fields only (validated)
-      allow update: if isAuthenticated() && (
-        isSuperAdmin() ||
-        (isValidOrganization(request.resource.data) && resource.data.ownerId == request.auth.uid)
+    function isAgency() {
+      return isSignedIn() && (
+        request.auth.token.role == 'admin' ||
+        request.auth.token.role == 'agency'
       );
+    }
+
+    // Users: owner or admin only
+    match /users/{uid} {
+      allow read, write: if isOwner(uid) || isAdmin();
+    }
+
+    // Categories: public read, admin write
+    match /categories/{id} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Products: public read for active, admin full access
+    match /products/{id} {
+      allow read: if resource.data.active == true || isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Orders: customer creates own, reads own; admin reads/updates all
+    match /orders/{id} {
+      allow create: if isSignedIn();
+      allow read: if isOwner(resource.data.customerId) || isAdmin();
+      allow update: if isAdmin()
+        || (isOwner(resource.data.customerId)
+            && request.resource.data.status == 'cancelled'
+            && resource.data.status == 'pending');
       allow delete: if isAdmin();
     }
 
-    match /plans/{planId} {
-      allow read: if isAuthenticated();
-      allow write: if isSuperAdmin();
-    }
-
-    match /referrals/{referralId} {
-      allow read: if isAuthenticated() && (
-        isSuperAdmin() ||
-        resource.data.referrerOrgId == getUserOrgId() ||
-        resource.data.referredOrgId == getUserOrgId()
-      );
-      allow create: if isAuthenticated();
-      allow update: if isSuperAdmin();
-      allow delete: if isSuperAdmin();
-    }
-
-    match /invites/{inviteId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isValidInvite(request.resource.data) && getUserOrgId() == request.resource.data.orgId;
-      allow update, delete: if isAuthenticated() && (getUserOrgId() == resource.data.orgId || request.auth.token.email == resource.data.email);
-    }
-
-    match /users/{userId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isValidUser(request.resource.data) && 
-                    request.resource.data.uid == userId;
-      allow update: if isAuthenticated() && isValidUser(request.resource.data) &&
-                    request.resource.data.uid == resource.data.uid &&
-                    request.resource.data.createdAt == resource.data.createdAt &&
-                    (isSuperAdmin() ||
-                     // Org admin can change role or remove (suspend) members within their own org
-                     (isAdmin() && resource.data.orgId == getUserOrgId()) ||
-                     (request.resource.data.role == resource.data.role && request.resource.data.orgId == resource.data.orgId) ||
-                     (request.auth.uid == userId && !('orgId' in resource.data) && request.resource.data.role == 'org_admin'));
-      allow delete: if isAdmin();
-
-      // FCM push notification tokens — each user manages their own tokens
-      match /fcmTokens/{tokenId} {
-        allow read, write: if isOwner(userId);
-      }
-    }
-
-    match /leads/{leadId} {
-      // Superadmin sees all; org_admin sees all leads in their org;
-      // agents see only leads assigned to them in their org.
-      allow read: if isAuthenticated() && (
-        isSuperAdmin() ||
-        (isAdmin() && (!('orgId' in resource.data) || resource.data.orgId == getUserOrgId())) ||
-        (!isAdmin() && resource.data.orgId == getUserOrgId() && resource.data.assigneeId == request.auth.uid)
-      );
-      // Allow unauthenticated creates for webhooks (validation still applies)
-      allow create: if isValidLead(request.resource.data);
-      // Admins can update any lead in their org; agents can update only their assigned leads
-      allow update: if isAuthenticated() && isValidLead(request.resource.data) &&
-                    request.resource.data.createdAt == resource.data.createdAt &&
-                    (isSuperAdmin() ||
-                     (isAdmin() && (!('orgId' in resource.data) || resource.data.orgId == getUserOrgId())) ||
-                     (!isAdmin() && resource.data.orgId == getUserOrgId() && resource.data.assigneeId == request.auth.uid));
-      // Only admins can delete leads
-      allow delete: if isAdmin() && (isSuperAdmin() || !('orgId' in resource.data) || resource.data.orgId == getUserOrgId());
-    }
-
-    match /remarks/{remarkId} {
-      allow read: if isAuthenticated() && (isSuperAdmin() || !('orgId' in resource.data) || resource.data.orgId == getUserOrgId());
-      allow create: if isAuthenticated() && isValidRemark(request.resource.data) && 
-                    request.resource.data.authorId == request.auth.uid;
-      allow update: if isAuthenticated() && isValidRemark(request.resource.data) && 
-                    request.resource.data.authorId == resource.data.authorId &&
-                    request.resource.data.createdAt == resource.data.createdAt &&
-                    (request.resource.data.authorId == request.auth.uid || isAdmin());
-      allow delete: if isAdmin() || (isAuthenticated() && resource.data.authorId == request.auth.uid);
-    }
-
+    // Website settings: signed-in agency write, public read
     match /website_settings/{orgId} {
       allow read: if true;
-      allow create, update: if isAuthenticated() && isValidWebsiteSettings(request.resource.data) && getUserOrgId() == orgId;
+      allow write: if isAgency();
     }
 
-    match /packages/{packageId} {
-      allow read: if true;
-      allow create: if isAuthenticated() && isValidPackage(request.resource.data) && (isSuperAdmin() || getUserOrgId() == request.resource.data.orgId);
-      allow update: if isAuthenticated() && isValidPackage(request.resource.data) && (isSuperAdmin() || getUserOrgId() == resource.data.orgId) && request.resource.data.createdAt == resource.data.createdAt;
-      allow delete: if isAuthenticated() && (isSuperAdmin() || getUserOrgId() == resource.data.orgId);
-    }
-
+    // Campaign settings: signed-in agency write, public read
     match /campaign_settings/{orgId} {
       allow read: if true;
-      allow create, update: if isAuthenticated() && (isSuperAdmin() || getUserOrgId() == orgId);
+      allow write: if isAgency();
     }
 
-    match /bookings/{bookingId} {
-      allow read: if isAuthenticated() && resource.data.orgId == getUserOrgId();
-      allow create: if isValidBooking(request.resource.data);
-      allow update: if isAuthenticated() && isValidBooking(request.resource.data) && resource.data.orgId == getUserOrgId() && request.resource.data.createdAt == resource.data.createdAt;
-      allow delete: if isAuthenticated() && resource.data.orgId == getUserOrgId();
-    }
-
-    match /business_profiles/{orgId} {
-      allow read: if isAuthenticated() && getUserOrgId() == orgId;
-      allow create, update: if isAuthenticated() && (isSuperAdmin() || getUserOrgId() == orgId);
-    }
-
-    match /whatsapp_templates/{templateId} {
-      allow read: if isAuthenticated() && (isSuperAdmin() || resource.data.orgId == getUserOrgId());
-      allow create: if isAuthenticated() && request.resource.data.orgId == getUserOrgId();
-      allow update: if isAuthenticated() && resource.data.orgId == getUserOrgId();
-      allow delete: if isAuthenticated() && resource.data.orgId == getUserOrgId();
-    }
-
-    // Custom domain reverse-lookup — read by middleware (unauthenticated), write by Admin SDK only
-    match /domains/{hostname} {
+    // Packages: public read, agency write
+    match /packages/{id} {
       allow read: if true;
-      allow write: if false;
+      allow create, update, delete: if isAgency();
     }
 
-    // WhatsApp number assignments (orgId is document ID)
-    match /whatsapp_numbers/{orgId} {
-      allow read: if true; // webhook reads this without auth to look up orgId by phone number
-      allow create, update, delete: if isSuperAdmin();
+    // Bookings: anyone can create (public booking flow), agency can manage
+    match /bookings/{id} {
+      allow create: if true;
+      allow read, update, delete: if isAgency();
     }
 
-    // Chatbot flow per org (orgId is document ID)
-    match /chatbot_flows/{orgId} {
-      allow read: if true; // webhook reads this without auth to load the flow
-      allow create, update: if isAuthenticated() && (isSuperAdmin() || getUserOrgId() == orgId);
-      allow delete: if isAuthenticated() && (isSuperAdmin() || getUserOrgId() == orgId);
+    // Campaigns: public read, agency write
+    match /campaigns/{id} {
+      allow read: if true;
+      allow create, update, delete: if isAgency();
     }
 
-    // Conversations (created by webhook, read by org members)
-    match /conversations/{conversationId} {
-      allow read: if true; // webhook reads conversation state to track current step
-      allow create, update: if true;
-      allow delete: if isAuthenticated() && (isSuperAdmin() || resource.data.orgId == getUserOrgId());
+    // Employees: agency/admin only
+    match /employees/{id} {
+      allow read, write: if isAgency();
     }
 
-    // Agency Twilio credentials — NEVER readable from client, admin SDK only
-    match /whatsapp_credentials/{orgId} {
-      allow read, write: if false;
-    }
-
-    // Email marketing settings (SMTP config + saved templates) — org admin only
-    match /email_settings/{orgId} {
-      allow read, write: if isAuthenticated() && (isSuperAdmin() || getUserOrgId() == orgId);
-    }
-
-    // Email campaign history — read/write by org admin; created by server via Admin SDK
-    match /email_campaigns/{orgId}/items/{campaignId} {
-      allow read: if isAuthenticated() && (isSuperAdmin() || getUserOrgId() == orgId);
-      allow write: if false; // Admin SDK only
-    }
-
-    // WhatsApp message log
-    match /whatsapp_messages/{messageId} {
-      allow read: if isAuthenticated() && (isSuperAdmin() || resource.data.orgId == getUserOrgId());
-      allow create: if true; // webhook + authenticated agents both create messages
-      allow update, delete: if isAuthenticated() && (isSuperAdmin() || resource.data.orgId == getUserOrgId());
-    }
-
-    // ===============================================================
-    // Generic Data Models (for apps integrating with this backend)
-    // ===============================================================
-    match /personalData/{appId}/users/{uid}/{collectionName}/{docId} {
-      allow get: if uid == request.auth.uid;
-      allow list: if uid == request.auth.uid && request.query.limit <= 100;
-      allow write: if uid == request.auth.uid;
-    }
-
-    match /publicData/{appId}/{collectionName}/{docId} {
-      allow get: if true;
-      allow list: if request.query.limit <= 100;
-      allow write: if true;
+    // Leads: agency/admin only
+    match /leads/{id} {
+      allow read, write: if isAgency();
     }
   }
 }

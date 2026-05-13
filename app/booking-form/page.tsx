@@ -9,7 +9,7 @@ import { db } from '@/lib/firebase';
 import {
   Save, Plus, Trash2, ChevronUp, ChevronDown,
   Eye, EyeOff, ClipboardList, Loader2, AlertCircle,
-  CheckCircle2, Palette, X,
+  CheckCircle2, Palette, X, FileText, ToggleLeft, ToggleRight, ShieldCheck,
 } from 'lucide-react';
 
 type FieldType = 'text' | 'tel' | 'email' | 'date' | 'select' | 'number' | 'textarea';
@@ -65,6 +65,11 @@ export default function BookingFormPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newOption, setNewOption] = useState('');
 
+  // Terms & Conditions settings
+  const [termsEnabled, setTermsEnabled] = useState(false);
+  const [termsMandatory, setTermsMandatory] = useState(true);
+  const [termsContent, setTermsContent] = useState('');
+
   useEffect(() => {
     if (!orgId) return;
     (async () => {
@@ -89,21 +94,38 @@ export default function BookingFormPage() {
             const custom = bf.fields.filter((f: BookingField) => !f.isDefault);
             setFields([...merged, ...custom].sort((a, b) => a.order - b.order));
           }
+          // Load T&C settings
+          if (bf.termsEnabled !== undefined) setTermsEnabled(bf.termsEnabled);
+          if (bf.termsMandatory !== undefined) setTermsMandatory(bf.termsMandatory);
+          if (bf.termsContent) setTermsContent(bf.termsContent);
         }
       } finally { setLoading(false); }
     })();
   }, [orgId]);
 
   const handleSave = async () => {
-    if (!orgId) return;
+    if (!orgId) { alert('No orgId — cannot save.'); return; }
     setSaving(true);
     try {
+      // Strip undefined values — Firestore rejects them
+      const cleanFields = JSON.parse(JSON.stringify(
+        fields.map((f, i) => ({ ...f, order: i }))
+      ));
       await setDoc(doc(db, 'website_settings', orgId), {
-        bookingForm: { bookingColor, fields: fields.map((f, i) => ({ ...f, order: i })) }
+        bookingForm: {
+          bookingColor,
+          fields: cleanFields,
+          termsEnabled,
+          termsMandatory,
+          termsContent,
+        }
       }, { merge: true });
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
-    } catch { alert('Failed to save'); }
+    } catch (err: any) {
+      console.error('[BookingForm] Save failed:', err?.code, err?.message, err);
+      alert(`Failed to save: ${err?.message ?? err}`);
+    }
     finally { setSaving(false); }
   };
 
@@ -326,6 +348,83 @@ export default function BookingFormPage() {
                   <Plus className="w-4 h-4" />
                   Add Custom Question
                 </button>
+              </div>
+            </div>
+
+            {/* Terms & Conditions Panel */}
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-6">
+              <div className="p-5 border-b border-gray-100 flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
+                  <ShieldCheck className="w-4 h-4 text-indigo-600" />
+                </div>
+                <div className="flex-1">
+                  <h2 className="font-semibold text-gray-900">Terms & Conditions</h2>
+                  <p className="text-xs text-gray-500 mt-0.5">Show T&C checkbox in the booking form for customers to accept.</p>
+                </div>
+              </div>
+
+              <div className="p-5 space-y-5">
+                {/* Enable / Disable T&C */}
+                <div className="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-xl border border-gray-100">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-800">Show T&C in Booking Form</p>
+                    <p className="text-xs text-gray-500 mt-0.5">Display a checkbox with a "Read Terms" link for customers</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setTermsEnabled(v => !v)}
+                    className="flex items-center gap-2 transition-all"
+                  >
+                    {termsEnabled
+                      ? <ToggleRight className="w-9 h-9 text-indigo-600" />
+                      : <ToggleLeft className="w-9 h-9 text-gray-300" />}
+                  </button>
+                </div>
+
+                {termsEnabled && (
+                  <>
+                    {/* Mandatory / Optional */}
+                    <div className="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-xl border border-gray-100">
+                      <div>
+                        <p className="text-sm font-semibold text-gray-800">Acceptance Required</p>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          {termsMandatory ? 'Customers must accept before submitting.' : 'Acceptance is optional — booking proceeds either way.'}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                          termsMandatory ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-500'
+                        }`}>{termsMandatory ? 'Mandatory' : 'Optional'}</span>
+                        <button
+                          type="button"
+                          onClick={() => setTermsMandatory(v => !v)}
+                          className="flex items-center gap-1 transition-all"
+                        >
+                          {termsMandatory
+                            ? <ToggleRight className="w-9 h-9 text-red-500" />
+                            : <ToggleLeft className="w-9 h-9 text-gray-300" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* T&C Content Editor */}
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 mb-1">
+                        <FileText className="w-4 h-4 text-gray-500" />
+                        <label className="text-sm font-semibold text-gray-700">Terms & Conditions Content</label>
+                      </div>
+                      <p className="text-xs text-gray-400 mb-2">This text will be shown in a scrollable popup when customers click "Read Terms & Conditions".</p>
+                      <textarea
+                        value={termsContent}
+                        onChange={e => setTermsContent(e.target.value)}
+                        placeholder={`Enter your Terms & Conditions here...\n\nExample:\n1. Bookings are non-refundable within 7 days of travel.\n2. The agency reserves the right to modify itineraries.\n3. Participants must carry valid ID proof.\n...`}
+                        rows={12}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-y leading-relaxed font-mono"
+                      />
+                      <p className="text-xs text-gray-400">{termsContent.length} characters · Supports plain text and line breaks</p>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
