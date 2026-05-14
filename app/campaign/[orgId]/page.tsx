@@ -10,6 +10,7 @@ import {
   Instagram, MessageCircle, FileText, ChevronLeft, Minus, Plus,
   Luggage, CheckCircle2, ChevronRight, Tag, ShieldCheck, X,
 } from 'lucide-react';
+import { UnifiedBookingForm, DEFAULT_BOOKING_PAGES, type BookingPage } from '@/components/UnifiedBookingForm';
 
 const INDIA_STATES = [
   'Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh','Goa','Gujarat',
@@ -38,22 +39,18 @@ export default function CampaignPage() {
   const [submitting, setSubmitting] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
 
+  // Dynamic form pages (loaded from Firestore bookingForm config)
+  const [bookingPages, setBookingPages] = useState<BookingPage[]>(DEFAULT_BOOKING_PAGES);
+  // Collected form data from UnifiedBookingForm
+  const [collectedFormData, setCollectedFormData] = useState<Record<string, any>>({});
+
   // Payment state
   const [rzpConfig, setRzpConfig] = useState<{ keyId: string; advanceType: 'percentage' | 'fixed'; advancePercentage: number; advanceFixedAmount: number } | null>(null);
   const [pendingBookingId, setPendingBookingId] = useState<string | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
 
-  // Step 1 fields
-  const [travelDate, setTravelDate] = useState('');
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
-  const [state, setState] = useState('');
-  const [city, setCity] = useState('');
-  const [source, setSource] = useState('');
-
-  // Step 2 ticket quantities
+  // Ticket quantities (step 2)
   const [ticketQty, setTicketQty] = useState<TicketQty>({ double: 1, triple: 1, quad: 1 });
   const [couponOpen, setCouponOpen] = useState(false);
   const [couponCode, setCouponCode] = useState('');
@@ -76,11 +73,18 @@ export default function CampaignPage() {
         ]);
         if (sSnap.exists()) {
           setSettings(sSnap.data());
-          // Load T&C from bookingForm settings
+          // Load booking form config (pages + T&C)
           const bf = sSnap.data().bookingForm;
           if (bf?.termsEnabled) setTermsEnabled(true);
           if (bf?.termsMandatory !== undefined) setTermsMandatory(bf.termsMandatory);
           if (bf?.termsContent) setTermsContent(bf.termsContent);
+          // Load multi-page form structure
+          if (bf?.pages && bf.pages.length > 0) {
+            setBookingPages(bf.pages);
+          } else if (bf?.fields && bf.fields.length > 0) {
+            // Backward compat: wrap flat fields into single page
+            setBookingPages([{ id: 'page_1', title: 'Details', fields: bf.fields }]);
+          }
         } else {
           // fallback to website_settings for agency name/social etc.
           const ws = await getDoc(doc(db, 'website_settings', orgId));
@@ -90,6 +94,11 @@ export default function CampaignPage() {
             if (bf?.termsEnabled) setTermsEnabled(true);
             if (bf?.termsMandatory !== undefined) setTermsMandatory(bf.termsMandatory);
             if (bf?.termsContent) setTermsContent(bf.termsContent);
+            if (bf?.pages && bf.pages.length > 0) {
+              setBookingPages(bf.pages);
+            } else if (bf?.fields && bf.fields.length > 0) {
+              setBookingPages([{ id: 'page_1', title: 'Details', fields: bf.fields }]);
+            }
           }
         }
         setPackages(pkgsSnap.docs.map(d => ({ id: d.id, ...d.data() })));
@@ -208,12 +217,17 @@ export default function CampaignPage() {
     setSelectedPkg(pkg);
     setBookingStep(1);
     setBookingSuccess(false);
-    setTravelDate(''); setName(''); setPhone(''); setEmail('');
-    setState(''); setCity(''); setSource('');
+    setCollectedFormData({});
     setTicketQty({ double: 1, triple: 1, quad: 1 });
     setAcceptSlot(false); setAcceptTnc(false); setCouponCode('');
     setTermsModalOpen(false);
     setBookingOpen(true);
+  };
+
+  // Called when UnifiedBookingForm completes all pages (step 1)
+  const handleFormComplete = (formData: Record<string, any>) => {
+    setCollectedFormData(formData);
+    setBookingStep(2);
   };
 
   const handleBookingSubmit = async () => {
@@ -225,6 +239,33 @@ export default function CampaignPage() {
     }
     setSubmitting(true);
     try {
+      // Split formData into standard booking fields vs custom fields
+      const STANDARD_KEYS: Record<string, string> = {
+        customerName: 'customerName',
+        customerEmail: 'customerEmail',
+        customerPhone: 'customerPhone',
+        travelDate: 'travelDate',
+        state: 'state',
+        city: 'city',
+        leadSource: 'leadSource',
+      };
+      const standardData: Record<string, any> = {};
+      const customFields: Record<string, any> = {};
+
+      // Build a lookup of field definitions from all pages
+      const allFields = bookingPages.flatMap(p => p.fields);
+      for (const [fieldId, value] of Object.entries(collectedFormData)) {
+        const fieldDef = allFields.find(f => f.id === fieldId);
+        const fieldKey = fieldDef?.key;
+        if (fieldKey && STANDARD_KEYS[fieldKey]) {
+          standardData[STANDARD_KEYS[fieldKey]] = value;
+        } else {
+          // Custom field — use label as key for readability
+          const label = fieldDef?.label || fieldId;
+          customFields[label] = value;
+        }
+      }
+
       const ticketTypes = getTicketTypes(selectedPkg);
       const ticketBreakdown = ticketTypes.map(t => ({
         type: t.type, label: t.label, quantity: ticketQty[t.type] || 0, pricePerPerson: t.price,
@@ -236,18 +277,19 @@ export default function CampaignPage() {
         orgId,
         packageId: selectedPkg.id,
         packageTitle: selectedPkg.title,
-        customerName: name,
-        customerEmail: email,
-        customerPhone: phone,
-        travelDate,
-        state,
-        city,
-        leadSource: source,
+        customerName: standardData.customerName || '',
+        customerEmail: standardData.customerEmail || '',
+        customerPhone: standardData.customerPhone || '',
+        travelDate: standardData.travelDate || '',
+        state: standardData.state || '',
+        city: standardData.city || '',
+        leadSource: standardData.leadSource || '',
         sharingType: dominant.type,
         numberOfPersons: totalTickets,
         ticketBreakdown,
         totalPrice: calcTotal(selectedPkg),
         couponCode: couponCode || '',
+        customFields,
         status: 'Pending',
         source: 'Campaign',
         paymentStatus: 'payment_pending',
@@ -410,36 +452,38 @@ export default function CampaignPage() {
           className="w-full sm:w-[400px] bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden max-h-[94vh] flex flex-col"
           onClick={e => e.stopPropagation()}>
 
-          {/* Header */}
-          <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 flex-shrink-0">
-            <button
-              onClick={() => bookingStep === 1 ? setBookingOpen(false) : setBookingStep(1)}
-              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-600 flex-shrink-0">
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <div className="flex-1 text-center min-w-0">
-              <h2 className="font-bold text-gray-900 text-[15px]">
-                {bookingStep === 1 ? 'Who Is Booking?' : 'Create Tickets & Pay'}
-              </h2>
-              <p className="text-xs text-gray-400 truncate">{selectedPkg.title}</p>
-            </div>
-            <div className="flex items-center gap-1 flex-shrink-0">
-              {[1, 2, 3].map(s => (
-                <div key={s}
-                  className="rounded-full transition-all"
-                  style={{
-                    width: bookingStep === s ? 16 : 8,
-                    height: 8,
-                    backgroundColor: s <= bookingStep ? accentColor : '#e5e7eb',
-                  }} />
-              ))}
-            </div>
-          </div>
-
-          {/* Step 1: Who Is Booking? */}
+          {/* Step 1: Dynamic booking form (UnifiedBookingForm) */}
           {bookingStep === 1 && (
-            <div className="overflow-y-auto flex-1 px-5 py-4 space-y-4">
-              {/* Package mini-card */}
+            <UnifiedBookingForm
+              pages={bookingPages}
+              accentColor={accentColor}
+              onComplete={handleFormComplete}
+              headerRenderer={(currentPage, totalPages, pageTitle, onBack) => (
+                <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 flex-shrink-0">
+                  <button
+                    onClick={() => currentPage === 0 ? setBookingOpen(false) : onBack()}
+                    className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-600 flex-shrink-0">
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <div className="flex-1 text-center min-w-0">
+                    <h2 className="font-bold text-gray-900 text-[15px]">{pageTitle}</h2>
+                    <p className="text-xs text-gray-400 truncate">{selectedPkg.title}</p>
+                  </div>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    {Array.from({ length: totalPages + 1 }).map((_, s) => (
+                      <div key={s}
+                        className="rounded-full transition-all"
+                        style={{
+                          width: currentPage === s ? 16 : 8,
+                          height: 8,
+                          backgroundColor: s <= currentPage ? accentColor : '#e5e7eb',
+                        }} />
+                    ))}
+                  </div>
+                </div>
+              )}
+            >
+              {/* Package mini-card shown on first page */}
               <div className="flex items-center gap-3 bg-gray-50 border border-gray-100 rounded-2xl p-3">
                 {overlayCover && <img src={overlayCover} alt={selectedPkg.title} className="w-14 h-14 rounded-xl object-cover flex-shrink-0" />}
                 <div className="min-w-0 flex-1">
@@ -459,83 +503,7 @@ export default function CampaignPage() {
                   </span>
                 )}
               </div>
-
-              {/* Date */}
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Select Date</label>
-                <input type="date" value={travelDate} onChange={e => setTravelDate(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none"
-                  style={{ accentColor }} />
-              </div>
-
-              {/* Name */}
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Name</label>
-                <input type="text" value={name} onChange={e => setName(e.target.value)}
-                  placeholder="Full Name" required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none" />
-              </div>
-
-              {/* Phone */}
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Phone Number (WhatsApp)</label>
-                <input type="tel" value={phone} onChange={e => setPhone(e.target.value)}
-                  placeholder="Phone Number" required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none" />
-              </div>
-
-              {/* Email */}
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Email Address</label>
-                <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-                  placeholder="Email Address"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none" />
-              </div>
-
-              {/* State */}
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">State</label>
-                <div className="relative">
-                  <select value={state} onChange={e => setState(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none appearance-none pr-8">
-                    <option value="">Select...</option>
-                    {INDIA_STATES.map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                  <ChevronRight className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 rotate-90 pointer-events-none" />
-                </div>
-              </div>
-
-              {/* City */}
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">City</label>
-                <input type="text" value={city} onChange={e => setCity(e.target.value)}
-                  placeholder="City"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none" />
-              </div>
-
-              {/* Source */}
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Source</label>
-                <div className="relative">
-                  <select value={source} onChange={e => setSource(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none appearance-none pr-8">
-                    <option value="">Select...</option>
-                    {LEAD_SOURCES.map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                  <ChevronRight className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 rotate-90 pointer-events-none" />
-                </div>
-              </div>
-            </div>
-          )}
-          {bookingStep === 1 && (
-            <div className="px-5 pb-5 pt-2 flex-shrink-0">
-              <button
-                onClick={() => { if (!name || !phone) { alert('Name and Phone are required'); return; } setBookingStep(2); }}
-                className="w-full py-4 rounded-2xl text-white font-bold text-base shadow-md hover:brightness-110 transition-all"
-                style={{ backgroundColor: accentColor }}>
-                Next
-              </button>
-            </div>
+            </UnifiedBookingForm>
           )}
 
           {/* Step 2: Tickets & Pay */}

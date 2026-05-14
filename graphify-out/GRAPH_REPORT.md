@@ -1,11 +1,11 @@
 # Graph Report - C:\Users\OmAgrawal\Downloads\dashboardaistudio  (2026-05-13)
 
 ## Corpus Check
-- 110 files · ~118,912 words
+- 110 files · ~119,992 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 347 nodes · 449 edges · 61 communities detected
+- 348 nodes · 450 edges · 61 communities detected
 - Extraction: 87% EXTRACTED · 13% INFERRED · 0% AMBIGUOUS · INFERRED: 57 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -158,7 +158,7 @@ Cohesion: 0.33
 Nodes (7): AI Studio App, .env.local, GEMINI_API_KEY, GitHub Banner Image, Node.js, npm install, npm run dev
 
 ### Community 14 - "Community 14"
-Cohesion: 0.7
+Cohesion: 0.53
 Nodes (3): calcTotal(), getTicketTypes(), handleBookingSubmit()
 
 ### Community 15 - "Community 15"
@@ -431,9 +431,9 @@ Nodes (0):
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `POST()` connect `Community 0` to `Community 2`, `Community 3`, `Community 4`, `Community 5`, `Community 10`, `Community 19`?**
-  _High betweenness centrality (0.214) - this node is a cross-community bridge._
+  _High betweenness centrality (0.213) - this node is a cross-community bridge._
 - **Why does `toDate()` connect `Community 5` to `Community 0`, `Community 1`, `Community 3`?**
-  _High betweenness centrality (0.166) - this node is a cross-community bridge._
+  _High betweenness centrality (0.165) - this node is a cross-community bridge._
 - **Why does `buildInvoiceBooking()` connect `Community 1` to `Community 5`?**
   _High betweenness centrality (0.059) - this node is a cross-community bridge._
 - **Are the 9 inferred relationships involving `POST()` (e.g. with `set()` and `update()`) actually correct?**

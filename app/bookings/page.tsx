@@ -837,6 +837,7 @@ export default function BookingsPage() {
                         <div className="min-w-0">
                           <p className="font-semibold text-gray-900 truncate">{booking.customerName}</p>
                           <p className="text-xs text-gray-500 truncate">{booking.customerPhone}</p>
+                          {booking.leadSource && <p className="text-[10px] text-gray-400 mt-0.5">Source: {booking.leadSource}</p>}
                         </div>
                         <div className="flex flex-col items-end gap-1 flex-shrink-0">
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
@@ -844,47 +845,11 @@ export default function BookingsPage() {
                             booking.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
                             'bg-yellow-100 text-yellow-800'
                           }`}>{booking.status || 'Pending'}</span>
-                          {booking.paymentStatus && PAYMENT_STATUS_LABELS[booking.paymentStatus] && (
-                            <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium ${PAYMENT_STATUS_LABELS[booking.paymentStatus].color}`}>
-                              {PAYMENT_STATUS_LABELS[booking.paymentStatus].label}
-                            </span>
-                          )}
                         </div>
                       </div>
                       <p className="text-sm font-medium text-gray-700 line-clamp-1">{booking.packageTitle}</p>
-                      <div className="flex items-center justify-between">
-                        <div className="text-xs text-gray-500 space-x-2">
-                          <span className="capitalize">{booking.sharingType} · {booking.numberOfPersons}p</span>
-                          <span>· {booking.createdAt ? format(booking.createdAt.toDate(), 'MMM d') : 'N/A'}</span>
-                        </div>
-                        <div className="text-right">
-                          <span className="font-semibold text-gray-900 text-sm">₹{((booking.totalPrice || 0) - (booking.discountAmount || 0)).toLocaleString('en-IN')}</span>
-                          {booking.discountAmount > 0 && <div className="text-[10px] text-green-600 font-medium">₹{booking.discountAmount.toLocaleString('en-IN')} off</div>}
-                        </div>
-                      </div>
-                      {(booking.amountPaid > 0 || (booking.paymentStatus && booking.paymentStatus !== 'payment_pending')) && (
-                        <div className="flex items-center gap-2 text-xs">
-                          {booking.amountPaid > 0 && (
-                            <span className="text-green-600 font-medium">₹{(booking.amountPaid || 0).toLocaleString('en-IN')} paid</span>
-                          )}
-                          {getRemainingBalance(booking) > 0 ? (
-                            <span className="text-red-500">· ₹{getRemainingBalance(booking).toLocaleString('en-IN')} due</span>
-                          ) : booking.amountPaid > 0 ? (
-                            <span className="text-green-600">· Fully paid</span>
-                          ) : null}
-                        </div>
-                      )}
-                      <div className="flex items-center gap-1.5 pt-1 flex-wrap">
-                        <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                          <Users className="w-3.5 h-3.5 text-indigo-400" />
-                          <span className="font-semibold text-gray-700">{booking.numberOfPersons || 0} pax</span>
-                        </div>
-                        {booking.customerPhone && (
-                          <>
-                            <a href={`tel:${booking.customerPhone}`} className="p-1.5 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 transition-colors" title="Call"><Phone className="w-3.5 h-3.5" /></a>
-                            <a href={`https://wa.me/${booking.customerPhone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors" title="WhatsApp"><MessageCircle className="w-3.5 h-3.5" /></a>
-                          </>
-                        )}
+                      <div className="text-sm font-semibold text-gray-900">
+                        ₹{((booking.totalPrice || 0) - (booking.discountAmount || 0)).toLocaleString('en-IN')}
                       </div>
                       <div className="flex items-center gap-2 pt-1">
                         <button onClick={() => handleOpenView(booking)} className="flex-1 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-center">View</button>
@@ -907,11 +872,8 @@ export default function BookingsPage() {
                       <tr className="bg-gray-50 border-b border-gray-200">
                         <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Customer</th>
                         <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Package</th>
-                        <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Participants</th>
-                        <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Price</th>
-                        <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Payment</th>
+                        <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
                         <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                        <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
                         <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
                       </tr>
                     </thead>
@@ -920,83 +882,23 @@ export default function BookingsPage() {
                         <tr key={booking.id} className="hover:bg-gray-50 transition-colors">
                           <td className="px-6 py-4">
                             <div className="font-medium text-gray-900">{booking.customerName}</div>
-                            <div className="text-sm text-gray-500">{booking.customerEmail}</div>
-                            <div className="flex items-center gap-2 mt-1">
-                              <span className="text-sm text-gray-500">{booking.customerPhone}</span>
-                              {booking.customerPhone && (
-                                <>
-                                  <a href={`tel:${booking.customerPhone}`} title="Call" className="p-1 rounded-full bg-green-50 hover:bg-green-100 text-green-600 transition-colors">
-                                    <Phone className="w-3.5 h-3.5" />
-                                  </a>
-                                  <a href={`https://wa.me/${booking.customerPhone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" title="WhatsApp" className="p-1 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-600 transition-colors">
-                                    <MessageCircle className="w-3.5 h-3.5" />
-                                  </a>
-                                </>
-                              )}
-                            </div>
+                            <div className="text-sm text-gray-500">{booking.customerPhone}</div>
+                            {booking.leadSource && <div className="text-xs text-gray-400 mt-0.5">Source: {booking.leadSource}</div>}
                           </td>
                           <td className="px-6 py-4">
                             <div className="font-medium text-gray-900 line-clamp-1">{booking.packageTitle}</div>
-                            <div className="text-sm text-gray-500">Source: {booking.source || 'Website'}</div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-1.5">
-                              <Users className="w-3.5 h-3.5 text-indigo-400" />
-                              <span className="font-semibold text-gray-900 text-sm">{booking.numberOfPersons || 0}</span>
-                              <span className="text-xs text-gray-400">pax</span>
-                            </div>
-                            <div className="text-xs text-gray-500 capitalize mt-0.5">
-                              {booking.sharingType === 'double' && 'Double Sharing'}
-                              {booking.sharingType === 'triple' && 'Triple Sharing'}
-                              {booking.sharingType === 'quad' && 'Quad Sharing'}
-                            </div>
-                            {booking.travelDate && (
-                              <div className="text-xs text-indigo-600 mt-0.5 font-medium">✈ {booking.travelDate}</div>
-                            )}
                           </td>
                           <td className="px-6 py-4">
                             <div className="font-medium text-gray-900">₹{((booking.totalPrice || 0) - (booking.discountAmount || 0)).toLocaleString('en-IN')}</div>
-                            {booking.discountAmount > 0 && <div className="text-xs text-green-600 font-medium">₹{booking.discountAmount.toLocaleString('en-IN')} off</div>}
                           </td>
                           <td className="px-6 py-4">
-                            {(() => {
-                              const amtPaid = booking.amountPaid || 0;
-                              const balance = getRemainingBalance(booking);
-                              if (amtPaid === 0 && !booking.paymentStatus) return <span className="text-xs text-gray-400">—</span>;
-                              return (
-                                <div className="space-y-0.5">
-                                  {amtPaid > 0 && (
-                                    <div className="text-sm font-semibold text-green-700">₹{amtPaid.toLocaleString('en-IN')} paid</div>
-                                  )}
-                                  {balance > 0 ? (
-                                    <div className="text-xs text-red-500 font-medium">₹{balance.toLocaleString('en-IN')} due</div>
-                                  ) : amtPaid > 0 ? (
-                                    <div className="text-xs text-green-600 font-medium">Fully paid</div>
-                                  ) : null}
-                                </div>
-                              );
-                            })()}
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="space-y-1">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                booking.status === 'Confirmed' ? 'bg-green-100 text-green-800' :
-                                booking.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
-                                'bg-yellow-100 text-yellow-800'
-                              }`}>
-                                {booking.status || 'Pending'}
-                              </span>
-                              {booking.paymentStatus && PAYMENT_STATUS_LABELS[booking.paymentStatus] && (
-                                <div>
-                                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${PAYMENT_STATUS_LABELS[booking.paymentStatus].color}`}>
-                                    {PAYMENT_STATUS_LABELS[booking.paymentStatus].label}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-500">
-                            {booking.createdAt ? format(booking.createdAt.toDate(), 'MMM d, yyyy') : 'N/A'}
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              booking.status === 'Confirmed' ? 'bg-green-100 text-green-800' :
+                              booking.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
+                              'bg-yellow-100 text-yellow-800'
+                            }`}>
+                              {booking.status || 'Pending'}
+                            </span>
                           </td>
                           <td className="px-6 py-4 text-right">
                             <div className="flex items-center justify-end gap-1.5">

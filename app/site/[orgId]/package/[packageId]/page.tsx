@@ -6,10 +6,11 @@ import { doc, getDoc, addDoc, collection, serverTimestamp } from 'firebase/fires
 import { db } from '@/lib/firebase';
 import {
   MapPin, Clock, ArrowLeft, CheckCircle2, ChevronLeft, ChevronRight,
-  Users, Flag, Zap, CheckCircle, XCircle, ChevronDown, ChevronUp,
-  Star, Calendar, Phone, MessageCircle, AlertCircle, X, Minus, Plus, ShieldCheck,
+  Users, Flag, CheckCircle, XCircle, ChevronDown, ChevronUp,
+  MessageCircle, AlertCircle, X, Minus, Plus, ShieldCheck,
 } from 'lucide-react';
 import Link from 'next/link';
+import { UnifiedBookingForm, DEFAULT_BOOKING_PAGES, type BookingPage } from '@/components/UnifiedBookingForm';
 
 const DIFFICULTY_COLOR: Record<string, string> = {
   Easy: 'bg-green-100 text-green-700 border-green-200',
@@ -19,73 +20,6 @@ const DIFFICULTY_COLOR: Record<string, string> = {
 };
 
 type Tab = 'overview' | 'highlights' | 'itinerary' | 'inclusions' | 'notes';
-
-interface BookingField {
-  id: string;
-  key?: string;
-  label: string;
-  type: string;
-  placeholder?: string;
-  options?: string[];
-  required: boolean;
-  enabled: boolean;
-  order: number;
-  isDefault: boolean;
-}
-
-const DEFAULT_FIELDS: BookingField[] = [
-  { id: 'f_name', key: 'customerName', label: 'Full Name', type: 'text', placeholder: 'Full Name', required: true, enabled: true, order: 0, isDefault: true },
-  { id: 'f_phone', key: 'customerPhone', label: 'Phone Number (WhatsApp)', type: 'tel', placeholder: 'Phone Number', required: true, enabled: true, order: 1, isDefault: true },
-  { id: 'f_email', key: 'customerEmail', label: 'Email Address', type: 'email', placeholder: 'Email Address', required: false, enabled: true, order: 2, isDefault: true },
-  { id: 'f_date', key: 'travelDate', label: 'Travel Date', type: 'date', required: false, enabled: true, order: 3, isDefault: true },
-  { id: 'f_state', key: 'state', label: 'State', type: 'select', options: [], required: false, enabled: true, order: 4, isDefault: true },
-  { id: 'f_city', key: 'city', label: 'City', type: 'text', placeholder: 'City', required: false, enabled: true, order: 5, isDefault: true },
-  { id: 'f_source', key: 'leadSource', label: 'Source', type: 'select', options: [], required: false, enabled: true, order: 6, isDefault: true },
-];
-
-function DynamicField({ field, value, onChange, color }: {
-  field: BookingField; value: string; onChange: (v: string) => void; color: string;
-}) {
-  const base = "w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none transition-all";
-  const focusStyle = { '--tw-ring-color': color } as React.CSSProperties;
-
-  if (field.type === 'select') {
-    return (
-      <div className="space-y-1.5">
-        <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">
-          {field.label}{field.required && <span className="text-red-500 ml-0.5">*</span>}
-        </label>
-        <select value={value} onChange={e => onChange(e.target.value)} required={field.required}
-          className={base + ' bg-white appearance-none'} style={focusStyle}>
-          <option value="">Select...</option>
-          {(field.options || []).map(opt => <option key={opt} value={opt}>{opt}</option>)}
-        </select>
-      </div>
-    );
-  }
-  if (field.type === 'textarea') {
-    return (
-      <div className="space-y-1.5">
-        <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">
-          {field.label}{field.required && <span className="text-red-500 ml-0.5">*</span>}
-        </label>
-        <textarea value={value} onChange={e => onChange(e.target.value)} required={field.required}
-          placeholder={field.placeholder} rows={3}
-          className={base + ' resize-none'} style={focusStyle} />
-      </div>
-    );
-  }
-  return (
-    <div className="space-y-1.5">
-      <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">
-        {field.label}{field.required && <span className="text-red-500 ml-0.5">*</span>}
-      </label>
-      <input type={field.type} value={value} onChange={e => onChange(e.target.value)}
-        required={field.required} placeholder={field.placeholder}
-        className={base} style={focusStyle} />
-    </div>
-  );
-}
 
 export default function PackageDetailsPage() {
   const params = useParams();
@@ -105,11 +39,11 @@ export default function PackageDetailsPage() {
   // Multi-step booking state
   const [bookingOpen, setBookingOpen] = useState(false);
   const [bookingStep, setBookingStep] = useState<1 | 2>(1);
-  const [bookingFields, setBookingFields] = useState<BookingField[]>(DEFAULT_FIELDS);
+  const [bookingPages, setBookingPages] = useState<BookingPage[]>(DEFAULT_BOOKING_PAGES);
   const [bookingColor, setBookingColor] = useState('#22c55e');
+  const [collectedFormData, setCollectedFormData] = useState<Record<string, any>>({});
 
   const [ticketQty, setTicketQty] = useState<Record<string, number>>({});
-  const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
 
   // Payment state
   const [rzpConfig, setRzpConfig] = useState<{ keyId: string; advancePercentage: number } | null>(null);
@@ -137,14 +71,17 @@ export default function PackageDetailsPage() {
           const data = sSnap.data();
           setSettings(data);
           if (data.bookingForm) {
-            setBookingColor(data.bookingForm.bookingColor || '#22c55e');
-            if (data.bookingForm.fields?.length) {
-              setBookingFields(data.bookingForm.fields.sort((a: BookingField, b: BookingField) => a.order - b.order));
+            const bf = data.bookingForm;
+            setBookingColor(bf.bookingColor || '#22c55e');
+            if (bf.termsEnabled) setTermsEnabled(true);
+            if (bf.termsMandatory !== undefined) setTermsMandatory(bf.termsMandatory);
+            if (bf.termsContent) setTermsContent(bf.termsContent);
+            // Load multi-page form structure (with backward compat for flat fields)
+            if (bf.pages?.length > 0) {
+              setBookingPages(bf.pages);
+            } else if (bf.fields?.length > 0) {
+              setBookingPages([{ id: 'page_1', title: 'Details', fields: bf.fields }]);
             }
-            // Load T&C settings
-            if (data.bookingForm.termsEnabled) setTermsEnabled(true);
-            if (data.bookingForm.termsMandatory !== undefined) setTermsMandatory(data.bookingForm.termsMandatory);
-            if (data.bookingForm.termsContent) setTermsContent(data.bookingForm.termsContent);
           }
         }
         if (pSnap.exists()) setPkg({ id: pSnap.id, ...pSnap.data() });
@@ -286,28 +223,32 @@ export default function PackageDetailsPage() {
     { type: 'quad', label: 'Quad Occupancy', price: pkg.priceQuad },
   ].filter(t => t.price > 0);
 
-  const activeFields = bookingFields.filter(f => f.enabled);
-
-  const handleBooking = async (e: React.FormEvent) => {
-    e.preventDefault();
-    // Validate T&C if mandatory
+  // Called when UnifiedBookingForm completes all pages
+  const handleFormComplete = async (formData: Record<string, any>) => {
     if (termsEnabled && termsMandatory && !termsAccepted) {
       alert('Please accept the Terms & Conditions to proceed.');
       return;
     }
     setSubmitting(true);
     try {
+      const STANDARD_KEYS: Record<string, string> = {
+        customerName: 'customerName', customerEmail: 'customerEmail',
+        customerPhone: 'customerPhone', travelDate: 'travelDate',
+        state: 'state', city: 'city', leadSource: 'leadSource',
+      };
       const standardData: Record<string, any> = {};
-      const customFieldsData: Record<string, string> = {};
+      const customFields: Record<string, any> = {};
 
-      activeFields.forEach(field => {
-        const val = fieldValues[field.id] || '';
-        if (field.key) {
-          standardData[field.key] = val;
+      const allFields = bookingPages.flatMap(p => p.fields);
+      for (const [fieldId, value] of Object.entries(formData)) {
+        const fieldDef = allFields.find(f => f.id === fieldId);
+        const fieldKey = fieldDef?.key;
+        if (fieldKey && STANDARD_KEYS[fieldKey]) {
+          standardData[STANDARD_KEYS[fieldKey]] = value;
         } else {
-          customFieldsData[field.id] = val;
+          customFields[fieldDef?.label || fieldId] = value;
         }
-      });
+      }
 
       const ticketBreakdown = ticketTypes.map(t => ({
         type: t.type, label: t.label, quantity: ticketQty[t.type] || 0, pricePerPerson: t.price,
@@ -331,13 +272,11 @@ export default function PackageDetailsPage() {
         status: 'Pending',
         source: 'Website',
         paymentStatus: 'payment_pending',
-        customFields: customFieldsData,
+        customFields,
         createdAt: serverTimestamp(),
       });
 
       setBookingOpen(false);
-
-      // If Razorpay configured, show payment choice modal
       if (rzpConfig) {
         setPendingBookingId(docRef.id);
         setShowPaymentModal(true);
@@ -351,7 +290,7 @@ export default function PackageDetailsPage() {
   const openBooking = () => {
     setBookingStep(1);
     setBookingSuccess(false);
-    setFieldValues({});
+    setCollectedFormData({});
     setTicketQty({ double: 1, triple: 1, quad: 1 });
     setTermsAccepted(false);
     setBookingOpen(true);
@@ -452,77 +391,54 @@ export default function PackageDetailsPage() {
           </div>
         )}
 
-        {/* Step 2: Customer Info */}
+        {/* Step 2: Customer Info via UnifiedBookingForm */}
         {bookingStep === 2 && (
-          <form onSubmit={handleBooking} className="flex-1 flex flex-col overflow-hidden">
-            <div className="overflow-y-auto flex-1 p-5 space-y-4">
-              {/* Package summary */}
-              <div className="flex items-center gap-3 bg-gray-50 rounded-2xl p-3 border border-gray-100">
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <UnifiedBookingForm
+              pages={bookingPages}
+              accentColor={bookingColor}
+              onComplete={handleFormComplete}
+              headerRenderer={(_cur, _total, _title, onBack) => (
+                <div className="px-5 py-3 border-b border-gray-100 flex-shrink-0">
+                  <button onClick={onBack} className="text-xs text-gray-500 hover:text-gray-800 font-medium flex items-center gap-1">
+                    <ChevronLeft className="w-3.5 h-3.5" /> Back to tickets
+                  </button>
+                </div>
+              )}
+            >
+              {/* Package mini-card shown on first form page */}
+              <div className="flex items-center gap-3 bg-gray-50 rounded-2xl p-3 border border-gray-100 mb-2">
                 {allImages[0] && (
                   <img src={allImages[0]} alt={pkg.title} className="w-14 h-14 rounded-xl object-cover flex-shrink-0" />
                 )}
                 <div className="min-w-0">
                   <p className="font-semibold text-gray-900 text-sm line-clamp-1">{pkg.title}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    {totalPersons()} tickets · ₹{calcTotal().toLocaleString()}
-                  </p>
+                  <p className="text-xs text-gray-500 mt-0.5">{totalPersons()} tickets · ₹{calcTotal().toLocaleString()}</p>
                 </div>
               </div>
-
-              {/* Dynamic fields */}
-              {activeFields
-                .filter(f => f.id !== 'f_date') // date already collected in step 1
-                .map(field => (
-                  <DynamicField
-                    key={field.id}
-                    field={field}
-                    value={fieldValues[field.id] || ''}
-                    onChange={v => setFieldValues(prev => ({ ...prev, [field.id]: v }))}
-                    color={bookingColor}
-                  />
-                ))}
-
               {/* T&C Checkbox */}
               {termsEnabled && (
                 <div className={`flex items-start gap-3 p-3.5 rounded-xl border transition-all ${
                   termsAccepted ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'
                 }`}>
-                  <div className="mt-0.5">
-                    <input
-                      type="checkbox"
-                      id="pkg-tnc-checkbox"
-                      checked={termsAccepted}
-                      onChange={e => setTermsAccepted(e.target.checked)}
-                      className="w-4 h-4 rounded cursor-pointer"
-                      style={{ accentColor: bookingColor }}
-                    />
-                  </div>
-                  <label htmlFor="pkg-tnc-checkbox" className="text-xs text-gray-700 leading-relaxed cursor-pointer">
-                    I have read and agree to the{' '}
-                    <button
-                      type="button"
-                      onClick={() => setTermsModalOpen(true)}
-                      className="font-semibold underline hover:opacity-80 transition-opacity"
-                      style={{ color: bookingColor }}
-                    >
-                      Terms & Conditions
-                    </button>
+                  <input type="checkbox" id="mob-tnc" checked={termsAccepted}
+                    onChange={e => setTermsAccepted(e.target.checked)}
+                    className="w-4 h-4 mt-0.5 rounded cursor-pointer" style={{ accentColor: bookingColor }} />
+                  <label htmlFor="mob-tnc" className="text-xs text-gray-700 leading-relaxed cursor-pointer">
+                    I agree to the{' '}
+                    <button type="button" onClick={() => setTermsModalOpen(true)}
+                      className="font-semibold underline" style={{ color: bookingColor }}>Terms & Conditions</button>
                     {termsMandatory && <span className="text-red-500 ml-0.5">*</span>}
                   </label>
                 </div>
               )}
-            </div>
-
-            {/* Sticky footer */}
-            <div className="p-4 border-t border-gray-100 bg-white flex-shrink-0 space-y-2">
-              <button type="submit" disabled={submitting}
-                className="w-full py-4 rounded-2xl text-white font-bold text-base shadow-md hover:shadow-lg hover:brightness-110 transition-all disabled:opacity-50"
-                style={{ backgroundColor: bookingColor }}>
-                {submitting ? 'Submitting...' : 'Confirm Booking'}
-              </button>
-              <p className="text-[10px] text-gray-400 text-center">{rzpConfig ? 'You can pay advance or full amount on the next step.' : "No payment required now. We'll confirm & collect payment separately."}</p>
-            </div>
-          </form>
+            </UnifiedBookingForm>
+            {submitting && (
+              <div className="absolute inset-0 bg-white/70 flex items-center justify-center rounded-3xl">
+                <div className="w-8 h-8 border-4 border-gray-200 border-t-current rounded-full animate-spin" style={{ borderTopColor: bookingColor }} />
+              </div>
+            )}
+          </div>
         )}
       </div>
     </div>
@@ -951,41 +867,44 @@ export default function PackageDetailsPage() {
                       </button>
                     </div>
                   ) : (
-                    <form onSubmit={handleBooking} className="p-5 space-y-3 max-h-[60vh] overflow-y-auto">
-                      <div className="flex items-center gap-2 mb-1">
-                        <button type="button" onClick={() => setBookingStep(1)} className="text-xs text-gray-500 hover:text-gray-800 font-medium flex items-center gap-1">
-                          <ChevronLeft className="w-3.5 h-3.5" /> Back
-                        </button>
-                        <span className="text-sm font-bold text-gray-900 flex-1">Your Details</span>
-                        <span className="text-xs text-gray-400 font-semibold">₹{calcTotal().toLocaleString()}</span>
-                      </div>
-
-                      {activeFields
-                        .filter(f => f.id !== 'f_date')
-                        .map(field => (
-                          <DynamicField
-                            key={field.id}
-                            field={field}
-                            value={fieldValues[field.id] || ''}
-                            onChange={v => setFieldValues(prev => ({ ...prev, [field.id]: v }))}
-                            color={bookingColor}
-                          />
-                        ))}
-
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Travel Date</label>
-                        <input type="date" value={fieldValues['f_date'] || ''}
-                          onChange={e => setFieldValues(v => ({ ...v, f_date: e.target.value }))}
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:outline-none" />
-                      </div>
-
-                      <button type="submit" disabled={submitting}
-                        className="w-full py-4 rounded-2xl text-white font-black text-lg shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all disabled:opacity-50"
-                        style={{ backgroundColor: bookingColor }}>
-                        {submitting ? 'Submitting...' : 'Confirm Booking'}
-                      </button>
-                      <p className="text-[10px] text-gray-400 text-center">No payment required now.</p>
-                    </form>
+                    <div className="relative">
+                      <UnifiedBookingForm
+                        pages={bookingPages}
+                        accentColor={bookingColor}
+                        onComplete={handleFormComplete}
+                        headerRenderer={(_cur, _total, _title, onBack) => (
+                          <div className="flex items-center gap-2 px-5 pt-4 pb-2">
+                            <button type="button" onClick={onBack} className="text-xs text-gray-500 hover:text-gray-800 font-medium flex items-center gap-1">
+                              <ChevronLeft className="w-3.5 h-3.5" /> Back
+                            </button>
+                            <span className="text-sm font-bold text-gray-900 flex-1">Your Details</span>
+                            <span className="text-xs text-gray-400 font-semibold">₹{calcTotal().toLocaleString()}</span>
+                          </div>
+                        )}
+                      >
+                        {/* T&C checkbox shown on first form page */}
+                        {termsEnabled && (
+                          <div className={`flex items-start gap-3 p-3.5 rounded-xl border transition-all ${
+                            termsAccepted ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'
+                          }`}>
+                            <input type="checkbox" id="desk-tnc" checked={termsAccepted}
+                              onChange={e => setTermsAccepted(e.target.checked)}
+                              className="w-4 h-4 mt-0.5 rounded cursor-pointer" style={{ accentColor: bookingColor }} />
+                            <label htmlFor="desk-tnc" className="text-xs text-gray-700 leading-relaxed cursor-pointer">
+                              I agree to the{' '}
+                              <button type="button" onClick={() => setTermsModalOpen(true)}
+                                className="font-semibold underline" style={{ color: bookingColor }}>Terms & Conditions</button>
+                              {termsMandatory && <span className="text-red-500 ml-0.5">*</span>}
+                            </label>
+                          </div>
+                        )}
+                      </UnifiedBookingForm>
+                      {submitting && (
+                        <div className="absolute inset-0 bg-white/70 flex items-center justify-center rounded-2xl">
+                          <div className="w-8 h-8 border-4 border-gray-200 border-t-current rounded-full animate-spin" style={{ borderTopColor: bookingColor }} />
+                        </div>
+                      )}
+                    </div>
                   )}
 
                   {settings?.contactWhatsApp && (
