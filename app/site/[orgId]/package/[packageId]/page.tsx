@@ -291,7 +291,7 @@ export default function PackageDetailsPage() {
     setBookingStep(1);
     setBookingSuccess(false);
     setCollectedFormData({});
-    setTicketQty({ double: 1, triple: 1, quad: 1 });
+    setTicketQty({ double: 0, triple: 0, quad: 0 });
     setTermsAccepted(false);
     setBookingOpen(true);
   };
@@ -331,14 +331,7 @@ export default function PackageDetailsPage() {
         {/* Step 1: Ticket Selection */}
         {bookingStep === 1 && (
           <div className="overflow-y-auto flex-1 p-5 space-y-5">
-            {/* Travel Date */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Selected Date</label>
-              <input type="date" value={fieldValues['f_date'] || ''}
-                onChange={e => setFieldValues(v => ({ ...v, f_date: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none"
-                style={{ accentColor: bookingColor }} />
-            </div>
+            {/* Extra legacy booking-date input removed: travel date is now captured only by UnifiedBookingForm. */}
 
             {/* Ticket types */}
             <div className="space-y-1.5">
@@ -398,9 +391,12 @@ export default function PackageDetailsPage() {
               pages={bookingPages}
               accentColor={bookingColor}
               onComplete={handleFormComplete}
-              headerRenderer={(_cur, _total, _title, onBack) => (
+              nextLabel="Continue"
+              submitLabel={rzpConfig ? 'Submit & choose payment' : 'Submit booking'}
+              isSubmitting={submitting}
+              headerRenderer={(currentPage, _total, _title, onBack) => (
                 <div className="px-5 py-3 border-b border-gray-100 flex-shrink-0">
-                  <button onClick={onBack} className="text-xs text-gray-500 hover:text-gray-800 font-medium flex items-center gap-1">
+                  <button type="button" onClick={() => currentPage === 0 ? setBookingStep(1) : onBack()} className="text-xs text-gray-500 hover:text-gray-800 font-medium flex items-center gap-1">
                     <ChevronLeft className="w-3.5 h-3.5" /> Back to tickets
                   </button>
                 </div>
@@ -872,9 +868,12 @@ export default function PackageDetailsPage() {
                         pages={bookingPages}
                         accentColor={bookingColor}
                         onComplete={handleFormComplete}
-                        headerRenderer={(_cur, _total, _title, onBack) => (
+                        nextLabel="Continue"
+                        submitLabel={rzpConfig ? 'Submit & choose payment' : 'Submit booking'}
+                        isSubmitting={submitting}
+                        headerRenderer={(currentPage, _total, _title, onBack) => (
                           <div className="flex items-center gap-2 px-5 pt-4 pb-2">
-                            <button type="button" onClick={onBack} className="text-xs text-gray-500 hover:text-gray-800 font-medium flex items-center gap-1">
+                            <button type="button" onClick={() => currentPage === 0 ? setBookingStep(1) : onBack()} className="text-xs text-gray-500 hover:text-gray-800 font-medium flex items-center gap-1">
                               <ChevronLeft className="w-3.5 h-3.5" /> Back
                             </button>
                             <span className="text-sm font-bold text-gray-900 flex-1">Your Details</span>

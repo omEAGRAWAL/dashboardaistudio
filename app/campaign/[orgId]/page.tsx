@@ -12,15 +12,6 @@ import {
 } from 'lucide-react';
 import { UnifiedBookingForm, DEFAULT_BOOKING_PAGES, type BookingPage } from '@/components/UnifiedBookingForm';
 
-const INDIA_STATES = [
-  'Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh','Goa','Gujarat',
-  'Haryana','Himachal Pradesh','Jharkhand','Karnataka','Kerala','Madhya Pradesh',
-  'Maharashtra','Manipur','Meghalaya','Mizoram','Nagaland','Odisha','Punjab',
-  'Rajasthan','Sikkim','Tamil Nadu','Telangana','Tripura','Uttar Pradesh',
-  'Uttarakhand','West Bengal','Delhi','Jammu & Kashmir','Ladakh',
-];
-const LEAD_SOURCES = ['Instagram','Facebook','WhatsApp','Google','Reference','Website','Other'];
-
 interface TicketQty { double: number; triple: number; quad: number }
 
 export default function CampaignPage() {
@@ -51,7 +42,7 @@ export default function CampaignPage() {
   const [paymentLoading, setPaymentLoading] = useState(false);
 
   // Ticket quantities (step 2)
-  const [ticketQty, setTicketQty] = useState<TicketQty>({ double: 1, triple: 1, quad: 1 });
+  const [ticketQty, setTicketQty] = useState<TicketQty>({ double: 0, triple: 0, quad: 0 });
   const [couponOpen, setCouponOpen] = useState(false);
   const [couponCode, setCouponCode] = useState('');
   const [acceptSlot, setAcceptSlot] = useState(false);
@@ -67,38 +58,27 @@ export default function CampaignPage() {
     if (!orgId) return;
     (async () => {
       try {
-        const [sSnap, pkgsSnap] = await Promise.all([
+        const [sSnap, wsSnap, pkgsSnap] = await Promise.all([
           getDoc(doc(db, 'campaign_settings', orgId)),
+          getDoc(doc(db, 'website_settings', orgId)),
           getDocs(query(collection(db, 'packages'), where('orgId', '==', orgId))),
         ]);
         if (sSnap.exists()) {
           setSettings(sSnap.data());
-          // Load booking form config (pages + T&C)
-          const bf = sSnap.data().bookingForm;
+        } else if (wsSnap.exists()) {
+          setSettings(wsSnap.data());
+        }
+
+        // Campaign settings may only contain campaign design. Fall back to the website booking form.
+        const bf = sSnap.data()?.bookingForm || wsSnap.data()?.bookingForm;
+        if (bf) {
           if (bf?.termsEnabled) setTermsEnabled(true);
           if (bf?.termsMandatory !== undefined) setTermsMandatory(bf.termsMandatory);
           if (bf?.termsContent) setTermsContent(bf.termsContent);
-          // Load multi-page form structure
           if (bf?.pages && bf.pages.length > 0) {
             setBookingPages(bf.pages);
           } else if (bf?.fields && bf.fields.length > 0) {
-            // Backward compat: wrap flat fields into single page
             setBookingPages([{ id: 'page_1', title: 'Details', fields: bf.fields }]);
-          }
-        } else {
-          // fallback to website_settings for agency name/social etc.
-          const ws = await getDoc(doc(db, 'website_settings', orgId));
-          if (ws.exists()) {
-            setSettings(ws.data());
-            const bf = ws.data().bookingForm;
-            if (bf?.termsEnabled) setTermsEnabled(true);
-            if (bf?.termsMandatory !== undefined) setTermsMandatory(bf.termsMandatory);
-            if (bf?.termsContent) setTermsContent(bf.termsContent);
-            if (bf?.pages && bf.pages.length > 0) {
-              setBookingPages(bf.pages);
-            } else if (bf?.fields && bf.fields.length > 0) {
-              setBookingPages([{ id: 'page_1', title: 'Details', fields: bf.fields }]);
-            }
           }
         }
         setPackages(pkgsSnap.docs.map(d => ({ id: d.id, ...d.data() })));
@@ -218,7 +198,7 @@ export default function CampaignPage() {
     setBookingStep(1);
     setBookingSuccess(false);
     setCollectedFormData({});
-    setTicketQty({ double: 1, triple: 1, quad: 1 });
+    setTicketQty({ double: 0, triple: 0, quad: 0 });
     setAcceptSlot(false); setAcceptTnc(false); setCouponCode('');
     setTermsModalOpen(false);
     setBookingOpen(true);
@@ -375,6 +355,10 @@ export default function CampaignPage() {
   const overlayDiscountPct = selectedPkg?.priceOriginal > overlayMaxPrice
     ? Math.round(((selectedPkg.priceOriginal - overlayMinPrice) / selectedPkg.priceOriginal) * 100)
     : null;
+  const selectedTravelDate = (() => {
+    const travelField = bookingPages.flatMap(p => p.fields).find(f => f.key === 'travelDate');
+    return travelField ? collectedFormData[travelField.id] : '';
+  })();
 
   return (
     <div style={bgStyle}>
@@ -458,9 +442,12 @@ export default function CampaignPage() {
               pages={bookingPages}
               accentColor={accentColor}
               onComplete={handleFormComplete}
+              nextLabel="Continue"
+              submitLabel="Continue to tickets"
               headerRenderer={(currentPage, totalPages, pageTitle, onBack) => (
                 <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 flex-shrink-0">
                   <button
+                    type="button"
                     onClick={() => currentPage === 0 ? setBookingOpen(false) : onBack()}
                     className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-600 flex-shrink-0">
                     <ChevronLeft className="w-5 h-5" />
@@ -511,11 +498,11 @@ export default function CampaignPage() {
             <>
               <div className="overflow-y-auto flex-1 px-5 py-4 space-y-4">
                 {/* Selected date */}
-                {travelDate && (
+                {selectedTravelDate && (
                   <div>
                     <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Selected Date</p>
                     <p className="font-semibold text-sm" style={{ color: accentColor }}>
-                      {new Date(travelDate).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
+                      {new Date(selectedTravelDate).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
                     </p>
                   </div>
                 )}

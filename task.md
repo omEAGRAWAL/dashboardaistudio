@@ -1,0 +1,12 @@
+- [ ] Update `UnifiedBookingForm.tsx` with T&C integration
+    - [ ] Add `termsConfig` prop and internal state
+    - [ ] Implement `TermsModal` sub-component
+    - [ ] Render checkbox on the last page
+    - [ ] Add validation logic in `handleNext`
+- [ ] Update `app/campaign/[orgId]/page.tsx`
+    - [ ] Pass `termsConfig` to `UnifiedBookingForm`
+    - [ ] Remove page-level T&C logic
+- [ ] Update `app/site/[orgId]/package/[packageId]/page.tsx`
+    - [ ] Pass `termsConfig` to `UnifiedBookingForm`
+    - [ ] Remove page-level T&C logic
+- [ ] Verify the flow on both pages
