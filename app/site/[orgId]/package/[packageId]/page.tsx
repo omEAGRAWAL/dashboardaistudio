@@ -632,11 +632,11 @@ export default function PackageDetailsPage() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-28 lg:pb-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-28">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
 
           {/* Left: Package Details */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-3">
             <div className="mb-8">
               <div className="flex flex-wrap items-center gap-2 mb-3">
                 <span className="flex items-center gap-1 text-sm font-semibold" style={{ color: tc }}>
@@ -787,7 +787,8 @@ export default function PackageDetailsPage() {
             </div>
           </div>
 
-          {/* Right: Booking Card (desktop) */}
+          {/* Right-side booking card disabled: sticky footer Book Now is the only booking entry point. */}
+          {false && (
           <div className="lg:col-span-1">
             <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden sticky top-24">
               {bookingSuccess ? (
@@ -921,11 +922,12 @@ export default function PackageDetailsPage() {
               )}
             </div>
           </div>
+          )}
         </div>
       </div>
 
-      {/* Mobile sticky Book Now bar */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 px-4 py-3 shadow-2xl">
+      {/* Sticky Book Now footer */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 px-4 py-3 shadow-2xl">
         <div className="flex items-center gap-3">
           <div className="flex-1">
             <p className="text-xs text-gray-500">{totalPersons()} tickets selected</p>
