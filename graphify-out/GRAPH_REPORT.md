@@ -1,12 +1,12 @@
-# Graph Report - C:\Users\OmAgrawal\Downloads\dashboardaistudio  (2026-05-18)
+# Graph Report - C:\Users\OmAgrawal\Downloads\dashboardaistudio  (2026-05-20)
 
 ## Corpus Check
-- 111 files · ~121,804 words
+- 114 files · ~123,977 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 362 nodes · 470 edges · 61 communities detected
-- Extraction: 88% EXTRACTED · 12% INFERRED · 0% AMBIGUOUS · INFERRED: 57 edges (avg confidence: 0.8)
+- 383 nodes · 526 edges · 59 communities detected
+- Extraction: 84% EXTRACTED · 16% INFERRED · 0% AMBIGUOUS · INFERRED: 84 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -69,32 +69,30 @@
 - [[_COMMUNITY_Community 56|Community 56]]
 - [[_COMMUNITY_Community 57|Community 57]]
 - [[_COMMUNITY_Community 58|Community 58]]
-- [[_COMMUNITY_Community 59|Community 59]]
-- [[_COMMUNITY_Community 60|Community 60]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `POST()` - 48 edges
-2. `GET()` - 29 edges
-3. `set()` - 12 edges
-4. `main()` - 9 edges
-5. `toDate()` - 9 edges
-6. `useAuth()` - 9 edges
-7. `DELETE()` - 8 edges
-8. `handleMetaWebhook()` - 8 edges
-9. `runChatbotFlow()` - 8 edges
-10. `scrape_justdial()` - 7 edges
+2. `GET()` - 41 edges
+3. `set()` - 13 edges
+4. `toDate()` - 10 edges
+5. `generateMetadata()` - 10 edges
+6. `main()` - 9 edges
+7. `sitemap()` - 9 edges
+8. `useAuth()` - 9 edges
+9. `DELETE()` - 8 edges
+10. `handleMetaWebhook()` - 8 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `toDate()` --calls--> `relativeDate()`  [INFERRED]
+  app\admin\page.tsx → C:\Users\OmAgrawal\Downloads\dashboardaistudio\components\LeadTable.tsx
 - `toDate()` --calls--> `trialDaysLeft()`  [INFERRED]
   app\admin\page.tsx → C:\Users\OmAgrawal\Downloads\dashboardaistudio\lib\features.ts
 - `POST()` --calls--> `featuresFromPlan()`  [INFERRED]
   C:\Users\OmAgrawal\Downloads\dashboardaistudio\app\api\whatsapp\send\route.ts → C:\Users\OmAgrawal\Downloads\dashboardaistudio\lib\features.ts
 - `scrape_justdial()` --calls--> `GET()`  [INFERRED]
-  acrapper.py → C:\Users\OmAgrawal\Downloads\dashboardaistudio\app\api\whatsapp\broadcast\route.ts
+  acrapper.py → C:\Users\OmAgrawal\Downloads\dashboardaistudio\app\llms.txt\route.ts
 - `scrape_indiamart()` --calls--> `GET()`  [INFERRED]
-  acrapper.py → C:\Users\OmAgrawal\Downloads\dashboardaistudio\app\api\whatsapp\broadcast\route.ts
-- `try_find_email()` --calls--> `GET()`  [INFERRED]
-  acrapper.py → C:\Users\OmAgrawal\Downloads\dashboardaistudio\app\api\whatsapp\broadcast\route.ts
+  acrapper.py → C:\Users\OmAgrawal\Downloads\dashboardaistudio\app\llms.txt\route.ts
 
 ## Hyperedges (group relationships)
 - **Local Development Setup Steps** — readme_nodejs, readme_npm_install, readme_gemini_api_key, readme_env_local, readme_npm_run_dev [EXTRACTED 1.00]
@@ -102,84 +100,84 @@
 ## Communities
 
 ### Community 0 - "Community 0"
-Cohesion: 0.07
-Nodes (15): ensureFonts(), fmt(), generateInvoicePdfBuffer(), toggleSelect(), buildEmailHtml(), concurrencyLimit(), createTransport(), DELETE() (+7 more)
+Cohesion: 0.06
+Nodes (19): ensureFonts(), fmt(), generateInvoicePdfBuffer(), toggleSelect(), getNextAssignee(), buildEmailHtml(), concurrencyLimit(), createTransport() (+11 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.13
-Nodes (22): extractMetaMessage(), getMetaCreds(), markRead(), metaPost(), sendButtons(), sendChoiceQuestion(), sendDocument(), sendImage() (+14 more)
+Cohesion: 0.12
+Nodes (20): generateInvoiceHTML(), buildInvoiceBooking(), calcTotalPrice(), getDominantSharing(), getInvoiceCounter(), getInvoiceHistory(), getNetTotal(), getRemainingBalance() (+12 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.14
-Nodes (19): generateInvoiceHTML(), buildInvoiceBooking(), calcTotalPrice(), getDominantSharing(), getInvoiceCounter(), getInvoiceHistory(), getNetTotal(), getRemainingBalance() (+11 more)
-
-### Community 3 - "Community 3"
 Cohesion: 0.09
 Nodes (14): useAuth(), featuresFromPlan(), getDefaultFeatures(), trialDaysLeft(), OrgProvider(), useFeatureAccess(), useOrg(), AdminPage() (+6 more)
 
+### Community 3 - "Community 3"
+Cohesion: 0.15
+Nodes (17): generateMetadata(), absoluteUrl(), cleanPublicPath(), getOrgCanonicalBase(), getPublicPackage(), getPublicPackages(), getWebsiteSettings(), isPlatformHost() (+9 more)
+
 ### Community 4 - "Community 4"
+Cohesion: 0.17
+Nodes (19): extractMetaMessage(), getMetaCreds(), markRead(), metaPost(), sendButtons(), sendChoiceQuestion(), sendDocument(), sendImage() (+11 more)
+
+### Community 5 - "Community 5"
 Cohesion: 0.1
 Nodes (2): handleLogoUpload(), handleSave()
 
-### Community 5 - "Community 5"
+### Community 6 - "Community 6"
 Cohesion: 0.22
 Nodes (16): clean(), deduplicate(), main(), random_delay(), ====================================================  INDIA TRAVEL AGENCY LEAD, Scrape travel agencies from IndiaMART directory., Scrape travel agencies from Google Maps using Playwright (headless browser)., Attempt to find a contact email from a website's homepage or contact page. (+8 more)
 
-### Community 6 - "Community 6"
-Cohesion: 0.14
-Nodes (8): relativeDate(), formatDate(), formatTime(), handleKeyDown(), sendMessage(), toDate(), trialDaysLeft(), serialize()
-
 ### Community 7 - "Community 7"
-Cohesion: 0.18
-Nodes (7): calcDropdownPos(), handleAssigneeChange(), handleBatchAssign(), openActionDropdown(), openAssigneeDropdown(), openStatusDropdown(), sendAssignmentEmail()
+Cohesion: 0.15
+Nodes (7): formatDate(), formatTime(), handleKeyDown(), sendMessage(), toDate(), trialDaysLeft(), serialize()
 
 ### Community 8 - "Community 8"
+Cohesion: 0.17
+Nodes (8): calcDropdownPos(), handleAssigneeChange(), handleBatchAssign(), openActionDropdown(), openAssigneeDropdown(), openStatusDropdown(), relativeDate(), sendAssignmentEmail()
+
+### Community 9 - "Community 9"
 Cohesion: 0.23
 Nodes (8): calcTotal(), dominantType(), getTicketTypes(), handleBookingSubmit(), handleFormComplete(), openBooking(), toggleDay(), totalPersons()
 
-### Community 9 - "Community 9"
+### Community 10 - "Community 10"
 Cohesion: 0.17
 Nodes (2): closeTemplateModal(), saveTemplate()
 
-### Community 10 - "Community 10"
-Cohesion: 0.27
-Nodes (9): middleware(), resolveHostToOrgId(), addDay(), addListItem(), removeDay(), removeListItem(), set(), updateDay() (+1 more)
-
 ### Community 11 - "Community 11"
+Cohesion: 0.27
+Nodes (10): fetchOrgIdForHostname(), middleware(), resolveHostToOrgId(), addDay(), addListItem(), removeDay(), removeListItem(), set() (+2 more)
+
+### Community 12 - "Community 12"
 Cohesion: 0.27
 Nodes (4): addChoice(), removeChoice(), updateChoice(), updateQuestion()
 
-### Community 12 - "Community 12"
+### Community 13 - "Community 13"
 Cohesion: 0.29
 Nodes (5): getMessagingInstance(), requestNotificationPermission(), setupForegroundHandler(), silentTokenRefresh(), handleEnable()
 
-### Community 13 - "Community 13"
+### Community 14 - "Community 14"
 Cohesion: 0.25
 Nodes (2): handleSend(), resolveVars()
 
-### Community 14 - "Community 14"
+### Community 15 - "Community 15"
 Cohesion: 0.43
 Nodes (4): handleInvite(), handleRemoveMember(), handleRoleChange(), sendRoleNotification()
 
-### Community 15 - "Community 15"
+### Community 16 - "Community 16"
 Cohesion: 0.33
 Nodes (7): AI Studio App, .env.local, GEMINI_API_KEY, GitHub Banner Image, Node.js, npm install, npm run dev
 
-### Community 16 - "Community 16"
-Cohesion: 0.5
-Nodes (2): handleNext(), validateCurrentPage()
-
 ### Community 17 - "Community 17"
 Cohesion: 0.5
-Nodes (0): 
+Nodes (2): handleNext(), validateCurrentPage()
 
 ### Community 18 - "Community 18"
 Cohesion: 0.5
 Nodes (0): 
 
 ### Community 19 - "Community 19"
-Cohesion: 0.67
-Nodes (2): generateMetadata(), getWebsiteSettings()
+Cohesion: 0.5
+Nodes (0): 
 
 ### Community 20 - "Community 20"
 Cohesion: 0.5
@@ -337,14 +335,6 @@ Nodes (0):
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 59 - "Community 59"
-Cohesion: 1.0
-Nodes (0): 
-
-### Community 60 - "Community 60"
-Cohesion: 1.0
-Nodes (0): 
-
 ## Knowledge Gaps
 - **9 isolated node(s):** `====================================================  INDIA TRAVEL AGENCY LEAD`, `Scrape travel agencies from Justdial for a given city.`, `Scrape travel agencies from IndiaMART directory.`, `Scrape travel agencies from Google Maps using Playwright (headless browser).`, `Attempt to find a contact email from a website's homepage or contact page.` (+4 more)
   These have ≤1 connection - possible missing edges or undocumented components.
@@ -352,45 +342,45 @@ Nodes (0):
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 24`** (2 nodes): `page.tsx`, `RootPage()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 25`** (2 nodes): `robots.ts`, `robots()`
+- **Thin community `Community 25`** (2 nodes): `layout.tsx`, `LandingLayout()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 26`** (2 nodes): `sitemap.ts`, `sitemap()`
+- **Thin community `Community 26`** (2 nodes): `page.tsx`, `BlogPage()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 27`** (2 nodes): `layout.tsx`, `LandingLayout()`
+- **Thin community `Community 27`** (2 nodes): `page.tsx`, `FeaturesPage()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 28`** (2 nodes): `page.tsx`, `BlogPage()`
+- **Thin community `Community 28`** (2 nodes): `page.tsx`, `VsLeadSquaredPage()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 29`** (2 nodes): `page.tsx`, `FeaturesPage()`
+- **Thin community `Community 29`** (2 nodes): `page.tsx`, `MarketingPage()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 30`** (2 nodes): `page.tsx`, `VsLeadSquaredPage()`
+- **Thin community `Community 30`** (2 nodes): `page.tsx`, `handleCreateOrg()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 31`** (2 nodes): `page.tsx`, `MarketingPage()`
+- **Thin community `Community 31`** (2 nodes): `ContactForm.tsx`, `handleContact()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 32`** (2 nodes): `page.tsx`, `handleCreateOrg()`
+- **Thin community `Community 32`** (2 nodes): `NavbarClient.tsx`, `NavbarClient()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 33`** (2 nodes): `ContactForm.tsx`, `handleContact()`
+- **Thin community `Community 33`** (2 nodes): `CreateLeadModal.tsx`, `handleSubmit()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 34`** (2 nodes): `NavbarClient.tsx`, `NavbarClient()`
+- **Thin community `Community 34`** (2 nodes): `ImportLeads.tsx`, `handleFileUpload()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 35`** (2 nodes): `CreateLeadModal.tsx`, `handleSubmit()`
+- **Thin community `Community 35`** (2 nodes): `SchemaMarkup.tsx`, `SchemaMarkup()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 36`** (2 nodes): `ImportLeads.tsx`, `handleFileUpload()`
+- **Thin community `Community 36`** (2 nodes): `Stats.tsx`, `Stats()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 37`** (2 nodes): `SchemaMarkup.tsx`, `SchemaMarkup()`
+- **Thin community `Community 37`** (2 nodes): `use-mobile.ts`, `useIsMobile()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 38`** (2 nodes): `Stats.tsx`, `Stats()`
+- **Thin community `Community 38`** (2 nodes): `utils.ts`, `cn()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 39`** (2 nodes): `use-mobile.ts`, `useIsMobile()`
+- **Thin community `Community 39`** (1 nodes): `eslint.config.mjs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 40`** (2 nodes): `utils.ts`, `cn()`
+- **Thin community `Community 40`** (1 nodes): `next-env.d.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 41`** (1 nodes): `eslint.config.mjs`
+- **Thin community `Community 41`** (1 nodes): `next.config.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 42`** (1 nodes): `next-env.d.ts`
+- **Thin community `Community 42`** (1 nodes): `postcss.config.mjs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 43`** (1 nodes): `next.config.ts`
+- **Thin community `Community 43`** (1 nodes): `page.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 44`** (1 nodes): `postcss.config.mjs`
+- **Thin community `Community 44`** (1 nodes): `page.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 45`** (1 nodes): `page.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
@@ -406,39 +396,35 @@ Nodes (0):
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 51`** (1 nodes): `page.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 52`** (1 nodes): `page.tsx`
+- **Thin community `Community 52`** (1 nodes): `Header.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 53`** (1 nodes): `page.tsx`
+- **Thin community `Community 53`** (1 nodes): `MobilePreview.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 54`** (1 nodes): `Header.tsx`
+- **Thin community `Community 54`** (1 nodes): `SiteFooter.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 55`** (1 nodes): `MobilePreview.tsx`
+- **Thin community `Community 55`** (1 nodes): `firebase-admin.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 56`** (1 nodes): `SiteFooter.tsx`
+- **Thin community `Community 56`** (1 nodes): `firebase.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 57`** (1 nodes): `firebase-admin.ts`
+- **Thin community `Community 57`** (1 nodes): `firebase-messaging-sw.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 58`** (1 nodes): `firebase.ts`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 59`** (1 nodes): `firebase-messaging-sw.js`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 60`** (1 nodes): `html2pdf.d.ts`
+- **Thin community `Community 58`** (1 nodes): `html2pdf.d.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `POST()` connect `Community 0` to `Community 1`, `Community 3`, `Community 5`, `Community 6`, `Community 10`?**
-  _High betweenness centrality (0.226) - this node is a cross-community bridge._
-- **Why does `toDate()` connect `Community 6` to `Community 0`, `Community 2`, `Community 3`?**
-  _High betweenness centrality (0.163) - this node is a cross-community bridge._
-- **Why does `set()` connect `Community 10` to `Community 0`, `Community 1`, `Community 4`, `Community 5`?**
-  _High betweenness centrality (0.083) - this node is a cross-community bridge._
+- **Why does `POST()` connect `Community 0` to `Community 2`, `Community 4`, `Community 6`, `Community 7`, `Community 11`?**
+  _High betweenness centrality (0.231) - this node is a cross-community bridge._
+- **Why does `toDate()` connect `Community 7` to `Community 0`, `Community 1`, `Community 2`, `Community 3`, `Community 8`?**
+  _High betweenness centrality (0.176) - this node is a cross-community bridge._
+- **Why does `GET()` connect `Community 0` to `Community 3`, `Community 4`, `Community 6`, `Community 7`, `Community 11`?**
+  _High betweenness centrality (0.110) - this node is a cross-community bridge._
 - **Are the 9 inferred relationships involving `POST()` (e.g. with `set()` and `update()`) actually correct?**
   _`POST()` has 9 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 11 inferred relationships involving `GET()` (e.g. with `scrape_justdial()` and `scrape_indiamart()`) actually correct?**
-  _`GET()` has 11 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 4 inferred relationships involving `set()` (e.g. with `deduplicate()` and `resolveHostToOrgId()`) actually correct?**
-  _`set()` has 4 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 6 inferred relationships involving `toDate()` (e.g. with `serialize()` and `POST()`) actually correct?**
-  _`toDate()` has 6 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 21 inferred relationships involving `GET()` (e.g. with `scrape_justdial()` and `scrape_indiamart()`) actually correct?**
+  _`GET()` has 21 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 5 inferred relationships involving `set()` (e.g. with `deduplicate()` and `resolveHostToOrgId()`) actually correct?**
+  _`set()` has 5 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 7 inferred relationships involving `toDate()` (e.g. with `serialize()` and `POST()`) actually correct?**
+  _`toDate()` has 7 INFERRED edges - model-reasoned connections that need verification._

@@ -6,7 +6,7 @@ import { Header } from '@/components/Header';
 import { useEffect, useState, useCallback } from 'react';
 import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc, addDoc, serverTimestamp, getDoc, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { CalendarCheck, Search, Filter, Trash2, Edit2, Plus, Minus, Eye, FileText, Mail, Download, Loader2, X, History, Link, Copy, CheckCircle2, CreditCard, Banknote, Smartphone, Phone, MessageCircle, Users, ChevronDown } from 'lucide-react';
+import { CalendarCheck, Search, Filter, Trash2, Edit2, Plus, Minus, Eye, FileText, Mail, Download, Loader2, X, History, Link, Copy, CheckCircle2, CreditCard, Banknote, Smartphone, Phone, MessageCircle, Users, ChevronDown, Clock3, ShieldCheck } from 'lucide-react';
 import { format } from 'date-fns';
 import { generateInvoiceHTML, type BusinessProfile, type InvoiceBooking } from '@/lib/invoice-template';
 import { getAuth } from 'firebase/auth';
@@ -49,6 +49,7 @@ function saveInvoiceToHistory(orgId: string, entry: any) {
 
 export default function BookingsPage() {
   const { user, orgId, role } = useAuth();
+  const canManageAllBookings = role === 'org_admin' || role === 'superadmin' || role === 'agency';
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -135,6 +136,7 @@ export default function BookingsPage() {
 
   useEffect(() => {
     if (!orgId) return;
+    if (!canManageAllBookings && !user?.uid) return;
 
     // Fetch packages
     const pkgsQuery = query(collection(db, 'packages'), where('orgId', '==', orgId));
@@ -142,8 +144,10 @@ export default function BookingsPage() {
       setPackages(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
 
-    // Fetch bookings
-    const q = query(collection(db, 'bookings'), where('orgId', '==', orgId));
+    // Fetch bookings. Admins see the agency ledger; agents see only their own CRM-created bookings.
+    const q = canManageAllBookings
+      ? query(collection(db, 'bookings'), where('orgId', '==', orgId))
+      : query(collection(db, 'bookings'), where('orgId', '==', orgId), where('createdById', '==', user!.uid));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const bks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       bks.sort((a: any, b: any) => {
@@ -169,7 +173,7 @@ export default function BookingsPage() {
       unsubscribe();
       unsubscribePkgs();
     };
-  }, [orgId]);
+  }, [orgId, user, canManageAllBookings]);
 
   const filteredBookings = bookings.filter(booking => {
     const matchesSearch =
@@ -251,12 +255,81 @@ export default function BookingsPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this booking?")) return;
+  const handleRequestDelete = async (booking: any) => {
+    if (!user) return;
+    if (booking.deleteRequest?.status === 'pending') {
+      alert('A deletion request is already waiting for admin approval.');
+      return;
+    }
+    if (!confirm('Request admin approval to delete this booking? The booking will stay visible until an admin approves it.')) return;
     try {
-      await deleteDoc(doc(db, 'bookings', id));
+      await updateDoc(doc(db, 'bookings', booking.id), {
+        deleteRequest: {
+          status: 'pending',
+          requestedById: user.uid,
+          requestedByName: user.displayName || user.email || 'Agent',
+          requestedAt: serverTimestamp(),
+        },
+        updatedAt: serverTimestamp(),
+      });
+    } catch (error) {
+      console.error("Error requesting booking deletion:", error);
+      alert("Failed to request deletion");
+    }
+  };
+
+  const handleDelete = async (booking: any) => {
+    if (!canManageAllBookings) {
+      await handleRequestDelete(booking);
+      return;
+    }
+
+    const hasPendingRequest = booking.deleteRequest?.status === 'pending';
+    const message = hasPendingRequest
+      ? `Approve deletion request for ${booking.customerName || 'this booking'}? This will permanently delete the booking.`
+      : "Delete this booking permanently? This should only be used for duplicate or test bookings.";
+
+    if (!confirm(message)) return;
+    try {
+      await deleteDoc(doc(db, 'bookings', booking.id));
+      if (viewingBooking?.id === booking.id) {
+        setIsViewModalOpen(false);
+        setViewingBooking(null);
+      }
     } catch (error) {
       console.error("Error deleting booking:", error);
+      alert("Failed to delete booking");
+    }
+  };
+
+  const handleRejectDeleteRequest = async (booking: any) => {
+    if (!canManageAllBookings) return;
+    if (!confirm('Reject this deletion request and keep the booking?')) return;
+    try {
+      await updateDoc(doc(db, 'bookings', booking.id), {
+        deleteRequest: {
+          ...(booking.deleteRequest || {}),
+          status: 'rejected',
+          reviewedById: user?.uid || '',
+          reviewedByName: user?.displayName || user?.email || 'Admin',
+          reviewedAt: serverTimestamp(),
+        },
+        updatedAt: serverTimestamp(),
+      });
+      if (viewingBooking?.id === booking.id) {
+        setViewingBooking((prev: any) => prev ? ({
+          ...prev,
+          deleteRequest: {
+            ...(prev.deleteRequest || {}),
+            status: 'rejected',
+            reviewedById: user?.uid || '',
+            reviewedByName: user?.displayName || user?.email || 'Admin',
+          },
+        }) : prev);
+      }
+    } catch (error) {
+      console.error("Error rejecting booking deletion:", error);
+      alert("Failed to reject deletion request");
     }
   };
 
@@ -417,6 +490,9 @@ export default function BookingsPage() {
         paymentType,
         paymentStatus: initialPaymentStatus,
         amountPaid,
+        createdById: user?.uid || null,
+        createdByName: user?.displayName || user?.email || 'Agent',
+        createdByRole: role || 'agent',
         createdAt: serverTimestamp()
       });
 
@@ -659,6 +735,7 @@ export default function BookingsPage() {
   if (!user || !orgId) return null;
 
   const noProfile = !businessProfile || !businessProfile.agencyName;
+  const pendingDeleteRequests = bookings.filter(booking => booking.deleteRequest?.status === 'pending');
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden font-sans">
@@ -705,6 +782,30 @@ export default function BookingsPage() {
                 </a>
               </div>
             )}
+
+            <div className="bg-white border border-gray-200 rounded-xl p-4 mb-4 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0">
+                  {canManageAllBookings ? <ShieldCheck className="w-5 h-5" /> : <Users className="w-5 h-5" />}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">
+                    {canManageAllBookings ? 'Admin booking view' : 'Agent booking view'}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {canManageAllBookings
+                      ? 'Full agency ledger with deletion approvals.'
+                      : 'Showing bookings created from your account. Deletion requests need admin approval.'}
+                  </p>
+                </div>
+              </div>
+              {canManageAllBookings && pendingDeleteRequests.length > 0 && (
+                <div className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
+                  <Clock3 className="w-4 h-4" />
+                  {pendingDeleteRequests.length} deletion {pendingDeleteRequests.length === 1 ? 'request' : 'requests'} pending
+                </div>
+              )}
+            </div>
 
             {/* Search and Filter */}
             <div className="mb-4 space-y-2">
@@ -825,7 +926,11 @@ export default function BookingsPage() {
                   <CalendarCheck className="w-8 h-8" />
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No bookings found</h3>
-                <p className="text-gray-500">There are no bookings matching your current filters.</p>
+                <p className="text-gray-500">
+                  {canManageAllBookings
+                    ? 'There are no bookings matching your current filters.'
+                    : 'No bookings created from your account match the current filters.'}
+                </p>
               </div>
             ) : (
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
@@ -838,6 +943,9 @@ export default function BookingsPage() {
                           <p className="font-semibold text-gray-900 truncate">{booking.customerName}</p>
                           <p className="text-xs text-gray-500 truncate">{booking.customerPhone}</p>
                           {booking.leadSource && <p className="text-[10px] text-gray-400 mt-0.5">Source: {booking.leadSource}</p>}
+                          {canManageAllBookings && booking.createdByName && (
+                            <p className="text-[10px] text-gray-400 mt-0.5">Created by {booking.createdByName}</p>
+                          )}
                         </div>
                         <div className="flex flex-col items-end gap-1 flex-shrink-0">
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
@@ -845,6 +953,11 @@ export default function BookingsPage() {
                             booking.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
                             'bg-yellow-100 text-yellow-800'
                           }`}>{booking.status || 'Pending'}</span>
+                          {booking.deleteRequest?.status === 'pending' && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-50 text-red-700 border border-red-100">
+                              <Clock3 className="w-3 h-3" /> Delete requested
+                            </span>
+                          )}
                         </div>
                       </div>
                       <p className="text-sm font-medium text-gray-700 line-clamp-1">{booking.packageTitle}</p>
@@ -859,7 +972,17 @@ export default function BookingsPage() {
                           </button>
                         )}
                         <button onClick={() => handleOpenEdit(booking)} className="flex-1 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors text-center">Edit</button>
-                        <button onClick={() => handleDelete(booking.id)} className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
+                        {canManageAllBookings && booking.deleteRequest?.status === 'pending' && (
+                          <button onClick={() => handleRejectDeleteRequest(booking)} className="px-2 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Keep</button>
+                        )}
+                        <button
+                          onClick={() => handleDelete(booking)}
+                          disabled={!canManageAllBookings && booking.deleteRequest?.status === 'pending'}
+                          className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:hover:bg-transparent"
+                          title={canManageAllBookings ? 'Delete booking' : 'Request deletion'}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -884,6 +1007,9 @@ export default function BookingsPage() {
                             <div className="font-medium text-gray-900">{booking.customerName}</div>
                             <div className="text-sm text-gray-500">{booking.customerPhone}</div>
                             {booking.leadSource && <div className="text-xs text-gray-400 mt-0.5">Source: {booking.leadSource}</div>}
+                            {canManageAllBookings && booking.createdByName && (
+                              <div className="text-xs text-gray-400 mt-0.5">Created by {booking.createdByName}</div>
+                            )}
                           </td>
                           <td className="px-6 py-4">
                             <div className="font-medium text-gray-900 line-clamp-1">{booking.packageTitle}</div>
@@ -899,6 +1025,11 @@ export default function BookingsPage() {
                             }`}>
                               {booking.status || 'Pending'}
                             </span>
+                            {booking.deleteRequest?.status === 'pending' && (
+                              <div className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-50 text-red-700 border border-red-100">
+                                <Clock3 className="w-3 h-3" /> Delete requested
+                              </div>
+                            )}
                           </td>
                           <td className="px-6 py-4 text-right">
                             <div className="flex items-center justify-end gap-1.5">
@@ -931,7 +1062,17 @@ export default function BookingsPage() {
                                 )
                               )}
                               <button onClick={() => handleOpenEdit(booking)} className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors" title="Edit Status"><Edit2 className="w-4 h-4" /></button>
-                              <button onClick={() => handleDelete(booking.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors" title="Delete Booking"><Trash2 className="w-4 h-4" /></button>
+                              {canManageAllBookings && booking.deleteRequest?.status === 'pending' && (
+                                <button onClick={() => handleRejectDeleteRequest(booking)} className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors" title="Keep Booking"><X className="w-4 h-4" /></button>
+                              )}
+                              <button
+                                onClick={() => handleDelete(booking)}
+                                disabled={!canManageAllBookings && booking.deleteRequest?.status === 'pending'}
+                                className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-40 disabled:hover:bg-transparent"
+                                title={canManageAllBookings ? 'Delete Booking' : 'Request Delete'}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
                             </div>
                           </td>
                         </tr>
@@ -1062,7 +1203,7 @@ export default function BookingsPage() {
                         <option value="payment_done">Fully Paid</option>
                         <option value="payment_failed">Payment Failed</option>
                       </select>
-                      <p className="text-xs text-gray-400">Status auto-upgrades to "Fully Paid" when collected amount ≥ net total.</p>
+                      <p className="text-xs text-gray-400">Status auto-upgrades to &quot;Fully Paid&quot; when collected amount ≥ net total.</p>
                     </div>
                   </div>
                 </div>
@@ -1103,6 +1244,33 @@ export default function BookingsPage() {
                 )}
                 <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-lg">{viewingBooking.source || 'Website'}</span>
               </div>
+
+              {viewingBooking.deleteRequest?.status === 'pending' && (
+                <div className="rounded-xl border border-red-200 bg-red-50 p-4 flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-red-800">Deletion request pending</p>
+                    <p className="text-xs text-red-600 mt-0.5">
+                      Requested by {viewingBooking.deleteRequest.requestedByName || 'Agent'}
+                    </p>
+                  </div>
+                  {canManageAllBookings && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleRejectDeleteRequest(viewingBooking)}
+                        className="px-3 py-1.5 rounded-lg border border-red-200 bg-white text-red-700 text-xs font-semibold hover:bg-red-100 transition-colors"
+                      >
+                        Keep Booking
+                      </button>
+                      <button
+                        onClick={() => handleDelete(viewingBooking)}
+                        className="px-3 py-1.5 rounded-lg bg-red-600 text-white text-xs font-semibold hover:bg-red-700 transition-colors"
+                      >
+                        Approve Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Package</p>

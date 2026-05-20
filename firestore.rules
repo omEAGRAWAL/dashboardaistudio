@@ -7,7 +7,11 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return isSignedIn() && request.auth.token.role == 'admin';
+      return isSignedIn() && (
+        request.auth.token.role == 'admin' ||
+        request.auth.token.role == 'superadmin' ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'superadmin']
+      );
     }
 
     function isOwner(uid) {
@@ -17,8 +21,28 @@ service cloud.firestore {
     function isAgency() {
       return isSignedIn() && (
         request.auth.token.role == 'admin' ||
-        request.auth.token.role == 'agency'
+        request.auth.token.role == 'agency' ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['org_admin', 'agency', 'superadmin']
       );
+    }
+
+    function userRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function userOrgId() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.orgId;
+    }
+
+    function isOrgAdminFor(orgId) {
+      return isSignedIn() && (
+        userRole() in ['org_admin', 'agency', 'superadmin'] &&
+        (userRole() == 'superadmin' || userOrgId() == orgId)
+      );
+    }
+
+    function isBookingCreator() {
+      return isSignedIn() && resource.data.createdById == request.auth.uid;
     }
 
     // Users: owner or admin only
@@ -67,10 +91,13 @@ service cloud.firestore {
       allow create, update, delete: if isAgency();
     }
 
-    // Bookings: anyone can create (public booking flow), agency can manage
+    // Bookings: anyone can create via public forms; admins see all org bookings.
+    // Agents can read/update only bookings they created and cannot delete directly.
     match /bookings/{id} {
       allow create: if true;
-      allow read, update, delete: if isAgency();
+      allow read: if isOrgAdminFor(resource.data.orgId) || isBookingCreator();
+      allow update: if isOrgAdminFor(resource.data.orgId) || isBookingCreator();
+      allow delete: if isOrgAdminFor(resource.data.orgId);
     }
 
     // Campaigns: public read, agency write

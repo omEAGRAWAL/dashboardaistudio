@@ -34,7 +34,8 @@ export async function POST(req: NextRequest) {
 
     // Verify user belongs to this org
     const userDoc = await adminDb.collection('users').doc(uid).get();
-    if (!userDoc.exists || (userDoc.data()!.orgId !== orgId && userDoc.data()!.role !== 'superadmin')) {
+    const userData = userDoc.data();
+    if (!userDoc.exists || (userData!.orgId !== orgId && userData!.role !== 'superadmin')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -47,6 +48,10 @@ export async function POST(req: NextRequest) {
     const booking = bookingSnap.data()!;
     if (booking.orgId !== orgId) {
       return NextResponse.json({ error: 'Booking does not belong to this org' }, { status: 403 });
+    }
+    const canManageAllBookings = ['org_admin', 'agency', 'superadmin'].includes(userData!.role);
+    if (!canManageAllBookings && booking.createdById !== uid) {
+      return NextResponse.json({ error: 'Agents can create payment links only for their own bookings' }, { status: 403 });
     }
     if (booking.paymentStatus === 'payment_done') {
       return NextResponse.json({ error: 'Booking is already fully paid' }, { status: 409 });
