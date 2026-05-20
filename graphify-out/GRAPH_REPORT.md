@@ -1,7 +1,7 @@
 # Graph Report - C:\Users\OmAgrawal\Downloads\dashboardaistudio  (2026-05-18)
 
 ## Corpus Check
-- 111 files · ~121,749 words
+- 111 files · ~121,804 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary

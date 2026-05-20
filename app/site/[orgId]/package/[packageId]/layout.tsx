@@ -2,47 +2,48 @@ import { Metadata } from 'next';
 import { headers } from 'next/headers';
 import {
   absoluteUrl,
-  cleanPublicPath,
   getOrgCanonicalBase,
+  getPublicPackage,
   getWebsiteSettings,
   protocolFromHeader,
   truncateDescription,
 } from '@/lib/public-seo';
 
 export async function generateMetadata(
-  { params }: { params: Promise<{ orgId: string }> }
+  { params }: { params: Promise<{ orgId: string; packageId: string }> }
 ): Promise<Metadata> {
-  const { orgId } = await params;
+  const { orgId, packageId } = await params;
   const h = await headers();
   const host = h.get('x-forwarded-host') || h.get('host') || '';
   const protocol = protocolFromHeader(h.get('x-forwarded-proto'));
-  const publicPath = cleanPublicPath(h.get('x-public-pathname') || '/', orgId);
 
-  const [settings, canonicalBase] = await Promise.all([
+  const [settings, pkg, canonicalBase] = await Promise.all([
     getWebsiteSettings(orgId),
+    getPublicPackage(packageId),
     getOrgCanonicalBase(orgId, host, protocol),
   ]);
 
   const agencyName = settings?.agencyName || 'Travel Agency';
-  const title = settings?.metaTitle || settings?.heroTitle || agencyName;
+  const packageTitle = pkg?.title || 'Travel Package';
+  const title = `${packageTitle} | ${agencyName}`;
   const description = truncateDescription(
-    settings?.metaDescription || settings?.heroSubtitle,
-    `Explore travel packages and destinations from ${agencyName}.`
+    pkg?.description,
+    `${packageTitle}${pkg?.destination ? ` in ${pkg.destination}` : ''} by ${agencyName}. View details and book online.`
   );
-  const image = settings?.heroImage || settings?.agencyLogo;
-  const canonical = absoluteUrl(canonicalBase, publicPath);
+  const image = pkg?.images?.[0] || pkg?.imageUrl || settings?.heroImage || settings?.agencyLogo;
+  const canonical = absoluteUrl(canonicalBase, `/package/${packageId}`);
 
   return {
     title,
     description,
     alternates: { canonical },
     openGraph: {
-      type: 'website',
+      type: 'article',
       title,
       description,
       url: canonical,
       siteName: agencyName,
-      ...(image ? { images: [{ url: image, alt: agencyName }] } : {}),
+      ...(image ? { images: [{ url: image, alt: packageTitle }] } : {}),
     },
     twitter: {
       card: image ? 'summary_large_image' : 'summary',
@@ -53,6 +54,6 @@ export async function generateMetadata(
   };
 }
 
-export default function SiteLayout({ children }: { children: React.ReactNode }) {
+export default function PackageLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }

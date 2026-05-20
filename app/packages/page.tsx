@@ -124,6 +124,7 @@ export default function PackagesPage() {
       note: formData.note,
       pdfUrl: formData.pdfUrl || '',
       campaignCategory: formData.campaignCategory || '',
+      updatedAt: serverTimestamp(),
     };
     try {
       if (editingPackage) {
