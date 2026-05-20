@@ -15,6 +15,11 @@ function createTransport() {
   });
 }
 
+function cleanEmail(value?: string | null) {
+  const email = value?.trim();
+  return email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : undefined;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -41,6 +46,8 @@ export async function POST(req: NextRequest) {
     const agencyName   = profile.agencyName || 'Travel Agency';
     const packageTitle = booking.packageTitle || 'Booking';
     const subject      = `Invoice #${invoiceNumber} — ${packageTitle} | ${agencyName}`;
+    const replyToEmail = cleanEmail(profile.invoiceReplyToEmail) || cleanEmail(profile.contactEmail);
+    const ccEmail = cleanEmail(profile.invoiceCcEmail);
 
     const emailHtml = `
 <!DOCTYPE html>
@@ -83,6 +90,8 @@ export async function POST(req: NextRequest) {
     const info = await transporter.sendMail({
       from: `"${agencyName}" <${process.env.SMTP_USER}>`,
       to: booking.customerEmail,
+      ...(ccEmail ? { cc: ccEmail } : {}),
+      ...(replyToEmail ? { replyTo: replyToEmail } : {}),
       subject,
       html: emailHtml,
       attachments: [
@@ -94,7 +103,14 @@ export async function POST(req: NextRequest) {
       ],
     });
 
-    return NextResponse.json({ success: true, messageId: info.messageId });
+    return NextResponse.json({
+      success: true,
+      messageId: info.messageId,
+      accepted: info.accepted || [],
+      rejected: info.rejected || [],
+      cc: ccEmail || null,
+      replyTo: replyToEmail || null,
+    });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     console.error('Invoice email send error:', err);

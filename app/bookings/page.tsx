@@ -55,6 +55,7 @@ export default function BookingsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [packageFilter, setPackageFilter] = useState('All');
+  const [agentFilter, setAgentFilter] = useState('All');
   const [travelDateFrom, setTravelDateFrom] = useState('');
   const [travelDateTo, setTravelDateTo] = useState('');
   const [bookingDateFrom, setBookingDateFrom] = useState('');
@@ -73,6 +74,7 @@ export default function BookingsPage() {
   const [editAmountPaid, setEditAmountPaid] = useState('');
   const [editPaymentMethod, setEditPaymentMethod] = useState('');
   const [packages, setPackages] = useState<any[]>([]);
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
   
   // Business profile for invoices
   const [businessProfile, setBusinessProfile] = useState<BusinessProfile | null>(null);
@@ -144,6 +146,13 @@ export default function BookingsPage() {
       setPackages(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
 
+    const membersQuery = query(collection(db, 'users'), where('orgId', '==', orgId));
+    const unsubscribeMembers = canManageAllBookings
+      ? onSnapshot(membersQuery, (snapshot) => {
+          setTeamMembers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        })
+      : () => {};
+
     // Fetch bookings. Admins see the agency ledger; agents see only their own CRM-created bookings.
     const q = canManageAllBookings
       ? query(collection(db, 'bookings'), where('orgId', '==', orgId))
@@ -172,6 +181,7 @@ export default function BookingsPage() {
     return () => {
       unsubscribe();
       unsubscribePkgs();
+      unsubscribeMembers();
     };
   }, [orgId, user, canManageAllBookings]);
 
@@ -184,6 +194,8 @@ export default function BookingsPage() {
 
     const matchesStatus = statusFilter === 'All' || booking.status === statusFilter;
     const matchesPackage = packageFilter === 'All' || booking.packageId === packageFilter;
+    const matchesAgent = agentFilter === 'All'
+      || (agentFilter === 'unassigned' ? !booking.createdById : booking.createdById === agentFilter);
     const matchesPaymentStatus = paymentStatusFilter === 'All' || booking.paymentStatus === paymentStatusFilter;
 
     // Travel date filter
@@ -208,10 +220,34 @@ export default function BookingsPage() {
       }
     }
 
-    return matchesSearch && matchesStatus && matchesPackage && matchesPaymentStatus && matchesTravelDate && matchesBookingDate;
+    return matchesSearch && matchesStatus && matchesPackage && matchesAgent && matchesPaymentStatus && matchesTravelDate && matchesBookingDate;
   });
 
-  const activeFilterCount = [statusFilter !== 'All', packageFilter !== 'All', paymentStatusFilter !== 'All', !!travelDateFrom || !!travelDateTo, !!bookingDateFrom || !!bookingDateTo].filter(Boolean).length;
+  const agentBookingCounts = bookings.reduce((acc: Record<string, number>, booking) => {
+    const key = booking.createdById || 'unassigned';
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+
+  const agentOptions = [
+    ...teamMembers
+      .filter(member => member.role !== 'superadmin')
+      .map(member => ({
+        id: member.uid || member.id,
+        name: member.displayName || member.email || 'Unnamed agent',
+        role: member.role || 'agent',
+        count: agentBookingCounts[member.uid || member.id] || 0,
+      })),
+    ...(agentBookingCounts.unassigned
+      ? [{ id: 'unassigned', name: 'Unassigned / website', role: 'public', count: agentBookingCounts.unassigned }]
+      : []),
+  ].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+
+  const selectedAgentName = agentFilter === 'All'
+    ? 'All agents'
+    : agentOptions.find(agent => agent.id === agentFilter)?.name || 'Selected agent';
+
+  const activeFilterCount = [statusFilter !== 'All', packageFilter !== 'All', agentFilter !== 'All', paymentStatusFilter !== 'All', !!travelDateFrom || !!travelDateTo, !!bookingDateFrom || !!bookingDateTo].filter(Boolean).length;
 
   const handleOpenEdit = (booking: any) => {
     setEditingBooking(booking);
@@ -703,8 +739,8 @@ export default function BookingsPage() {
         }),
       });
 
+      const data = await res.json();
       if (!res.ok) {
-        const data = await res.json();
         throw new Error(data.error || 'Failed to send email');
       }
 
@@ -718,11 +754,14 @@ export default function BookingsPage() {
         totalPrice: invoiceModalBooking.totalPrice,
         date: new Date().toISOString(),
         action: 'email',
+        messageId: data.messageId,
+        ccEmail: data.cc,
+        replyToEmail: data.replyTo,
       };
       saveInvoiceToHistory(orgId, entry);
       setInvoiceHistory(getInvoiceHistory(orgId));
 
-      alert(`Invoice #${invoiceNum} sent successfully to ${invoiceModalBooking.customerEmail}!`);
+      alert(`Invoice #${invoiceNum} sent successfully to ${invoiceModalBooking.customerEmail}${data.cc ? ` with copy to ${data.cc}` : ''}!`);
       setInvoiceModalBooking(null);
     } catch (err: any) {
       console.error('Invoice email error:', err);
@@ -863,6 +902,23 @@ export default function BookingsPage() {
                     ))}
                   </select>
                 </div>
+                {canManageAllBookings && (
+                  <div className="relative">
+                    <Users className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <select
+                      value={agentFilter}
+                      onChange={(e) => setAgentFilter(e.target.value)}
+                      className="pl-9 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-sm max-w-[220px]"
+                    >
+                      <option value="All">All Agents ({bookings.length})</option>
+                      {agentOptions.map(agent => (
+                        <option key={agent.id} value={agent.id}>
+                          {agent.name} ({agent.count})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
                 <button
                   onClick={() => setShowAdvancedFilters(v => !v)}
                   className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
@@ -881,7 +937,7 @@ export default function BookingsPage() {
                 {activeFilterCount > 0 && (
                   <button
                     onClick={() => {
-                      setStatusFilter('All'); setPackageFilter('All'); setPaymentStatusFilter('All');
+                      setStatusFilter('All'); setPackageFilter('All'); setAgentFilter('All'); setPaymentStatusFilter('All');
                       setTravelDateFrom(''); setTravelDateTo(''); setBookingDateFrom(''); setBookingDateTo('');
                     }}
                     className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-red-200 bg-red-50 text-red-600 text-sm font-medium hover:bg-red-100 transition-colors"
@@ -915,8 +971,41 @@ export default function BookingsPage() {
               {/* Results count */}
               <div className="text-xs text-gray-400">
                 Showing <span className="font-semibold text-gray-600">{filteredBookings.length}</span> of <span className="font-semibold text-gray-600">{bookings.length}</span> bookings
+                {canManageAllBookings && agentFilter !== 'All' && (
+                  <span> by <span className="font-semibold text-gray-600">{selectedAgentName}</span></span>
+                )}
               </div>
             </div>
+
+            {canManageAllBookings && agentOptions.length > 0 && (
+              <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
+                <button
+                  onClick={() => setAgentFilter('All')}
+                  className={`flex-shrink-0 rounded-lg border px-3 py-2 text-left transition-colors ${
+                    agentFilter === 'All'
+                      ? 'border-indigo-300 bg-indigo-50 text-indigo-700'
+                      : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="text-[10px] font-semibold uppercase tracking-wide">All agents</div>
+                  <div className="text-sm font-bold">{bookings.length} bookings</div>
+                </button>
+                {agentOptions.slice(0, 8).map(agent => (
+                  <button
+                    key={agent.id}
+                    onClick={() => setAgentFilter(agent.id)}
+                    className={`flex-shrink-0 rounded-lg border px-3 py-2 text-left transition-colors ${
+                      agentFilter === agent.id
+                        ? 'border-indigo-300 bg-indigo-50 text-indigo-700'
+                        : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="max-w-[150px] truncate text-[10px] font-semibold uppercase tracking-wide">{agent.name}</div>
+                    <div className="text-sm font-bold">{agent.count} {agent.count === 1 ? 'booking' : 'bookings'}</div>
+                  </button>
+                ))}
+              </div>
+            )}
 
             {loading ? (
               <div className="text-center py-12 text-gray-500">Loading bookings...</div>
@@ -1972,8 +2061,19 @@ export default function BookingsPage() {
                   {businessProfile.gstRate > 0 && ` — Tax: ₹${Math.round((invoiceModalBooking.totalPrice - (Number(invoiceDiscount) || 0)) * businessProfile.gstRate / 100)}`}
                 </div>
               </div>
+              {(businessProfile.invoiceCcEmail || businessProfile.invoiceReplyToEmail || businessProfile.contactEmail) && (
+                <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3 text-xs text-emerald-700 flex items-start gap-2">
+                  <Mail className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    {businessProfile.invoiceCcEmail
+                      ? `Agency copy will be CC'd to ${businessProfile.invoiceCcEmail}.`
+                      : 'No agency CC email is set.'}
+                    {' '}
+                    Replies go to {businessProfile.invoiceReplyToEmail || businessProfile.contactEmail}.
+                  </div>
+                </div>
+              )}
             </div>
-
             {/* Actions */}
             <div className="p-6 bg-gray-50 rounded-b-2xl flex flex-col sm:flex-row gap-3">
               <button
@@ -2221,6 +2321,9 @@ export default function BookingsPage() {
                           <span className="text-xs text-gray-500 truncate">{entry.customerName}</span>
                         </div>
                         <p className="text-xs text-gray-400 truncate">{entry.packageTitle} — ₹{entry.totalPrice?.toLocaleString('en-IN')}</p>
+                        {entry.action === 'email' && entry.ccEmail && (
+                          <p className="text-[10px] text-emerald-600 truncate">CC copy: {entry.ccEmail}</p>
+                        )}
                       </div>
                       <div className="text-right flex-shrink-0">
                         <div className="text-xs text-gray-400">{new Date(entry.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</div>

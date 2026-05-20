@@ -6,7 +6,7 @@ import { Header } from '@/components/Header';
 import { useEffect, useState } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { Building2, Save, Loader2, CheckCircle2, Upload, X, Info } from 'lucide-react';
+import { Building2, Save, Loader2, CheckCircle2, Upload, X, Info, Mail } from 'lucide-react';
 
 const INDIAN_STATES = [
   'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat',
@@ -39,6 +39,8 @@ const EMPTY_PROFILE = {
   stateCode: '',
   contactPhone: '',
   contactEmail: '',
+  invoiceReplyToEmail: '',
+  invoiceCcEmail: '',
   logoUrl: '',
   gstNumber: '',
   gstRate: 5,
@@ -296,6 +298,49 @@ export default function BusinessProfilePage() {
                         className={inp}
                         placeholder="agency@example.com"
                       />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Invoice Email Settings */}
+                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                  <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/80">
+                    <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                      <Mail className="w-4 h-4 text-indigo-500" />
+                      Invoice Email Settings
+                    </h2>
+                    <p className="text-xs text-gray-400 mt-0.5">Keep a copy of sent invoices and route customer replies to your team</p>
+                  </div>
+                  <div className="p-6 space-y-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-sm font-semibold text-gray-700">Reply-To Email</label>
+                        <input
+                          type="email"
+                          value={profile.invoiceReplyToEmail}
+                          onChange={e => setProfile(prev => ({ ...prev, invoiceReplyToEmail: e.target.value }))}
+                          className={inp}
+                          placeholder={profile.contactEmail || 'reservations@agency.com'}
+                        />
+                        <p className="text-xs text-gray-400">Customer replies to invoice emails will go here.</p>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-sm font-semibold text-gray-700">CC Email for Invoice Copy</label>
+                        <input
+                          type="email"
+                          value={profile.invoiceCcEmail}
+                          onChange={e => setProfile(prev => ({ ...prev, invoiceCcEmail: e.target.value }))}
+                          className={inp}
+                          placeholder={profile.contactEmail || 'accounts@agency.com'}
+                        />
+                        <p className="text-xs text-gray-400">A copy of every emailed invoice will be sent to this address.</p>
+                      </div>
+                    </div>
+                    <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-3 flex items-start gap-2">
+                      <Info className="w-4 h-4 text-indigo-500 flex-shrink-0 mt-0.5" />
+                      <p className="text-xs text-indigo-700">
+                        Invoice emails are delivered through the platform mail server for reliability. Use Reply-To and CC so the agency inbox receives customer replies and a visible sent copy.
+                      </p>
                     </div>
                   </div>
                 </div>

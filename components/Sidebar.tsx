@@ -112,7 +112,7 @@ export function Sidebar() {
           <NavItem href="/home"             icon={LayoutDashboard} label="Leads"            featureKey={FEATURES.LEADS_CRM}        onClick={handleNav} />
           <NavItem href="/reminders"        icon={Bell}            label="Reminders"        onClick={handleNav} />
           <NavItem href="/bookings"         icon={CalendarCheck}   label="Bookings"         featureKey={FEATURES.BOOKINGS}         onClick={handleNav} />
-          <NavItem href="/packages"         icon={Package}         label="Packages"         featureKey={FEATURES.PACKAGES}         onClick={handleNav} />
+          <NavItem href="/packages"         icon={Package}         label="Packages"         featureKey={FEATURES.PACKAGES}         requiredRole="org_admin" onClick={handleNav} />
           <NavItem href="/whatsapp"         icon={MessageSquare}   label="WhatsApp Inbox"     featureKey={FEATURES.WHATSAPP_INBOX}      onClick={handleNav} />
           <NavItem href="/broadcasts"       icon={Megaphone}       label="WA Broadcasts"      featureKey={FEATURES.WHATSAPP_BROADCAST}  requiredRole="org_admin" onClick={handleNav} />
           <NavItem href="/email-marketing"  icon={Mail}            label="Email Marketing"    featureKey={FEATURES.EMAIL_MARKETING}     requiredRole="org_admin" onClick={handleNav} />

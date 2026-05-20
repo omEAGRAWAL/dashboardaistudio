@@ -5,6 +5,7 @@ import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
 import { ImageUploadGrid } from '@/components/ImageUploadGrid';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { collection, query, where, onSnapshot, addDoc, serverTimestamp, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import {
@@ -46,7 +47,8 @@ const FORM_SECTIONS: { id: SectionKey; label: string; icon: React.ReactNode }[] 
 ];
 
 export default function PackagesPage() {
-  const { user, orgId, role } = useAuth();
+  const { user, orgId, role, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [packages, setPackages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -64,6 +66,11 @@ export default function PackagesPage() {
     });
     return () => unsub();
   }, [orgId]);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (role === 'agent') router.replace('/bookings');
+  }, [authLoading, role, router]);
 
   const set = (patch: Partial<FormData>) => setFormData(prev => ({ ...prev, ...patch }));
 
@@ -166,7 +173,7 @@ export default function PackagesPage() {
   };
   const toggleDay = (i: number) => setExpandedItinerary(prev => { const s = new Set(prev); s.has(i) ? s.delete(i) : s.add(i); return s; });
 
-  if (!user || (!orgId && role !== 'superadmin')) return null;
+  if (!user || role === 'agent' || (!orgId && role !== 'superadmin')) return null;
 
   const inp = "w-full px-3.5 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-gray-50 focus:bg-white transition-colors";
 
@@ -425,7 +432,7 @@ export default function PackagesPage() {
                       <div className="space-y-3">
                         <div className="flex items-center gap-2 mb-1">
                           <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center"><CheckCircle className="w-3.5 h-3.5 text-green-600" /></div>
-                          <label className="text-sm font-semibold text-gray-700">What's Included</label>
+                          <label className="text-sm font-semibold text-gray-700">What&apos;s Included</label>
                         </div>
                         {formData.inclusions.map((inc, i) => (
                           <div key={i} className="flex gap-2 items-center">
@@ -442,7 +449,7 @@ export default function PackagesPage() {
                       <div className="space-y-3">
                         <div className="flex items-center gap-2 mb-1">
                           <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center"><XCircle className="w-3.5 h-3.5 text-red-500" /></div>
-                          <label className="text-sm font-semibold text-gray-700">What's NOT Included</label>
+                          <label className="text-sm font-semibold text-gray-700">What&apos;s NOT Included</label>
                         </div>
                         {formData.exclusions.map((exc, i) => (
                           <div key={i} className="flex gap-2 items-center">
@@ -541,7 +548,7 @@ export default function PackagesPage() {
                       </div>
                       <div className="space-y-1.5">
                         <label className="text-sm font-semibold text-gray-700">Campaign Category</label>
-                        <p className="text-xs text-gray-400">Used as a filter tab on the campaign page (e.g. "2N3D Weekend Trips"). Overrides the standard website category for campaign display.</p>
+                        <p className="text-xs text-gray-400">Used as a filter tab on the campaign page (e.g. &quot;2N3D Weekend Trips&quot;). Overrides the standard website category for campaign display.</p>
                         <input type="text" value={formData.campaignCategory} onChange={e => set({ campaignCategory: e.target.value })}
                           className={inp} placeholder="e.g. 2N3D Weekend Trips" />
                       </div>

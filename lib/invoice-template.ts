@@ -6,6 +6,8 @@ export interface BusinessProfile {
   stateCode: string;
   contactPhone: string;
   contactEmail: string;
+  invoiceReplyToEmail?: string;
+  invoiceCcEmail?: string;
   logoUrl: string;
   gstNumber: string;
   gstRate: number; // e.g. 5 for 5%
