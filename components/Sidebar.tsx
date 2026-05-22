@@ -1,9 +1,9 @@
 'use client';
 
 import {
-  LayoutDashboard, Users, Settings, LogOut, Shield, Package, CalendarCheck,
-  Globe, ClipboardList, Smartphone, X, MessageSquare, Bot, ShieldCheck,
-  Building2, Lock, AlertTriangle, Megaphone, Mail, Bell,
+  LayoutDashboard, Users, Settings, LogOut, Package, CalendarCheck,
+  Globe, ClipboardList, Smartphone, X, ShieldCheck,
+  Building2, Lock, AlertTriangle, Mail, Bell,
 } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import { useOrg } from './OrgProvider';
@@ -24,7 +24,7 @@ interface NavItemProps {
 
 function NavItem({ href, icon: Icon, label, featureKey, requiredRole, onClick }: NavItemProps) {
   const { role } = useAuth();
-  const { hasFeature, isTrialing } = useOrg();
+  const { hasFeature } = useOrg();
   const pathname = usePathname();
 
   const active = pathname === href;
@@ -80,7 +80,7 @@ export function Sidebar() {
   const { isOpen, setIsOpen } = useSidebar();
   const handleNav = () => setIsOpen(false);
 
-  const showTrialBanner = isTrialing && trialDaysLeft !== null && trialDaysLeft <= 7 && role !== 'superadmin';
+  const showTrialBanner = isTrialing && trialDaysLeft !== null && trialDaysLeft <= 7 && role === 'org_admin';
 
   return (
     <>
@@ -113,21 +113,18 @@ export function Sidebar() {
           <NavItem href="/reminders"        icon={Bell}            label="Reminders"        onClick={handleNav} />
           <NavItem href="/bookings"         icon={CalendarCheck}   label="Bookings"         featureKey={FEATURES.BOOKINGS}         onClick={handleNav} />
           <NavItem href="/packages"         icon={Package}         label="Packages"         featureKey={FEATURES.PACKAGES}         requiredRole="org_admin" onClick={handleNav} />
-          <NavItem href="/whatsapp"         icon={MessageSquare}   label="WhatsApp Inbox"     featureKey={FEATURES.WHATSAPP_INBOX}      onClick={handleNav} />
-          <NavItem href="/broadcasts"       icon={Megaphone}       label="WA Broadcasts"      featureKey={FEATURES.WHATSAPP_BROADCAST}  requiredRole="org_admin" onClick={handleNav} />
           <NavItem href="/email-marketing"  icon={Mail}            label="Email Marketing"    featureKey={FEATURES.EMAIL_MARKETING}     requiredRole="org_admin" onClick={handleNav} />
           <NavItem href="/team"             icon={Users}           label="Team"             featureKey={FEATURES.TEAM_MANAGEMENT}  requiredRole="org_admin" onClick={handleNav} />
           <NavItem href="/website-builder"  icon={Globe}           label="Website Builder"  featureKey={FEATURES.WEBSITE_BUILDER}  requiredRole="org_admin" onClick={handleNav} />
           <NavItem href="/booking-form"     icon={ClipboardList}   label="Booking Form"     featureKey={FEATURES.BOOKING_FORM}     requiredRole="org_admin" onClick={handleNav} />
           <NavItem href="/campaign-builder" icon={Smartphone}      label="Campaign Builder" featureKey={FEATURES.CAMPAIGN_BUILDER} requiredRole="org_admin" onClick={handleNav} />
-          <NavItem href="/chatbot"          icon={Bot}             label="Chatbot Builder"  featureKey={FEATURES.CHATBOT_BUILDER}  requiredRole="org_admin" onClick={handleNav} />
           <NavItem href="/business-profile" icon={Building2}       label="Business Profile" requiredRole="org_admin"               onClick={handleNav} />
 
           {role === 'superadmin' && (
             <NavItem href="/admin" icon={ShieldCheck} label="Superadmin" onClick={handleNav} />
           )}
 
-          <NavItem href="/settings" icon={Settings} label="Settings" onClick={handleNav} />
+          <NavItem href="/settings" icon={Settings} label="Settings" requiredRole="org_admin" onClick={handleNav} />
         </nav>
 
         {/* Trial expiry warning */}

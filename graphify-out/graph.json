@@ -171,7 +171,7 @@
       "source_file": "eslint.config.mjs",
       "source_location": "L1",
       "id": "eslint_config_mjs",
-      "community": 39,
+      "community": 40,
       "norm_label": "eslint.config.mjs"
     },
     {
@@ -180,7 +180,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\middleware.ts",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_middleware_ts",
-      "community": 11,
+      "community": 10,
       "norm_label": "middleware.ts"
     },
     {
@@ -189,7 +189,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\middleware.ts",
       "source_location": "L10",
       "id": "middleware_fetchorgidforhostname",
-      "community": 11,
+      "community": 10,
       "norm_label": "fetchorgidforhostname()"
     },
     {
@@ -198,7 +198,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\middleware.ts",
       "source_location": "L25",
       "id": "middleware_resolvehosttoorgid",
-      "community": 11,
+      "community": 10,
       "norm_label": "resolvehosttoorgid()"
     },
     {
@@ -207,7 +207,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\middleware.ts",
       "source_location": "L56",
       "id": "middleware_middleware",
-      "community": 11,
+      "community": 10,
       "norm_label": "middleware()"
     },
     {
@@ -216,7 +216,7 @@
       "source_file": "next-env.d.ts",
       "source_location": "L1",
       "id": "next_env_d_ts",
-      "community": 40,
+      "community": 41,
       "norm_label": "next-env.d.ts"
     },
     {
@@ -225,7 +225,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\next.config.ts",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_next_config_ts",
-      "community": 41,
+      "community": 42,
       "norm_label": "next.config.ts"
     },
     {
@@ -234,7 +234,7 @@
       "source_file": "postcss.config.mjs",
       "source_location": "L1",
       "id": "postcss_config_mjs",
-      "community": 42,
+      "community": 43,
       "norm_label": "postcss.config.mjs"
     },
     {
@@ -243,7 +243,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\layout.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_layout_tsx",
-      "community": 23,
+      "community": 24,
       "norm_label": "layout.tsx"
     },
     {
@@ -252,7 +252,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\layout.tsx",
       "source_location": "L76",
       "id": "layout_rootlayout",
-      "community": 23,
+      "community": 24,
       "norm_label": "rootlayout()"
     },
     {
@@ -261,7 +261,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\page.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_page_tsx",
-      "community": 24,
+      "community": 25,
       "norm_label": "page.tsx"
     },
     {
@@ -270,7 +270,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\page.tsx",
       "source_location": "L133",
       "id": "page_rootpage",
-      "community": 24,
+      "community": 25,
       "norm_label": "rootpage()"
     },
     {
@@ -279,7 +279,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\robots.ts",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_robots_ts",
-      "community": 3,
+      "community": 1,
       "norm_label": "robots.ts"
     },
     {
@@ -288,7 +288,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\robots.ts",
       "source_location": "L43",
       "id": "robots_robots",
-      "community": 3,
+      "community": 1,
       "norm_label": "robots()"
     },
     {
@@ -297,7 +297,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\sitemap.ts",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_sitemap_ts",
-      "community": 3,
+      "community": 1,
       "norm_label": "sitemap.ts"
     },
     {
@@ -306,7 +306,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\sitemap.ts",
       "source_location": "L18",
       "id": "sitemap_platformsitemap",
-      "community": 3,
+      "community": 1,
       "norm_label": "platformsitemap()"
     },
     {
@@ -315,7 +315,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\sitemap.ts",
       "source_location": "L42",
       "id": "sitemap_sitemap",
-      "community": 3,
+      "community": 1,
       "norm_label": "sitemap()"
     },
     {
@@ -324,7 +324,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\(landing)\\layout.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_landing_layout_tsx",
-      "community": 25,
+      "community": 26,
       "norm_label": "layout.tsx"
     },
     {
@@ -333,7 +333,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\(landing)\\layout.tsx",
       "source_location": "L67",
       "id": "layout_landinglayout",
-      "community": 25,
+      "community": 26,
       "norm_label": "landinglayout()"
     },
     {
@@ -342,7 +342,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\(landing)\\blog\\page.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_landing_blog_page_tsx",
-      "community": 26,
+      "community": 27,
       "norm_label": "page.tsx"
     },
     {
@@ -351,7 +351,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\(landing)\\blog\\page.tsx",
       "source_location": "L46",
       "id": "page_blogpage",
-      "community": 26,
+      "community": 27,
       "norm_label": "blogpage()"
     },
     {
@@ -360,7 +360,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\(landing)\\features\\page.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_landing_features_page_tsx",
-      "community": 27,
+      "community": 28,
       "norm_label": "page.tsx"
     },
     {
@@ -369,7 +369,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\(landing)\\features\\page.tsx",
       "source_location": "L53",
       "id": "page_featurespage",
-      "community": 27,
+      "community": 28,
       "norm_label": "featurespage()"
     },
     {
@@ -378,7 +378,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\(landing)\\pricing\\page.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_landing_pricing_page_tsx",
-      "community": 43,
+      "community": 44,
       "norm_label": "page.tsx"
     },
     {
@@ -387,7 +387,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\(landing)\\travel-crm-vs-leadsquared\\page.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_landing_travel_crm_vs_leadsquared_page_tsx",
-      "community": 28,
+      "community": 29,
       "norm_label": "page.tsx"
     },
     {
@@ -396,7 +396,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\(landing)\\travel-crm-vs-leadsquared\\page.tsx",
       "source_location": "L23",
       "id": "page_vsleadsquaredpage",
-      "community": 28,
+      "community": 29,
       "norm_label": "vsleadsquaredpage()"
     },
     {
@@ -405,7 +405,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\(landing)\\travel-crm-vs-spreadsheets\\page.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_landing_travel_crm_vs_spreadsheets_page_tsx",
-      "community": 44,
+      "community": 45,
       "norm_label": "page.tsx"
     },
     {
@@ -450,7 +450,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\(landing)\\travel-lead-management\\page.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_landing_travel_lead_management_page_tsx",
-      "community": 45,
+      "community": 46,
       "norm_label": "page.tsx"
     },
     {
@@ -459,7 +459,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\(landing)\\whatsapp-bot-travel-agency\\page.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_landing_whatsapp_bot_travel_agency_page_tsx",
-      "community": 46,
+      "community": 47,
       "norm_label": "page.tsx"
     },
     {
@@ -522,7 +522,7 @@
       "source_file": "app\\admin\\page.tsx",
       "source_location": "L119",
       "id": "page_adminpage",
-      "community": 2,
+      "community": 3,
       "norm_label": "adminpage()"
     },
     {
@@ -594,7 +594,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\llms.txt\\route.ts",
       "source_location": "L22",
       "id": "route_get",
-      "community": 0,
+      "community": 1,
       "norm_label": "get()"
     },
     {
@@ -729,7 +729,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\razorpay\\public-config\\route.ts",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_api_razorpay_public_config_route_ts",
-      "community": 0,
+      "community": 1,
       "norm_label": "route.ts"
     },
     {
@@ -738,7 +738,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\razorpay\\save-config\\route.ts",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_api_razorpay_save_config_route_ts",
-      "community": 0,
+      "community": 1,
       "norm_label": "route.ts"
     },
     {
@@ -783,7 +783,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\reminders\\list\\route.ts",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_api_reminders_list_route_ts",
-      "community": 0,
+      "community": 1,
       "norm_label": "route.ts"
     },
     {
@@ -848,6 +848,15 @@
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_api_send_invoice_route_ts",
       "community": 0,
       "norm_label": "route.ts"
+    },
+    {
+      "label": "cleanEmail()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\send-invoice\\route.ts",
+      "source_location": "L18",
+      "id": "route_cleanemail",
+      "community": 0,
+      "norm_label": "cleanemail()"
     },
     {
       "label": "route.ts",
@@ -1152,7 +1161,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_bookings_page_tsx",
-      "community": 1,
+      "community": 2,
       "norm_label": "page.tsx"
     },
     {
@@ -1161,7 +1170,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
       "source_location": "L28",
       "id": "page_getinvoicecounter",
-      "community": 1,
+      "community": 2,
       "norm_label": "getinvoicecounter()"
     },
     {
@@ -1170,7 +1179,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
       "source_location": "L32",
       "id": "page_incrementinvoicecounter",
-      "community": 1,
+      "community": 2,
       "norm_label": "incrementinvoicecounter()"
     },
     {
@@ -1179,7 +1188,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
       "source_location": "L37",
       "id": "page_getinvoicehistory",
-      "community": 1,
+      "community": 2,
       "norm_label": "getinvoicehistory()"
     },
     {
@@ -1188,196 +1197,196 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
       "source_location": "L43",
       "id": "page_saveinvoicetohistory",
-      "community": 1,
+      "community": 2,
       "norm_label": "saveinvoicetohistory()"
     },
     {
       "label": "handleOpenEdit()",
       "file_type": "code",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L216",
+      "source_location": "L252",
       "id": "page_handleopenedit",
-      "community": 1,
+      "community": 2,
       "norm_label": "handleopenedit()"
     },
     {
       "label": "handleOpenView()",
       "file_type": "code",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L225",
+      "source_location": "L261",
       "id": "page_handleopenview",
-      "community": 1,
+      "community": 2,
       "norm_label": "handleopenview()"
     },
     {
       "label": "handleSaveStatus()",
       "file_type": "code",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L230",
+      "source_location": "L266",
       "id": "page_handlesavestatus",
-      "community": 1,
+      "community": 2,
       "norm_label": "handlesavestatus()"
     },
     {
       "label": "handleRequestDelete()",
       "file_type": "code",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L258",
+      "source_location": "L294",
       "id": "page_handlerequestdelete",
-      "community": 1,
+      "community": 2,
       "norm_label": "handlerequestdelete()"
     },
     {
       "label": "handleDelete()",
       "file_type": "code",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\packages\\page.tsx",
-      "source_location": "L142",
+      "source_location": "L149",
       "id": "page_handledelete",
-      "community": 1,
+      "community": 2,
       "norm_label": "handledelete()"
     },
     {
       "label": "handleRejectDeleteRequest()",
       "file_type": "code",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L305",
+      "source_location": "L341",
       "id": "page_handlerejectdeleterequest",
-      "community": 1,
+      "community": 2,
       "norm_label": "handlerejectdeleterequest()"
     },
     {
       "label": "getTotalPersons()",
       "file_type": "code",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L337",
+      "source_location": "L373",
       "id": "page_gettotalpersons",
-      "community": 1,
+      "community": 2,
       "norm_label": "gettotalpersons()"
     },
     {
       "label": "calcTotalPrice()",
       "file_type": "code",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L341",
+      "source_location": "L377",
       "id": "page_calctotalprice",
-      "community": 1,
+      "community": 2,
       "norm_label": "calctotalprice()"
     },
     {
       "label": "getDominantSharing()",
       "file_type": "code",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L349",
+      "source_location": "L385",
       "id": "page_getdominantsharing",
-      "community": 1,
+      "community": 2,
       "norm_label": "getdominantsharing()"
     },
     {
       "label": "resetCreateModal()",
       "file_type": "code",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L358",
+      "source_location": "L394",
       "id": "page_resetcreatemodal",
-      "community": 1,
+      "community": 2,
       "norm_label": "resetcreatemodal()"
     },
     {
       "label": "handleGeneratePaymentLink()",
       "file_type": "code",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L372",
+      "source_location": "L408",
       "id": "page_handlegeneratepaymentlink",
-      "community": 1,
+      "community": 2,
       "norm_label": "handlegeneratepaymentlink()"
     },
     {
       "label": "openEditParticipants()",
       "file_type": "code",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L394",
+      "source_location": "L430",
       "id": "page_openeditparticipants",
-      "community": 1,
+      "community": 2,
       "norm_label": "openeditparticipants()"
     },
     {
       "label": "handleSaveParticipants()",
       "file_type": "code",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L406",
+      "source_location": "L442",
       "id": "page_handlesaveparticipants",
-      "community": 1,
+      "community": 2,
       "norm_label": "handlesaveparticipants()"
     },
     {
       "label": "handleStep1Next()",
       "file_type": "code",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L424",
+      "source_location": "L460",
       "id": "page_handlestep1next",
-      "community": 1,
+      "community": 2,
       "norm_label": "handlestep1next()"
     },
     {
       "label": "handleCreateBookingFinal()",
       "file_type": "code",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L434",
+      "source_location": "L470",
       "id": "page_handlecreatebookingfinal",
-      "community": 1,
+      "community": 2,
       "norm_label": "handlecreatebookingfinal()"
     },
     {
       "label": "getNetTotal()",
       "file_type": "code",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L514",
+      "source_location": "L550",
       "id": "page_getnettotal",
-      "community": 1,
+      "community": 2,
       "norm_label": "getnettotal()"
     },
     {
       "label": "getRemainingBalance()",
       "file_type": "code",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L518",
+      "source_location": "L554",
       "id": "page_getremainingbalance",
-      "community": 1,
+      "community": 2,
       "norm_label": "getremainingbalance()"
     },
     {
       "label": "openInvoiceModal()",
       "file_type": "code",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L522",
+      "source_location": "L558",
       "id": "page_openinvoicemodal",
-      "community": 1,
+      "community": 2,
       "norm_label": "openinvoicemodal()"
     },
     {
       "label": "buildInvoiceBooking()",
       "file_type": "code",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L536",
+      "source_location": "L572",
       "id": "page_buildinvoicebooking",
-      "community": 1,
+      "community": 2,
       "norm_label": "buildinvoicebooking()"
     },
     {
       "label": "handleDownloadInvoice()",
       "file_type": "code",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L640",
+      "source_location": "L676",
       "id": "page_handledownloadinvoice",
-      "community": 1,
+      "community": 2,
       "norm_label": "handledownloadinvoice()"
     },
     {
       "label": "handleEmailInvoice()",
       "file_type": "code",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L684",
+      "source_location": "L720",
       "id": "page_handleemailinvoice",
-      "community": 1,
+      "community": 2,
       "norm_label": "handleemailinvoice()"
     },
     {
@@ -1419,17 +1428,17 @@
     {
       "label": "page.tsx",
       "file_type": "code",
-      "source_file": "app\\business-profile\\page.tsx",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\business-profile\\page.tsx",
       "source_location": "L1",
-      "id": "app_business_profile_page_tsx",
+      "id": "c_users_omagrawal_downloads_dashboardaistudio_app_business_profile_page_tsx",
       "community": 5,
       "norm_label": "page.tsx"
     },
     {
       "label": "fetchProfile()",
       "file_type": "code",
-      "source_file": "app\\business-profile\\page.tsx",
-      "source_location": "L61",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\business-profile\\page.tsx",
+      "source_location": "L63",
       "id": "page_fetchprofile",
       "community": 5,
       "norm_label": "fetchprofile()"
@@ -1437,8 +1446,8 @@
     {
       "label": "handleStateChange()",
       "file_type": "code",
-      "source_file": "app\\business-profile\\page.tsx",
-      "source_location": "L76",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\business-profile\\page.tsx",
+      "source_location": "L78",
       "id": "page_handlestatechange",
       "community": 5,
       "norm_label": "handlestatechange()"
@@ -1638,7 +1647,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_email_marketing_page_tsx",
-      "community": 10,
+      "community": 11,
       "norm_label": "page.tsx"
     },
     {
@@ -1647,7 +1656,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
       "source_location": "L61",
       "id": "page_substitute",
-      "community": 10,
+      "community": 11,
       "norm_label": "substitute()"
     },
     {
@@ -1656,7 +1665,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
       "source_location": "L181",
       "id": "page_savesmtp",
-      "community": 10,
+      "community": 11,
       "norm_label": "savesmtp()"
     },
     {
@@ -1665,7 +1674,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
       "source_location": "L195",
       "id": "page_testsmtp",
-      "community": 10,
+      "community": 11,
       "norm_label": "testsmtp()"
     },
     {
@@ -1674,7 +1683,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
       "source_location": "L216",
       "id": "page_savetemplate",
-      "community": 10,
+      "community": 11,
       "norm_label": "savetemplate()"
     },
     {
@@ -1683,7 +1692,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
       "source_location": "L231",
       "id": "page_deletetemplate",
-      "community": 10,
+      "community": 11,
       "norm_label": "deletetemplate()"
     },
     {
@@ -1692,7 +1701,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
       "source_location": "L238",
       "id": "page_opennewtemplate",
-      "community": 10,
+      "community": 11,
       "norm_label": "opennewtemplate()"
     },
     {
@@ -1701,7 +1710,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
       "source_location": "L243",
       "id": "page_openedittemplate",
-      "community": 10,
+      "community": 11,
       "norm_label": "openedittemplate()"
     },
     {
@@ -1710,7 +1719,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
       "source_location": "L248",
       "id": "page_closetemplatemodal",
-      "community": 10,
+      "community": 11,
       "norm_label": "closetemplatemodal()"
     },
     {
@@ -1719,7 +1728,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
       "source_location": "L253",
       "id": "page_sendcampaign",
-      "community": 10,
+      "community": 11,
       "norm_label": "sendcampaign()"
     },
     {
@@ -1728,7 +1737,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
       "source_location": "L278",
       "id": "page_closenewcampaign",
-      "community": 10,
+      "community": 11,
       "norm_label": "closenewcampaign()"
     },
     {
@@ -1737,7 +1746,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
       "source_location": "L286",
       "id": "page_applytemplate",
-      "community": 10,
+      "community": 11,
       "norm_label": "applytemplate()"
     },
     {
@@ -1746,7 +1755,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\email-marketing\\page.tsx",
       "source_location": "L292",
       "id": "page_insertvar",
-      "community": 10,
+      "community": 11,
       "norm_label": "insertvar()"
     },
     {
@@ -1755,7 +1764,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\home\\page.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_home_page_tsx",
-      "community": 2,
+      "community": 3,
       "norm_label": "page.tsx"
     },
     {
@@ -1764,7 +1773,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\home\\page.tsx",
       "source_location": "L22",
       "id": "page_homepage",
-      "community": 2,
+      "community": 3,
       "norm_label": "homepage()"
     },
     {
@@ -1773,7 +1782,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\llms.txt\\route.ts",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_llms_txt_route_ts",
-      "community": 0,
+      "community": 1,
       "norm_label": "route.ts"
     },
     {
@@ -1782,7 +1791,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\llms.txt\\route.ts",
       "source_location": "L13",
       "id": "route_textresponse",
-      "community": 0,
+      "community": 1,
       "norm_label": "textresponse()"
     },
     {
@@ -1791,7 +1800,7 @@
       "source_file": "app\\login\\page.tsx",
       "source_location": "L1",
       "id": "app_login_page_tsx",
-      "community": 2,
+      "community": 3,
       "norm_label": "page.tsx"
     },
     {
@@ -1800,7 +1809,7 @@
       "source_file": "app\\login\\page.tsx",
       "source_location": "L8",
       "id": "page_loginpage",
-      "community": 2,
+      "community": 3,
       "norm_label": "loginpage()"
     },
     {
@@ -1809,7 +1818,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\marketing\\page.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_marketing_page_tsx",
-      "community": 29,
+      "community": 30,
       "norm_label": "page.tsx"
     },
     {
@@ -1818,7 +1827,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\marketing\\page.tsx",
       "source_location": "L32",
       "id": "page_marketingpage",
-      "community": 29,
+      "community": 30,
       "norm_label": "marketingpage()"
     },
     {
@@ -1827,7 +1836,7 @@
       "source_file": "app\\onboarding\\page.tsx",
       "source_location": "L1",
       "id": "app_onboarding_page_tsx",
-      "community": 30,
+      "community": 31,
       "norm_label": "page.tsx"
     },
     {
@@ -1836,7 +1845,7 @@
       "source_file": "app\\onboarding\\page.tsx",
       "source_location": "L32",
       "id": "page_handlecreateorg",
-      "community": 30,
+      "community": 31,
       "norm_label": "handlecreateorg()"
     },
     {
@@ -1845,7 +1854,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\packages\\page.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_packages_page_tsx",
-      "community": 11,
+      "community": 10,
       "norm_label": "page.tsx"
     },
     {
@@ -1854,70 +1863,70 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\website-builder\\page.tsx",
       "source_location": "L261",
       "id": "page_set",
-      "community": 11,
+      "community": 10,
       "norm_label": "set()"
     },
     {
       "label": "handleOpenModal()",
       "file_type": "code",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\packages\\page.tsx",
-      "source_location": "L70",
+      "source_location": "L77",
       "id": "page_handleopenmodal",
-      "community": 11,
+      "community": 10,
       "norm_label": "handleopenmodal()"
     },
     {
       "label": "updateList()",
       "file_type": "code",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\packages\\page.tsx",
-      "source_location": "L148",
+      "source_location": "L155",
       "id": "page_updatelist",
-      "community": 11,
+      "community": 10,
       "norm_label": "updatelist()"
     },
     {
       "label": "addListItem()",
       "file_type": "code",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\packages\\page.tsx",
-      "source_location": "L151",
+      "source_location": "L158",
       "id": "page_addlistitem",
-      "community": 11,
+      "community": 10,
       "norm_label": "addlistitem()"
     },
     {
       "label": "removeListItem()",
       "file_type": "code",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\packages\\page.tsx",
-      "source_location": "L152",
+      "source_location": "L159",
       "id": "page_removelistitem",
-      "community": 11,
+      "community": 10,
       "norm_label": "removelistitem()"
     },
     {
       "label": "updateDay()",
       "file_type": "code",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\packages\\page.tsx",
-      "source_location": "L155",
+      "source_location": "L162",
       "id": "page_updateday",
-      "community": 11,
+      "community": 10,
       "norm_label": "updateday()"
     },
     {
       "label": "addDay()",
       "file_type": "code",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\packages\\page.tsx",
-      "source_location": "L158",
+      "source_location": "L165",
       "id": "page_addday",
-      "community": 11,
+      "community": 10,
       "norm_label": "addday()"
     },
     {
       "label": "removeDay()",
       "file_type": "code",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\packages\\page.tsx",
-      "source_location": "L163",
+      "source_location": "L170",
       "id": "page_removeday",
-      "community": 11,
+      "community": 10,
       "norm_label": "removeday()"
     },
     {
@@ -1935,7 +1944,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\reminders\\page.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_reminders_page_tsx",
-      "community": 19,
+      "community": 20,
       "norm_label": "page.tsx"
     },
     {
@@ -1944,7 +1953,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\reminders\\page.tsx",
       "source_location": "L28",
       "id": "page_formatscheduledtime",
-      "community": 19,
+      "community": 20,
       "norm_label": "formatscheduledtime()"
     },
     {
@@ -1953,7 +1962,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\reminders\\page.tsx",
       "source_location": "L36",
       "id": "page_timefromnow",
-      "community": 19,
+      "community": 20,
       "norm_label": "timefromnow()"
     },
     {
@@ -1962,7 +1971,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\reminders\\page.tsx",
       "source_location": "L75",
       "id": "page_handlecancel",
-      "community": 19,
+      "community": 20,
       "norm_label": "handlecancel()"
     },
     {
@@ -1971,7 +1980,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\settings\\page.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_settings_page_tsx",
-      "community": 2,
+      "community": 3,
       "norm_label": "page.tsx"
     },
     {
@@ -1980,7 +1989,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\settings\\page.tsx",
       "source_location": "L12",
       "id": "page_settingspage",
-      "community": 2,
+      "community": 3,
       "norm_label": "settingspage()"
     },
     {
@@ -1989,7 +1998,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\site\\[orgId]\\ContactForm.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_site_orgid_contactform_tsx",
-      "community": 31,
+      "community": 32,
       "norm_label": "contactform.tsx"
     },
     {
@@ -1998,7 +2007,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\site\\[orgId]\\ContactForm.tsx",
       "source_location": "L17",
       "id": "contactform_handlecontact",
-      "community": 31,
+      "community": 32,
       "norm_label": "handlecontact()"
     },
     {
@@ -2007,7 +2016,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\site\\[orgId]\\layout.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_site_orgid_layout_tsx",
-      "community": 3,
+      "community": 1,
       "norm_label": "layout.tsx"
     },
     {
@@ -2016,7 +2025,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\site\\[orgId]\\package\\[packageId]\\layout.tsx",
       "source_location": "L12",
       "id": "layout_generatemetadata",
-      "community": 3,
+      "community": 1,
       "norm_label": "generatemetadata()"
     },
     {
@@ -2025,7 +2034,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\site\\[orgId]\\layout.tsx",
       "source_location": "L56",
       "id": "layout_sitelayout",
-      "community": 3,
+      "community": 1,
       "norm_label": "sitelayout()"
     },
     {
@@ -2034,7 +2043,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\site\\[orgId]\\NavbarClient.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_site_orgid_navbarclient_tsx",
-      "community": 32,
+      "community": 33,
       "norm_label": "navbarclient.tsx"
     },
     {
@@ -2043,7 +2052,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\site\\[orgId]\\NavbarClient.tsx",
       "source_location": "L18",
       "id": "navbarclient_navbarclient",
-      "community": 32,
+      "community": 33,
       "norm_label": "navbarclient()"
     },
     {
@@ -2052,7 +2061,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\site\\[orgId]\\page.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_site_orgid_page_tsx",
-      "community": 47,
+      "community": 48,
       "norm_label": "page.tsx"
     },
     {
@@ -2061,7 +2070,7 @@
       "source_file": "app\\site\\[orgId]\\about-us\\page.tsx",
       "source_location": "L1",
       "id": "app_site_orgid_about_us_page_tsx",
-      "community": 48,
+      "community": 49,
       "norm_label": "page.tsx"
     },
     {
@@ -2070,7 +2079,7 @@
       "source_file": "app\\site\\[orgId]\\cancellation-refund\\page.tsx",
       "source_location": "L1",
       "id": "app_site_orgid_cancellation_refund_page_tsx",
-      "community": 49,
+      "community": 50,
       "norm_label": "page.tsx"
     },
     {
@@ -2079,7 +2088,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\site\\[orgId]\\package\\[packageId]\\layout.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_app_site_orgid_package_packageid_layout_tsx",
-      "community": 3,
+      "community": 1,
       "norm_label": "layout.tsx"
     },
     {
@@ -2088,7 +2097,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\site\\[orgId]\\package\\[packageId]\\layout.tsx",
       "source_location": "L57",
       "id": "layout_packagelayout",
-      "community": 3,
+      "community": 1,
       "norm_label": "packagelayout()"
     },
     {
@@ -2151,7 +2160,7 @@
       "source_file": "app\\site\\[orgId]\\privacy-policy\\page.tsx",
       "source_location": "L1",
       "id": "app_site_orgid_privacy_policy_page_tsx",
-      "community": 50,
+      "community": 51,
       "norm_label": "page.tsx"
     },
     {
@@ -2160,7 +2169,7 @@
       "source_file": "app\\site\\[orgId]\\terms-conditions\\page.tsx",
       "source_location": "L1",
       "id": "app_site_orgid_terms_conditions_page_tsx",
-      "community": 51,
+      "community": 52,
       "norm_label": "page.tsx"
     },
     {
@@ -2304,7 +2313,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\components\\AuthProvider.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_components_authprovider_tsx",
-      "community": 2,
+      "community": 3,
       "norm_label": "authprovider.tsx"
     },
     {
@@ -2313,7 +2322,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\components\\AuthProvider.tsx",
       "source_location": "L28",
       "id": "authprovider_useauth",
-      "community": 2,
+      "community": 3,
       "norm_label": "useauth()"
     },
     {
@@ -2322,7 +2331,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\components\\AuthProvider.tsx",
       "source_location": "L30",
       "id": "authprovider_authprovider",
-      "community": 2,
+      "community": 3,
       "norm_label": "authprovider()"
     },
     {
@@ -2331,7 +2340,7 @@
       "source_file": "components\\CreateLeadModal.tsx",
       "source_location": "L1",
       "id": "components_createleadmodal_tsx",
-      "community": 33,
+      "community": 34,
       "norm_label": "createleadmodal.tsx"
     },
     {
@@ -2340,7 +2349,7 @@
       "source_file": "components\\CreateLeadModal.tsx",
       "source_location": "L20",
       "id": "createleadmodal_handlesubmit",
-      "community": 33,
+      "community": 34,
       "norm_label": "handlesubmit()"
     },
     {
@@ -2349,7 +2358,7 @@
       "source_file": "components\\Header.tsx",
       "source_location": "L1",
       "id": "components_header_tsx",
-      "community": 52,
+      "community": 53,
       "norm_label": "header.tsx"
     },
     {
@@ -2358,7 +2367,7 @@
       "source_file": "components\\ImageUploadGrid.tsx",
       "source_location": "L1",
       "id": "components_imageuploadgrid_tsx",
-      "community": 21,
+      "community": 22,
       "norm_label": "imageuploadgrid.tsx"
     },
     {
@@ -2367,7 +2376,7 @@
       "source_file": "components\\ImageUploadGrid.tsx",
       "source_location": "L16",
       "id": "imageuploadgrid_handleupload",
-      "community": 21,
+      "community": 22,
       "norm_label": "handleupload()"
     },
     {
@@ -2376,7 +2385,7 @@
       "source_file": "components\\ImageUploadGrid.tsx",
       "source_location": "L55",
       "id": "imageuploadgrid_handleremove",
-      "community": 21,
+      "community": 22,
       "norm_label": "handleremove()"
     },
     {
@@ -2385,7 +2394,7 @@
       "source_file": "components\\ImportLeads.tsx",
       "source_location": "L1",
       "id": "components_importleads_tsx",
-      "community": 34,
+      "community": 35,
       "norm_label": "importleads.tsx"
     },
     {
@@ -2394,7 +2403,7 @@
       "source_file": "components\\ImportLeads.tsx",
       "source_location": "L16",
       "id": "importleads_handlefileupload",
-      "community": 34,
+      "community": 35,
       "norm_label": "handlefileupload()"
     },
     {
@@ -2556,7 +2565,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\components\\MarketingPageContent.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_components_marketingpagecontent_tsx",
-      "community": 20,
+      "community": 21,
       "norm_label": "marketingpagecontent.tsx"
     },
     {
@@ -2565,7 +2574,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\components\\MarketingPageContent.tsx",
       "source_location": "L11",
       "id": "marketingpagecontent_checkicon",
-      "community": 20,
+      "community": 21,
       "norm_label": "checkicon()"
     },
     {
@@ -2574,7 +2583,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\components\\MarketingPageContent.tsx",
       "source_location": "L17",
       "id": "marketingpagecontent_xicon",
-      "community": 20,
+      "community": 21,
       "norm_label": "xicon()"
     },
     {
@@ -2583,7 +2592,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\components\\MarketingPageContent.tsx",
       "source_location": "L23",
       "id": "marketingpagecontent_staricon",
-      "community": 20,
+      "community": 21,
       "norm_label": "staricon()"
     },
     {
@@ -2592,7 +2601,7 @@
       "source_file": "components\\MobilePreview.tsx",
       "source_location": "L1",
       "id": "components_mobilepreview_tsx",
-      "community": 53,
+      "community": 54,
       "norm_label": "mobilepreview.tsx"
     },
     {
@@ -2646,7 +2655,7 @@
       "source_file": "components\\OrgProvider.tsx",
       "source_location": "L1",
       "id": "components_orgprovider_tsx",
-      "community": 2,
+      "community": 3,
       "norm_label": "orgprovider.tsx"
     },
     {
@@ -2655,7 +2664,7 @@
       "source_file": "components\\OrgProvider.tsx",
       "source_location": "L52",
       "id": "orgprovider_useorg",
-      "community": 2,
+      "community": 3,
       "norm_label": "useorg()"
     },
     {
@@ -2664,7 +2673,7 @@
       "source_file": "components\\OrgProvider.tsx",
       "source_location": "L54",
       "id": "orgprovider_usefeatureaccess",
-      "community": 2,
+      "community": 3,
       "norm_label": "usefeatureaccess()"
     },
     {
@@ -2673,7 +2682,7 @@
       "source_file": "components\\OrgProvider.tsx",
       "source_location": "L63",
       "id": "orgprovider_orgprovider",
-      "community": 2,
+      "community": 3,
       "norm_label": "orgprovider()"
     },
     {
@@ -2682,7 +2691,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\components\\ReminderModal.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_components_remindermodal_tsx",
-      "community": 2,
+      "community": 3,
       "norm_label": "remindermodal.tsx"
     },
     {
@@ -2691,7 +2700,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\components\\ReminderModal.tsx",
       "source_location": "L29",
       "id": "remindermodal_remindermodal",
-      "community": 2,
+      "community": 3,
       "norm_label": "remindermodal()"
     },
     {
@@ -2700,7 +2709,7 @@
       "source_file": "components\\RootGate.tsx",
       "source_location": "L1",
       "id": "components_rootgate_tsx",
-      "community": 2,
+      "community": 3,
       "norm_label": "rootgate.tsx"
     },
     {
@@ -2709,7 +2718,7 @@
       "source_file": "components\\RootGate.tsx",
       "source_location": "L8",
       "id": "rootgate_rootgate",
-      "community": 2,
+      "community": 3,
       "norm_label": "rootgate()"
     },
     {
@@ -2718,7 +2727,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\components\\SchemaMarkup.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_components_schemamarkup_tsx",
-      "community": 35,
+      "community": 36,
       "norm_label": "schemamarkup.tsx"
     },
     {
@@ -2727,7 +2736,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\components\\SchemaMarkup.tsx",
       "source_location": "L104",
       "id": "schemamarkup_schemamarkup",
-      "community": 35,
+      "community": 36,
       "norm_label": "schemamarkup()"
     },
     {
@@ -2736,7 +2745,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\components\\Sidebar.tsx",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_components_sidebar_tsx",
-      "community": 2,
+      "community": 3,
       "norm_label": "sidebar.tsx"
     },
     {
@@ -2745,7 +2754,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\components\\Sidebar.tsx",
       "source_location": "L25",
       "id": "sidebar_navitem",
-      "community": 2,
+      "community": 3,
       "norm_label": "navitem()"
     },
     {
@@ -2754,7 +2763,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\components\\Sidebar.tsx",
       "source_location": "L81",
       "id": "sidebar_handlenav",
-      "community": 2,
+      "community": 3,
       "norm_label": "handlenav()"
     },
     {
@@ -2763,7 +2772,7 @@
       "source_file": "components\\SidebarContext.tsx",
       "source_location": "L1",
       "id": "components_sidebarcontext_tsx",
-      "community": 22,
+      "community": 23,
       "norm_label": "sidebarcontext.tsx"
     },
     {
@@ -2772,7 +2781,7 @@
       "source_file": "components\\SidebarContext.tsx",
       "source_location": "L10",
       "id": "sidebarcontext_sidebarprovider",
-      "community": 22,
+      "community": 23,
       "norm_label": "sidebarprovider()"
     },
     {
@@ -2781,7 +2790,7 @@
       "source_file": "components\\SidebarContext.tsx",
       "source_location": "L19",
       "id": "sidebarcontext_usesidebar",
-      "community": 22,
+      "community": 23,
       "norm_label": "usesidebar()"
     },
     {
@@ -2790,7 +2799,7 @@
       "source_file": "components\\SiteFooter.tsx",
       "source_location": "L1",
       "id": "components_sitefooter_tsx",
-      "community": 54,
+      "community": 55,
       "norm_label": "sitefooter.tsx"
     },
     {
@@ -2799,7 +2808,7 @@
       "source_file": "components\\Stats.tsx",
       "source_location": "L1",
       "id": "components_stats_tsx",
-      "community": 36,
+      "community": 37,
       "norm_label": "stats.tsx"
     },
     {
@@ -2808,7 +2817,7 @@
       "source_file": "components\\Stats.tsx",
       "source_location": "L10",
       "id": "stats_stats",
-      "community": 36,
+      "community": 37,
       "norm_label": "stats()"
     },
     {
@@ -2943,7 +2952,7 @@
       "source_file": "hooks\\use-mobile.ts",
       "source_location": "L1",
       "id": "hooks_use_mobile_ts",
-      "community": 37,
+      "community": 38,
       "norm_label": "use-mobile.ts"
     },
     {
@@ -2952,7 +2961,7 @@
       "source_file": "hooks\\use-mobile.ts",
       "source_location": "L5",
       "id": "use_mobile_useismobile",
-      "community": 37,
+      "community": 38,
       "norm_label": "useismobile()"
     },
     {
@@ -2961,7 +2970,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\features.ts",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_lib_features_ts",
-      "community": 2,
+      "community": 3,
       "norm_label": "features.ts"
     },
     {
@@ -2970,7 +2979,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\features.ts",
       "source_location": "L94",
       "id": "features_getdefaultfeatures",
-      "community": 2,
+      "community": 3,
       "norm_label": "getdefaultfeatures()"
     },
     {
@@ -2979,7 +2988,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\features.ts",
       "source_location": "L101",
       "id": "features_featuresfromplan",
-      "community": 2,
+      "community": 3,
       "norm_label": "featuresfromplan()"
     },
     {
@@ -2988,7 +2997,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\features.ts",
       "source_location": "L109",
       "id": "features_trialdaysleft",
-      "community": 2,
+      "community": 3,
       "norm_label": "trialdaysleft()"
     },
     {
@@ -2997,7 +3006,7 @@
       "source_file": "lib\\firebase-admin.ts",
       "source_location": "L1",
       "id": "lib_firebase_admin_ts",
-      "community": 55,
+      "community": 56,
       "norm_label": "firebase-admin.ts"
     },
     {
@@ -3051,7 +3060,7 @@
       "source_file": "lib\\firebase.ts",
       "source_location": "L1",
       "id": "lib_firebase_ts",
-      "community": 56,
+      "community": 57,
       "norm_label": "firebase.ts"
     },
     {
@@ -3060,7 +3069,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\invoice-pdf-server.ts",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_lib_invoice_pdf_server_ts",
-      "community": 0,
+      "community": 19,
       "norm_label": "invoice-pdf-server.ts"
     },
     {
@@ -3069,7 +3078,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\invoice-pdf-server.ts",
       "source_location": "L13",
       "id": "invoice_pdf_server_ensurefonts",
-      "community": 0,
+      "community": 19,
       "norm_label": "ensurefonts()"
     },
     {
@@ -3078,7 +3087,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\invoice-pdf-server.ts",
       "source_location": "L27",
       "id": "invoice_pdf_server_fmt",
-      "community": 0,
+      "community": 19,
       "norm_label": "fmt()"
     },
     {
@@ -3087,25 +3096,25 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\invoice-pdf-server.ts",
       "source_location": "L29",
       "id": "invoice_pdf_server_generateinvoicepdfbuffer",
-      "community": 0,
+      "community": 19,
       "norm_label": "generateinvoicepdfbuffer()"
     },
     {
       "label": "invoice-template.ts",
       "file_type": "code",
-      "source_file": "lib\\invoice-template.ts",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\invoice-template.ts",
       "source_location": "L1",
-      "id": "lib_invoice_template_ts",
-      "community": 1,
+      "id": "c_users_omagrawal_downloads_dashboardaistudio_lib_invoice_template_ts",
+      "community": 2,
       "norm_label": "invoice-template.ts"
     },
     {
       "label": "generateInvoiceHTML()",
       "file_type": "code",
-      "source_file": "lib\\invoice-template.ts",
-      "source_location": "L40",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\invoice-template.ts",
+      "source_location": "L42",
       "id": "invoice_template_generateinvoicehtml",
-      "community": 1,
+      "community": 2,
       "norm_label": "generateinvoicehtml()"
     },
     {
@@ -3213,7 +3222,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\public-seo.ts",
       "source_location": "L1",
       "id": "c_users_omagrawal_downloads_dashboardaistudio_lib_public_seo_ts",
-      "community": 3,
+      "community": 1,
       "norm_label": "public-seo.ts"
     },
     {
@@ -3222,7 +3231,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\public-seo.ts",
       "source_location": "L43",
       "id": "public_seo_normalizehost",
-      "community": 3,
+      "community": 1,
       "norm_label": "normalizehost()"
     },
     {
@@ -3231,7 +3240,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\public-seo.ts",
       "source_location": "L47",
       "id": "public_seo_isplatformhost",
-      "community": 3,
+      "community": 1,
       "norm_label": "isplatformhost()"
     },
     {
@@ -3240,7 +3249,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\public-seo.ts",
       "source_location": "L59",
       "id": "public_seo_protocolfromheader",
-      "community": 3,
+      "community": 1,
       "norm_label": "protocolfromheader()"
     },
     {
@@ -3249,7 +3258,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\public-seo.ts",
       "source_location": "L63",
       "id": "public_seo_cleanpublicpath",
-      "community": 3,
+      "community": 1,
       "norm_label": "cleanpublicpath()"
     },
     {
@@ -3258,7 +3267,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\public-seo.ts",
       "source_location": "L74",
       "id": "public_seo_absoluteurl",
-      "community": 3,
+      "community": 1,
       "norm_label": "absoluteurl()"
     },
     {
@@ -3267,7 +3276,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\public-seo.ts",
       "source_location": "L80",
       "id": "public_seo_timestamptodate",
-      "community": 3,
+      "community": 1,
       "norm_label": "timestamptodate()"
     },
     {
@@ -3276,7 +3285,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\public-seo.ts",
       "source_location": "L93",
       "id": "public_seo_latestdate",
-      "community": 3,
+      "community": 1,
       "norm_label": "latestdate()"
     },
     {
@@ -3285,7 +3294,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\public-seo.ts",
       "source_location": "L99",
       "id": "public_seo_resolveagencybyhost",
-      "community": 3,
+      "community": 1,
       "norm_label": "resolveagencybyhost()"
     },
     {
@@ -3294,7 +3303,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\public-seo.ts",
       "source_location": "L127",
       "id": "public_seo_getorgcanonicalbase",
-      "community": 3,
+      "community": 1,
       "norm_label": "getorgcanonicalbase()"
     },
     {
@@ -3303,7 +3312,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\public-seo.ts",
       "source_location": "L140",
       "id": "public_seo_getwebsitesettings",
-      "community": 3,
+      "community": 1,
       "norm_label": "getwebsitesettings()"
     },
     {
@@ -3312,7 +3321,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\public-seo.ts",
       "source_location": "L145",
       "id": "public_seo_getpublicpackages",
-      "community": 3,
+      "community": 1,
       "norm_label": "getpublicpackages()"
     },
     {
@@ -3321,7 +3330,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\public-seo.ts",
       "source_location": "L150",
       "id": "public_seo_getpublicpackage",
-      "community": 3,
+      "community": 1,
       "norm_label": "getpublicpackage()"
     },
     {
@@ -3330,7 +3339,7 @@
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\public-seo.ts",
       "source_location": "L155",
       "id": "public_seo_truncatedescription",
-      "community": 3,
+      "community": 1,
       "norm_label": "truncatedescription()"
     },
     {
@@ -3375,7 +3384,7 @@
       "source_file": "lib\\utils.ts",
       "source_location": "L1",
       "id": "lib_utils_ts",
-      "community": 38,
+      "community": 39,
       "norm_label": "utils.ts"
     },
     {
@@ -3384,7 +3393,7 @@
       "source_file": "lib\\utils.ts",
       "source_location": "L4",
       "id": "utils_cn",
-      "community": 38,
+      "community": 39,
       "norm_label": "cn()"
     },
     {
@@ -3393,7 +3402,7 @@
       "source_file": "public\\firebase-messaging-sw.js",
       "source_location": "L1",
       "id": "public_firebase_messaging_sw_js",
-      "community": 57,
+      "community": 58,
       "norm_label": "firebase-messaging-sw.js"
     },
     {
@@ -3402,7 +3411,7 @@
       "source_file": "types\\html2pdf.d.ts",
       "source_location": "L1",
       "id": "types_html2pdf_d_ts",
-      "community": 58,
+      "community": 59,
       "norm_label": "html2pdf.d.ts"
     },
     {
@@ -4846,12 +4855,24 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\send-invoice\\route.ts",
-      "source_location": "L18",
+      "source_location": "L23",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_api_send_invoice_route_ts",
       "_tgt": "route_post",
       "source": "route_post",
       "target": "c_users_omagrawal_downloads_dashboardaistudio_app_api_send_invoice_route_ts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\send-invoice\\route.ts",
+      "source_location": "L49",
+      "weight": 1.0,
+      "_src": "route_post",
+      "_tgt": "route_cleanemail",
+      "source": "route_post",
+      "target": "route_cleanemail",
       "confidence_score": 1.0
     },
     {
@@ -5757,6 +5778,18 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\send-invoice\\route.ts",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_api_send_invoice_route_ts",
+      "_tgt": "route_cleanemail",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_app_api_send_invoice_route_ts",
+      "target": "route_cleanemail",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\api\\webhooks\\whatsapp\\route.ts",
       "source_location": "L61",
       "weight": 1.0,
@@ -6249,13 +6282,13 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "app\\business-profile\\page.tsx",
-      "source_location": "L109",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\business-profile\\page.tsx",
+      "source_location": "L111",
       "weight": 1.0,
-      "_src": "app_business_profile_page_tsx",
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_business_profile_page_tsx",
       "_tgt": "page_handlesave",
       "source": "page_handlesave",
-      "target": "app_business_profile_page_tsx",
+      "target": "c_users_omagrawal_downloads_dashboardaistudio_app_business_profile_page_tsx",
       "confidence_score": 1.0
     },
     {
@@ -6274,7 +6307,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\packages\\page.tsx",
-      "source_location": "L103",
+      "source_location": "L110",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_packages_page_tsx",
       "_tgt": "page_handlesave",
@@ -6346,7 +6379,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L216",
+      "source_location": "L252",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_bookings_page_tsx",
       "_tgt": "page_handleopenedit",
@@ -6358,7 +6391,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L225",
+      "source_location": "L261",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_bookings_page_tsx",
       "_tgt": "page_handleopenview",
@@ -6370,7 +6403,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L230",
+      "source_location": "L266",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_bookings_page_tsx",
       "_tgt": "page_handlesavestatus",
@@ -6382,7 +6415,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L258",
+      "source_location": "L294",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_bookings_page_tsx",
       "_tgt": "page_handlerequestdelete",
@@ -6394,7 +6427,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L281",
+      "source_location": "L317",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_bookings_page_tsx",
       "_tgt": "page_handledelete",
@@ -6406,7 +6439,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L305",
+      "source_location": "L341",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_bookings_page_tsx",
       "_tgt": "page_handlerejectdeleterequest",
@@ -6418,7 +6451,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L337",
+      "source_location": "L373",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_bookings_page_tsx",
       "_tgt": "page_gettotalpersons",
@@ -6430,7 +6463,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L341",
+      "source_location": "L377",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_bookings_page_tsx",
       "_tgt": "page_calctotalprice",
@@ -6442,7 +6475,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L349",
+      "source_location": "L385",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_bookings_page_tsx",
       "_tgt": "page_getdominantsharing",
@@ -6454,7 +6487,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L358",
+      "source_location": "L394",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_bookings_page_tsx",
       "_tgt": "page_resetcreatemodal",
@@ -6466,7 +6499,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L372",
+      "source_location": "L408",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_bookings_page_tsx",
       "_tgt": "page_handlegeneratepaymentlink",
@@ -6478,7 +6511,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L394",
+      "source_location": "L430",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_bookings_page_tsx",
       "_tgt": "page_openeditparticipants",
@@ -6490,7 +6523,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L406",
+      "source_location": "L442",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_bookings_page_tsx",
       "_tgt": "page_handlesaveparticipants",
@@ -6502,7 +6535,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L424",
+      "source_location": "L460",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_bookings_page_tsx",
       "_tgt": "page_handlestep1next",
@@ -6514,7 +6547,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L434",
+      "source_location": "L470",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_bookings_page_tsx",
       "_tgt": "page_handlecreatebookingfinal",
@@ -6526,7 +6559,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L514",
+      "source_location": "L550",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_bookings_page_tsx",
       "_tgt": "page_getnettotal",
@@ -6538,7 +6571,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L518",
+      "source_location": "L554",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_bookings_page_tsx",
       "_tgt": "page_getremainingbalance",
@@ -6550,7 +6583,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L522",
+      "source_location": "L558",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_bookings_page_tsx",
       "_tgt": "page_openinvoicemodal",
@@ -6562,7 +6595,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L536",
+      "source_location": "L572",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_bookings_page_tsx",
       "_tgt": "page_buildinvoicebooking",
@@ -6574,7 +6607,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L640",
+      "source_location": "L676",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_bookings_page_tsx",
       "_tgt": "page_handledownloadinvoice",
@@ -6586,7 +6619,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L684",
+      "source_location": "L720",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_bookings_page_tsx",
       "_tgt": "page_handleemailinvoice",
@@ -6610,7 +6643,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L644",
+      "source_location": "L680",
       "weight": 1.0,
       "_src": "page_handledownloadinvoice",
       "_tgt": "page_incrementinvoicecounter",
@@ -6622,7 +6655,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L692",
+      "source_location": "L728",
       "weight": 1.0,
       "_src": "page_handleemailinvoice",
       "_tgt": "page_incrementinvoicecounter",
@@ -6646,7 +6679,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L674",
+      "source_location": "L710",
       "weight": 1.0,
       "_src": "page_handledownloadinvoice",
       "_tgt": "page_getinvoicehistory",
@@ -6658,7 +6691,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L723",
+      "source_location": "L762",
       "weight": 1.0,
       "_src": "page_handleemailinvoice",
       "_tgt": "page_getinvoicehistory",
@@ -6670,7 +6703,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L673",
+      "source_location": "L709",
       "weight": 1.0,
       "_src": "page_handledownloadinvoice",
       "_tgt": "page_saveinvoicetohistory",
@@ -6682,7 +6715,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L722",
+      "source_location": "L761",
       "weight": 1.0,
       "_src": "page_handleemailinvoice",
       "_tgt": "page_saveinvoicetohistory",
@@ -6694,7 +6727,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L243",
+      "source_location": "L279",
       "weight": 1.0,
       "_src": "page_handlesavestatus",
       "_tgt": "page_getnettotal",
@@ -6706,7 +6739,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L283",
+      "source_location": "L319",
       "weight": 1.0,
       "_src": "page_handledelete",
       "_tgt": "page_handlerequestdelete",
@@ -6718,7 +6751,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\packages\\page.tsx",
-      "source_location": "L142",
+      "source_location": "L149",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_packages_page_tsx",
       "_tgt": "page_handledelete",
@@ -6730,7 +6763,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L426",
+      "source_location": "L462",
       "weight": 1.0,
       "_src": "page_handlestep1next",
       "_tgt": "page_gettotalpersons",
@@ -6742,7 +6775,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L438",
+      "source_location": "L474",
       "weight": 1.0,
       "_src": "page_handlecreatebookingfinal",
       "_tgt": "page_gettotalpersons",
@@ -6754,7 +6787,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L439",
+      "source_location": "L475",
       "weight": 1.0,
       "_src": "page_handlecreatebookingfinal",
       "_tgt": "page_calctotalprice",
@@ -6766,7 +6799,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L481",
+      "source_location": "L517",
       "weight": 1.0,
       "_src": "page_handlecreatebookingfinal",
       "_tgt": "page_getdominantsharing",
@@ -6778,7 +6811,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L499",
+      "source_location": "L535",
       "weight": 1.0,
       "_src": "page_handlecreatebookingfinal",
       "_tgt": "page_resetcreatemodal",
@@ -6790,7 +6823,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L504",
+      "source_location": "L540",
       "weight": 1.0,
       "_src": "page_handlecreatebookingfinal",
       "_tgt": "page_handlegeneratepaymentlink",
@@ -6802,7 +6835,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L519",
+      "source_location": "L555",
       "weight": 1.0,
       "_src": "page_getremainingbalance",
       "_tgt": "page_getnettotal",
@@ -6814,7 +6847,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L645",
+      "source_location": "L681",
       "weight": 1.0,
       "_src": "page_handledownloadinvoice",
       "_tgt": "page_buildinvoicebooking",
@@ -6826,7 +6859,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\bookings\\page.tsx",
-      "source_location": "L693",
+      "source_location": "L729",
       "weight": 1.0,
       "_src": "page_handleemailinvoice",
       "_tgt": "page_buildinvoicebooking",
@@ -6909,36 +6942,36 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "app\\business-profile\\page.tsx",
-      "source_location": "L61",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\business-profile\\page.tsx",
+      "source_location": "L63",
       "weight": 1.0,
-      "_src": "app_business_profile_page_tsx",
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_business_profile_page_tsx",
       "_tgt": "page_fetchprofile",
-      "source": "app_business_profile_page_tsx",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_app_business_profile_page_tsx",
       "target": "page_fetchprofile",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "app\\business-profile\\page.tsx",
-      "source_location": "L76",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\business-profile\\page.tsx",
+      "source_location": "L78",
       "weight": 1.0,
-      "_src": "app_business_profile_page_tsx",
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_business_profile_page_tsx",
       "_tgt": "page_handlestatechange",
-      "source": "app_business_profile_page_tsx",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_app_business_profile_page_tsx",
       "target": "page_handlestatechange",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "app\\business-profile\\page.tsx",
-      "source_location": "L84",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\business-profile\\page.tsx",
+      "source_location": "L86",
       "weight": 1.0,
-      "_src": "app_business_profile_page_tsx",
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_business_profile_page_tsx",
       "_tgt": "page_handlelogoupload",
-      "source": "app_business_profile_page_tsx",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_app_business_profile_page_tsx",
       "target": "page_handlelogoupload",
       "confidence_score": 1.0
     },
@@ -7546,7 +7579,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\packages\\page.tsx",
-      "source_location": "L68",
+      "source_location": "L75",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_packages_page_tsx",
       "_tgt": "page_set",
@@ -7558,7 +7591,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\packages\\page.tsx",
-      "source_location": "L70",
+      "source_location": "L77",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_packages_page_tsx",
       "_tgt": "page_handleopenmodal",
@@ -7570,7 +7603,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\packages\\page.tsx",
-      "source_location": "L148",
+      "source_location": "L155",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_packages_page_tsx",
       "_tgt": "page_updatelist",
@@ -7582,7 +7615,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\packages\\page.tsx",
-      "source_location": "L151",
+      "source_location": "L158",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_packages_page_tsx",
       "_tgt": "page_addlistitem",
@@ -7594,7 +7627,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\packages\\page.tsx",
-      "source_location": "L152",
+      "source_location": "L159",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_packages_page_tsx",
       "_tgt": "page_removelistitem",
@@ -7606,7 +7639,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\packages\\page.tsx",
-      "source_location": "L155",
+      "source_location": "L162",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_packages_page_tsx",
       "_tgt": "page_updateday",
@@ -7618,7 +7651,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\packages\\page.tsx",
-      "source_location": "L158",
+      "source_location": "L165",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_packages_page_tsx",
       "_tgt": "page_addday",
@@ -7630,7 +7663,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\packages\\page.tsx",
-      "source_location": "L163",
+      "source_location": "L170",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_packages_page_tsx",
       "_tgt": "page_removeday",
@@ -7642,7 +7675,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\packages\\page.tsx",
-      "source_location": "L167",
+      "source_location": "L174",
       "weight": 1.0,
       "_src": "c_users_omagrawal_downloads_dashboardaistudio_app_packages_page_tsx",
       "_tgt": "page_toggleday",
@@ -7654,7 +7687,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\packages\\page.tsx",
-      "source_location": "L149",
+      "source_location": "L156",
       "weight": 1.0,
       "_src": "page_updatelist",
       "_tgt": "page_set",
@@ -7666,7 +7699,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\packages\\page.tsx",
-      "source_location": "L151",
+      "source_location": "L158",
       "weight": 1.0,
       "_src": "page_addlistitem",
       "_tgt": "page_set",
@@ -7678,7 +7711,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\packages\\page.tsx",
-      "source_location": "L152",
+      "source_location": "L159",
       "weight": 1.0,
       "_src": "page_removelistitem",
       "_tgt": "page_set",
@@ -7690,7 +7723,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\packages\\page.tsx",
-      "source_location": "L156",
+      "source_location": "L163",
       "weight": 1.0,
       "_src": "page_updateday",
       "_tgt": "page_set",
@@ -7702,7 +7735,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\packages\\page.tsx",
-      "source_location": "L160",
+      "source_location": "L167",
       "weight": 1.0,
       "_src": "page_addday",
       "_tgt": "page_set",
@@ -7714,7 +7747,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\app\\packages\\page.tsx",
-      "source_location": "L165",
+      "source_location": "L172",
       "weight": 1.0,
       "_src": "page_removeday",
       "_tgt": "page_set",
@@ -9225,12 +9258,12 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "lib\\invoice-template.ts",
-      "source_location": "L40",
+      "source_file": "C:\\Users\\OmAgrawal\\Downloads\\dashboardaistudio\\lib\\invoice-template.ts",
+      "source_location": "L42",
       "weight": 1.0,
-      "_src": "lib_invoice_template_ts",
+      "_src": "c_users_omagrawal_downloads_dashboardaistudio_lib_invoice_template_ts",
       "_tgt": "invoice_template_generateinvoicehtml",
-      "source": "lib_invoice_template_ts",
+      "source": "c_users_omagrawal_downloads_dashboardaistudio_lib_invoice_template_ts",
       "target": "invoice_template_generateinvoicehtml",
       "confidence_score": 1.0
     },
