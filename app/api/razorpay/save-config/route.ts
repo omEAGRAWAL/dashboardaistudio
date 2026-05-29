@@ -21,8 +21,8 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { orgId, keyId, keySecret, webhookSecret, advancePercentage, advanceType, advanceFixedAmount } = body;
 
-    if (!orgId || !keyId || !keySecret) {
-      return NextResponse.json({ error: 'orgId, keyId, and keySecret are required' }, { status: 400 });
+    if (!orgId || !keyId) {
+      return NextResponse.json({ error: 'orgId and keyId are required' }, { status: 400 });
     }
 
     // Verify the user belongs to this org
@@ -33,6 +33,16 @@ export async function POST(req: NextRequest) {
     const userData = userDoc.data()!;
     if (userData.orgId !== orgId && userData.role !== 'superadmin') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    const configRef = adminDb.collection('razorpay_config').doc(orgId);
+    const existingSnap = await configRef.get();
+    const existingConfig = existingSnap.exists ? existingSnap.data()! : {};
+    const nextKeySecret = keySecret?.trim() || existingConfig.keySecret;
+    const nextWebhookSecret = webhookSecret?.trim() || existingConfig.webhookSecret || '';
+
+    if (!nextKeySecret) {
+      return NextResponse.json({ error: 'keySecret is required for first-time setup' }, { status: 400 });
     }
 
     const type: 'percentage' | 'fixed' = advanceType === 'fixed' ? 'fixed' : 'percentage';
@@ -48,10 +58,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Store config — keySecret never goes back to client
-    await adminDb.collection('razorpay_config').doc(orgId).set({
+    await configRef.set({
       keyId: keyId.trim(),
-      keySecret: keySecret.trim(),
-      webhookSecret: (webhookSecret || '').trim(),
+      keySecret: nextKeySecret,
+      webhookSecret: nextWebhookSecret,
       advanceType: type,
       advancePercentage: pct,
       advanceFixedAmount: fixedAmt,
@@ -67,7 +77,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// GET: return only non-sensitive config fields (keyId, advancePercentage) for the UI
+// GET: return only non-sensitive config fields for the UI
 export async function GET(req: NextRequest) {
   try {
     const authHeader = req.headers.get('Authorization');

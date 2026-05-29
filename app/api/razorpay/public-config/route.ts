@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
 
 // Public endpoint — no auth required.
-// Returns ONLY non-sensitive Razorpay config fields (keyId, advancePercentage).
+// Returns ONLY non-sensitive Razorpay config fields.
 // keySecret and webhookSecret are NEVER returned.
 export async function GET(req: NextRequest) {
   try {

@@ -4,12 +4,13 @@ import { useAuth } from '@/components/AuthProvider';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
 import { useEffect, useState, useCallback } from 'react';
-import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc, addDoc, serverTimestamp, getDoc, Timestamp } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc, addDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { CalendarCheck, Search, Filter, Trash2, Edit2, Plus, Minus, Eye, FileText, Mail, Download, Loader2, X, History, Link, Copy, CheckCircle2, CreditCard, Banknote, Smartphone, Phone, MessageCircle, Users, ChevronDown, Clock3, ShieldCheck } from 'lucide-react';
 import { format } from 'date-fns';
 import { generateInvoiceHTML, type BusinessProfile, type InvoiceBooking } from '@/lib/invoice-template';
 import { getAuth } from 'firebase/auth';
+import { sendBookingConfirmationEmail } from '@/lib/booking-confirmation-email';
 
 // ─── Payment status helpers ────────────────────────────────────────────────
 const PAYMENT_STATUS_LABELS: Record<string, { label: string; color: string }> = {
@@ -114,7 +115,7 @@ export default function BookingsPage() {
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'upi' | 'razorpay'>('cash');
   const [paymentType, setPaymentType] = useState<'advance' | 'full'>('advance');
   const [agentAdvanceAmount, setAgentAdvanceAmount] = useState('');
-  const [rzpConfig, setRzpConfig] = useState<{ keyId: string; advancePercentage: number } | null>(null);
+  const [rzpConfig, setRzpConfig] = useState<{ keyId: string; advanceType: 'percentage' | 'fixed'; advancePercentage: number; advanceFixedAmount: number } | null>(null);
   const [rzpLinkLoading, setRzpLinkLoading] = useState<string | null>(null); // bookingId being linked
   const [rzpLinkModal, setRzpLinkModal] = useState<{ url: string; amount: number; bookingId: string } | null>(null);
   const [rzpLinkCopied, setRzpLinkCopied] = useState(false);
@@ -130,7 +131,14 @@ export default function BookingsPage() {
         });
         if (res.ok) {
           const data = await res.json();
-          if (data.configured) setRzpConfig({ keyId: data.keyId, advancePercentage: data.advancePercentage ?? 30 });
+          if (data.configured) {
+            setRzpConfig({
+              keyId: data.keyId,
+              advanceType: data.advanceType ?? 'percentage',
+              advancePercentage: data.advancePercentage ?? 30,
+              advanceFixedAmount: data.advanceFixedAmount ?? 0,
+            });
+          }
         }
       } catch { /* ignore */ }
     });
@@ -532,6 +540,8 @@ export default function BookingsPage() {
         createdAt: serverTimestamp()
       });
 
+      void sendBookingConfirmationEmail(orgId, docRef.id);
+
       resetCreateModal();
 
       // If Razorpay selected, generate a payment link after booking is created
@@ -553,6 +563,45 @@ export default function BookingsPage() {
   // Remaining balance the customer still owes
   const getRemainingBalance = (booking: any) =>
     Math.max(0, getNetTotal(booking) - (booking.amountPaid || 0));
+
+  const formatTravelDate = (value: any) => {
+    if (!value) return 'TBD';
+    if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      const [year, month, day] = value.split('-').map(Number);
+      return format(new Date(year, month - 1, day), 'dd MMM yyyy');
+    }
+    const date = typeof value?.toDate === 'function' ? value.toDate() : new Date(value);
+    return Number.isNaN(date.getTime()) ? String(value) : format(date, 'dd MMM yyyy');
+  };
+
+  const getBookingPax = (booking: any) => {
+    const direct = Number(booking.numberOfPersons);
+    if (direct > 0) return direct;
+    if (Array.isArray(booking.ticketBreakdown)) {
+      return booking.ticketBreakdown.reduce((sum: number, item: any) => sum + (Number(item.quantity) || 0), 0);
+    }
+    return 0;
+  };
+
+  const formatPax = (booking: any) => {
+    const pax = getBookingPax(booking);
+    return pax > 0 ? `${pax} pax` : 'Pax TBD';
+  };
+
+  const getDefaultAdvanceAmount = (netTotal: number) => {
+    if (!rzpConfig) return Math.round(netTotal * 0.3);
+    if (rzpConfig.advanceType === 'fixed' && rzpConfig.advanceFixedAmount > 0) {
+      return Math.round(Math.min(rzpConfig.advanceFixedAmount, netTotal));
+    }
+    return Math.round(netTotal * (rzpConfig.advancePercentage ?? 30) / 100);
+  };
+
+  const getAdvanceSettingLabel = () => {
+    if (!rzpConfig) return '30%';
+    return rzpConfig.advanceType === 'fixed'
+      ? 'fixed amount'
+      : `${rzpConfig.advancePercentage ?? 30}%`;
+  };
 
   // ─── Invoice Generation ──────────────────────────────────────────
   const openInvoiceModal = (booking: any) => {
@@ -1050,6 +1099,16 @@ export default function BookingsPage() {
                         </div>
                       </div>
                       <p className="text-sm font-medium text-gray-700 line-clamp-1">{booking.packageTitle}</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="flex items-center gap-1.5 rounded-lg bg-gray-50 px-2.5 py-2 text-xs text-gray-600">
+                          <CalendarCheck className="h-3.5 w-3.5 text-indigo-500" />
+                          <span className="truncate">{formatTravelDate(booking.travelDate)}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 rounded-lg bg-gray-50 px-2.5 py-2 text-xs text-gray-600">
+                          <Users className="h-3.5 w-3.5 text-indigo-500" />
+                          <span className="truncate">{formatPax(booking)}</span>
+                        </div>
+                      </div>
                       <div className="text-sm font-semibold text-gray-900">
                         ₹{((booking.totalPrice || 0) - (booking.discountAmount || 0)).toLocaleString('en-IN')}
                       </div>
@@ -1084,6 +1143,7 @@ export default function BookingsPage() {
                       <tr className="bg-gray-50 border-b border-gray-200">
                         <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Customer</th>
                         <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Package</th>
+                        <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Travel & Pax</th>
                         <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
                         <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                         <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
@@ -1102,6 +1162,18 @@ export default function BookingsPage() {
                           </td>
                           <td className="px-6 py-4">
                             <div className="font-medium text-gray-900 line-clamp-1">{booking.packageTitle}</div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex flex-col gap-1 text-sm text-gray-600">
+                              <span className="flex items-center gap-1.5">
+                                <CalendarCheck className="h-3.5 w-3.5 text-indigo-500" />
+                                {formatTravelDate(booking.travelDate)}
+                              </span>
+                              <span className="flex items-center gap-1.5">
+                                <Users className="h-3.5 w-3.5 text-indigo-500" />
+                                {formatPax(booking)}
+                              </span>
+                            </div>
                           </td>
                           <td className="px-6 py-4">
                             <div className="font-medium text-gray-900">₹{((booking.totalPrice || 0) - (booking.discountAmount || 0)).toLocaleString('en-IN')}</div>
@@ -1775,7 +1847,7 @@ export default function BookingsPage() {
                     const netTotal = pkg
                       ? calcTotalPrice(createFormData.ticketQty, pkg) - (Number(createFormData.discountAmount) || 0)
                       : 0;
-                    const defaultAdv = rzpConfig ? Math.round(netTotal * rzpConfig.advancePercentage / 100) : Math.round(netTotal * 0.3);
+                    const defaultAdv = getDefaultAdvanceAmount(netTotal);
 
                     if (paymentMethod === 'razorpay') {
                       return (
@@ -1791,10 +1863,10 @@ export default function BookingsPage() {
                                 max={netTotal}
                                 value={agentAdvanceAmount}
                                 onChange={e => setAgentAdvanceAmount(e.target.value)}
-                                placeholder={`Default: ₹${defaultAdv.toLocaleString('en-IN')} (${rzpConfig?.advancePercentage ?? 30}%)`}
+                                placeholder={`Default: ₹${defaultAdv.toLocaleString('en-IN')} (${getAdvanceSettingLabel()})`}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                               />
-                              <p className="text-xs text-gray-400">Leave blank to use default advance % from settings. A Razorpay payment link will be generated after saving.</p>
+                              <p className="text-xs text-gray-400">Leave blank to use the default advance amount from settings. A Razorpay payment link will be generated after saving.</p>
                             </>
                           ) : (
                             <div className="bg-indigo-50 rounded-lg px-3 py-2 text-sm font-bold text-indigo-700">

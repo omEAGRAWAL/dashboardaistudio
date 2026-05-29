@@ -72,8 +72,9 @@ export async function POST(req: NextRequest) {
         // Agent explicitly set advance amount — use it (still validated server-side against total)
         amountInRupees = Math.round(agentAdvanceAmount);
       } else {
-        const pct = config.advancePercentage ?? 30;
-        amountInRupees = Math.round((netTotal * pct) / 100);
+        amountInRupees = config.advanceType === 'fixed' && config.advanceFixedAmount > 0
+          ? Math.round(Math.min(config.advanceFixedAmount, netTotal))
+          : Math.round((netTotal * (config.advancePercentage ?? 30)) / 100);
       }
     } else {
       amountInRupees = Math.round(netTotal);

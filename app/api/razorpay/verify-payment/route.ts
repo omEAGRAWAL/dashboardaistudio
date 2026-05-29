@@ -67,10 +67,12 @@ export async function POST(req: NextRequest) {
     if (booking.advanceAmount && booking.advanceAmount > 0) {
       amountPaid = booking.advanceAmount; // stored in rupees during create-order
     } else {
-      // Fallback: derive from stored paymentType and config percentage
-      const pct = configSnap.data()!.advancePercentage ?? 30;
+      // Fallback: derive from stored paymentType and current config.
+      const config = configSnap.data()!;
       amountPaid = booking.paymentType === 'advance'
-        ? Math.round((netTotal * pct) / 100)
+        ? (config.advanceType === 'fixed' && config.advanceFixedAmount > 0
+          ? Math.round(Math.min(config.advanceFixedAmount, netTotal))
+          : Math.round((netTotal * (config.advancePercentage ?? 30)) / 100))
         : Math.round(netTotal);
     }
 

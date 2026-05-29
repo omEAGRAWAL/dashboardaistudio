@@ -368,8 +368,8 @@ export default function SettingsPage() {
 
   const handleSaveRazorpay = async () => {
     if (!orgId || !user) return;
-    if (!rzpKeyId.trim() || !rzpKeySecret.trim()) {
-      setRzpError('Key ID and Key Secret are required');
+    if (!rzpKeyId.trim() || (!rzpConfigured && !rzpKeySecret.trim())) {
+      setRzpError(rzpConfigured ? 'Key ID is required' : 'Key ID and Key Secret are required');
       return;
     }
     setRzpSaving(true);
@@ -395,7 +395,7 @@ export default function SettingsPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setRzpConfigured(true);
-      setRzpHasWebhookSecret(!!rzpWebhookSecret.trim());
+      setRzpHasWebhookSecret(!!rzpWebhookSecret.trim() || rzpHasWebhookSecret);
       setRzpKeySecret(''); // clear secret from UI after save
       setRzpWebhookSecret('');
       setRzpSuccess('Razorpay settings saved successfully!');

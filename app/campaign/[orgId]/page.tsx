@@ -11,6 +11,7 @@ import {
   Luggage, CheckCircle2, ChevronRight, Tag, ShieldCheck, X,
 } from 'lucide-react';
 import { UnifiedBookingForm, DEFAULT_BOOKING_PAGES, type BookingPage } from '@/components/UnifiedBookingForm';
+import { sendBookingConfirmationEmail } from '@/lib/booking-confirmation-email';
 
 interface TicketQty { double: number; triple: number; quad: number }
 
@@ -275,6 +276,7 @@ export default function CampaignPage() {
         paymentStatus: 'payment_pending',
         createdAt: serverTimestamp(),
       });
+      void sendBookingConfirmationEmail(orgId, docRef.id);
       setBookingOpen(false);
       // If Razorpay configured, show payment choice
       if (rzpConfig) {
@@ -365,7 +367,7 @@ export default function CampaignPage() {
       {/* Success Banner */}
       {bookingSuccess && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-green-600 text-white px-6 py-3 rounded-2xl shadow-xl flex items-center gap-2 text-sm font-semibold">
-          <CheckCircle2 className="w-4 h-4" /> Booking submitted! We'll reach out soon.
+          <CheckCircle2 className="w-4 h-4" /> Booking submitted! We&apos;ll reach out soon.
         </div>
       )}
 
@@ -387,7 +389,7 @@ export default function CampaignPage() {
               {/* Advance */}
               {(() => {
                 const total = calcTotal(selectedPkg);
-                const advanceAmt = rzpConfig.advanceType === 'fixed'
+                const advanceAmt = rzpConfig.advanceType === 'fixed' && rzpConfig.advanceFixedAmount > 0
                   ? Math.min(rzpConfig.advanceFixedAmount, total)
                   : Math.round(total * rzpConfig.advancePercentage / 100);
                 const advanceLabel = rzpConfig.advanceType === 'fixed'

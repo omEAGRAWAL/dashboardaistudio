@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { UnifiedBookingForm, DEFAULT_BOOKING_PAGES, type BookingPage } from '@/components/UnifiedBookingForm';
+import { sendBookingConfirmationEmail } from '@/lib/booking-confirmation-email';
 
 const DIFFICULTY_COLOR: Record<string, string> = {
   Easy: 'bg-green-100 text-green-700 border-green-200',
@@ -46,7 +47,7 @@ export default function PackageDetailsPage() {
   const [ticketQty, setTicketQty] = useState<Record<string, number>>({});
 
   // Payment state
-  const [rzpConfig, setRzpConfig] = useState<{ keyId: string; advancePercentage: number } | null>(null);
+  const [rzpConfig, setRzpConfig] = useState<{ keyId: string; advanceType: 'percentage' | 'fixed'; advancePercentage: number; advanceFixedAmount: number } | null>(null);
   const [pendingBookingId, setPendingBookingId] = useState<string | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
@@ -95,7 +96,16 @@ export default function PackageDetailsPage() {
     if (!orgId) return;
     fetch(`/api/razorpay/public-config?orgId=${orgId}`)
       .then(r => r.ok ? r.json() : null)
-      .then(data => { if (data?.configured) setRzpConfig({ keyId: data.keyId, advancePercentage: data.advancePercentage ?? 30 }); })
+      .then(data => {
+        if (data?.configured) {
+          setRzpConfig({
+            keyId: data.keyId,
+            advanceType: data.advanceType ?? 'percentage',
+            advancePercentage: data.advancePercentage ?? 30,
+            advanceFixedAmount: data.advanceFixedAmount ?? 0,
+          });
+        }
+      })
       .catch(() => {});
   }, [orgId]);
 
@@ -275,6 +285,7 @@ export default function PackageDetailsPage() {
         customFields,
         createdAt: serverTimestamp(),
       });
+      void sendBookingConfirmationEmail(orgId, docRef.id);
 
       setBookingOpen(false);
       if (rzpConfig) {
@@ -480,7 +491,12 @@ export default function PackageDetailsPage() {
   const PaymentModal = () => {
     if (!showPaymentModal || !pendingBookingId || !rzpConfig) return null;
     const netTotal = calcTotal();
-    const advanceAmt = Math.round(netTotal * rzpConfig.advancePercentage / 100);
+    const advanceAmt = rzpConfig.advanceType === 'fixed' && rzpConfig.advanceFixedAmount > 0
+      ? Math.round(Math.min(rzpConfig.advanceFixedAmount, netTotal))
+      : Math.round(netTotal * rzpConfig.advancePercentage / 100);
+    const advanceLabel = rzpConfig.advanceType === 'fixed'
+      ? 'Pay Advance (Fixed)'
+      : `Pay Advance (${rzpConfig.advancePercentage}%)`;
 
     return (
       <div className="fixed inset-0 z-[300] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm">
@@ -501,7 +517,7 @@ export default function PackageDetailsPage() {
               className="w-full py-4 rounded-2xl border-2 border-transparent text-white font-bold text-base shadow-md hover:brightness-110 transition-all disabled:opacity-50 flex items-center justify-between px-5"
               style={{ backgroundColor: tc }}
             >
-              <span>Pay Advance ({rzpConfig.advancePercentage}%)</span>
+              <span>{advanceLabel}</span>
               <span className="font-black">₹{advanceAmt.toLocaleString('en-IN')}</span>
             </button>
 
@@ -743,7 +759,7 @@ export default function PackageDetailsPage() {
                         <div className="w-7 h-7 bg-green-100 rounded-full flex items-center justify-center">
                           <CheckCircle className="w-4 h-4 text-green-600" />
                         </div>
-                        What's Included
+                        What&apos;s Included
                       </h3>
                       <ul className="space-y-2.5">
                         {inclusions.map((item, i) => (
