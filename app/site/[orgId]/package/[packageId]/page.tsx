@@ -12,6 +12,7 @@ import {
 import Link from 'next/link';
 import { UnifiedBookingForm, DEFAULT_BOOKING_PAGES, type BookingPage } from '@/components/UnifiedBookingForm';
 import { sendBookingConfirmationEmail } from '@/lib/booking-confirmation-email';
+import { calculateAdvanceAmount } from '@/lib/advance-amount';
 
 const DIFFICULTY_COLOR: Record<string, string> = {
   Easy: 'bg-green-100 text-green-700 border-green-200',
@@ -491,11 +492,9 @@ export default function PackageDetailsPage() {
   const PaymentModal = () => {
     if (!showPaymentModal || !pendingBookingId || !rzpConfig) return null;
     const netTotal = calcTotal();
-    const advanceAmt = rzpConfig.advanceType === 'fixed' && rzpConfig.advanceFixedAmount > 0
-      ? Math.round(Math.min(rzpConfig.advanceFixedAmount, netTotal))
-      : Math.round(netTotal * rzpConfig.advancePercentage / 100);
+    const advanceAmt = calculateAdvanceAmount(netTotal, rzpConfig, totalPersons());
     const advanceLabel = rzpConfig.advanceType === 'fixed'
-      ? 'Pay Advance (Fixed)'
+      ? 'Pay Advance (Fixed per ticket)'
       : `Pay Advance (${rzpConfig.advancePercentage}%)`;
 
     return (

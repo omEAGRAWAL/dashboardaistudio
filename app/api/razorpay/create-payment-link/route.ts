@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { adminDb, adminAuth } from '@/lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import Razorpay from 'razorpay';
+import { calculateAdvanceAmount, getBookingTicketCount } from '@/lib/advance-amount';
 
 // Creates a shareable Razorpay Payment Link (for agents to send to customers)
 export async function POST(req: NextRequest) {
@@ -72,9 +73,7 @@ export async function POST(req: NextRequest) {
         // Agent explicitly set advance amount — use it (still validated server-side against total)
         amountInRupees = Math.round(agentAdvanceAmount);
       } else {
-        amountInRupees = config.advanceType === 'fixed' && config.advanceFixedAmount > 0
-          ? Math.round(Math.min(config.advanceFixedAmount, netTotal))
-          : Math.round((netTotal * (config.advancePercentage ?? 30)) / 100);
+        amountInRupees = calculateAdvanceAmount(netTotal, config, getBookingTicketCount(booking));
       }
     } else {
       amountInRupees = Math.round(netTotal);

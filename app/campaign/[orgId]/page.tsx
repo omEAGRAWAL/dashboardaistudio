@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { UnifiedBookingForm, DEFAULT_BOOKING_PAGES, type BookingPage } from '@/components/UnifiedBookingForm';
 import { sendBookingConfirmationEmail } from '@/lib/booking-confirmation-email';
+import { calculateAdvanceAmount } from '@/lib/advance-amount';
 
 interface TicketQty { double: number; triple: number; quad: number }
 
@@ -389,11 +390,10 @@ export default function CampaignPage() {
               {/* Advance */}
               {(() => {
                 const total = calcTotal(selectedPkg);
-                const advanceAmt = rzpConfig.advanceType === 'fixed' && rzpConfig.advanceFixedAmount > 0
-                  ? Math.min(rzpConfig.advanceFixedAmount, total)
-                  : Math.round(total * rzpConfig.advancePercentage / 100);
+                const ticketCount = getTicketTypes(selectedPkg).reduce((sum, t) => sum + (ticketQty[t.type] || 0), 0);
+                const advanceAmt = calculateAdvanceAmount(total, rzpConfig, ticketCount);
                 const advanceLabel = rzpConfig.advanceType === 'fixed'
-                  ? 'Pay Advance (Fixed)'
+                  ? 'Pay Advance (Fixed per ticket)'
                   : `Pay Advance (${rzpConfig.advancePercentage}%)`;
                 return (
                   <button

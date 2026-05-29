@@ -11,6 +11,7 @@ import { format } from 'date-fns';
 import { generateInvoiceHTML, type BusinessProfile, type InvoiceBooking } from '@/lib/invoice-template';
 import { getAuth } from 'firebase/auth';
 import { sendBookingConfirmationEmail } from '@/lib/booking-confirmation-email';
+import { calculateAdvanceAmount } from '@/lib/advance-amount';
 
 // ─── Payment status helpers ────────────────────────────────────────────────
 const PAYMENT_STATUS_LABELS: Record<string, { label: string; color: string }> = {
@@ -84,6 +85,7 @@ export default function BookingsPage() {
   // Loading states for invoice actions
   const [generatingFor, setGeneratingFor] = useState<string | null>(null);
   const [emailingFor, setEmailingFor] = useState<string | null>(null);
+  const [confirmationEmailingFor, setConfirmationEmailingFor] = useState<string | null>(null);
 
   // Invoice generation modal
   const [invoiceModalBooking, setInvoiceModalBooking] = useState<any>(null);
@@ -115,6 +117,7 @@ export default function BookingsPage() {
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'upi' | 'razorpay'>('cash');
   const [paymentType, setPaymentType] = useState<'advance' | 'full'>('advance');
   const [agentAdvanceAmount, setAgentAdvanceAmount] = useState('');
+  const [sendCreateBookingEmail, setSendCreateBookingEmail] = useState(true);
   const [rzpConfig, setRzpConfig] = useState<{ keyId: string; advanceType: 'percentage' | 'fixed'; advancePercentage: number; advanceFixedAmount: number } | null>(null);
   const [rzpLinkLoading, setRzpLinkLoading] = useState<string | null>(null); // bookingId being linked
   const [rzpLinkModal, setRzpLinkModal] = useState<{ url: string; amount: number; bookingId: string } | null>(null);
@@ -411,6 +414,7 @@ export default function BookingsPage() {
     setPaymentMethod('cash');
     setPaymentType('advance');
     setAgentAdvanceAmount('');
+    setSendCreateBookingEmail(true);
   };
 
   const handleGeneratePaymentLink = async (bookingId: string, pType: 'advance' | 'full', advAmt?: number) => {
@@ -432,6 +436,25 @@ export default function BookingsPage() {
       alert(`Failed to generate payment link: ${err.message}`);
     } finally {
       setRzpLinkLoading(null);
+    }
+  };
+
+  const handleSendConfirmationEmail = async (booking: any) => {
+    if (!orgId) return;
+    if (!booking.customerEmail) {
+      alert('This booking has no customer email. Please add an email address first.');
+      return;
+    }
+
+    setConfirmationEmailingFor(booking.id);
+    try {
+      const result = await sendBookingConfirmationEmail(orgId, booking.id, { force: true });
+      if (!result.success) throw new Error(result.error || 'Failed to send confirmation email');
+      alert(`Confirmation email sent to ${booking.customerEmail}`);
+    } catch (err: any) {
+      alert(`Failed to send confirmation email: ${err.message}`);
+    } finally {
+      setConfirmationEmailingFor(null);
     }
   };
 
@@ -540,7 +563,9 @@ export default function BookingsPage() {
         createdAt: serverTimestamp()
       });
 
-      void sendBookingConfirmationEmail(orgId, docRef.id);
+      if (sendCreateBookingEmail) {
+        void sendBookingConfirmationEmail(orgId, docRef.id);
+      }
 
       resetCreateModal();
 
@@ -588,18 +613,13 @@ export default function BookingsPage() {
     return pax > 0 ? `${pax} pax` : 'Pax TBD';
   };
 
-  const getDefaultAdvanceAmount = (netTotal: number) => {
-    if (!rzpConfig) return Math.round(netTotal * 0.3);
-    if (rzpConfig.advanceType === 'fixed' && rzpConfig.advanceFixedAmount > 0) {
-      return Math.round(Math.min(rzpConfig.advanceFixedAmount, netTotal));
-    }
-    return Math.round(netTotal * (rzpConfig.advancePercentage ?? 30) / 100);
-  };
+  const getDefaultAdvanceAmount = (netTotal: number, ticketCount: number) =>
+    calculateAdvanceAmount(netTotal, rzpConfig, ticketCount);
 
   const getAdvanceSettingLabel = () => {
     if (!rzpConfig) return '30%';
     return rzpConfig.advanceType === 'fixed'
-      ? 'fixed amount'
+      ? 'fixed amount per ticket'
       : `${rzpConfig.advancePercentage ?? 30}%`;
   };
 
@@ -1112,8 +1132,16 @@ export default function BookingsPage() {
                       <div className="text-sm font-semibold text-gray-900">
                         ₹{((booking.totalPrice || 0) - (booking.discountAmount || 0)).toLocaleString('en-IN')}
                       </div>
-                      <div className="flex items-center gap-2 pt-1">
+                      <div className="flex flex-wrap items-center gap-2 pt-1">
                         <button onClick={() => handleOpenView(booking)} className="flex-1 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-center">View</button>
+                        <button
+                          onClick={() => handleSendConfirmationEmail(booking)}
+                          disabled={confirmationEmailingFor === booking.id || !booking.customerEmail}
+                          className="flex-1 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors text-center flex items-center justify-center gap-1 disabled:opacity-50"
+                        >
+                          {confirmationEmailingFor === booking.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Mail className="w-3 h-3" />}
+                          Mail
+                        </button>
                         {booking.status === 'Confirmed' && !noProfile && (
                           <button onClick={() => openInvoiceModal(booking)} className="flex-1 py-1.5 text-xs font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors text-center flex items-center justify-center gap-1">
                             <FileText className="w-3 h-3" /> Invoice
@@ -1195,6 +1223,14 @@ export default function BookingsPage() {
                           <td className="px-6 py-4 text-right">
                             <div className="flex items-center justify-end gap-1.5">
                               <button onClick={() => handleOpenView(booking)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" title="View Details"><Eye className="w-4 h-4" /></button>
+                              <button
+                                onClick={() => handleSendConfirmationEmail(booking)}
+                                disabled={confirmationEmailingFor === booking.id || !booking.customerEmail}
+                                className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors disabled:opacity-40 disabled:hover:bg-transparent"
+                                title="Send Confirmation Email"
+                              >
+                                {confirmationEmailingFor === booking.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
+                              </button>
                               {booking.status === 'Confirmed' && !noProfile && (
                                 <button
                                   onClick={() => openInvoiceModal(booking)}
@@ -1594,7 +1630,15 @@ export default function BookingsPage() {
                 <p className="text-xs text-gray-400">Submitted on {format(viewingBooking.createdAt.toDate(), 'MMM d, yyyy h:mm a')}</p>
               )}
             </div>
-            <div className="p-4 bg-gray-50 rounded-b-2xl flex justify-end gap-3">
+            <div className="p-4 bg-gray-50 rounded-b-2xl flex flex-wrap justify-end gap-3">
+              <button
+                onClick={() => handleSendConfirmationEmail(viewingBooking)}
+                disabled={confirmationEmailingFor === viewingBooking.id || !viewingBooking.customerEmail}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-lg font-medium text-sm transition-colors flex items-center gap-1.5"
+              >
+                {confirmationEmailingFor === viewingBooking.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
+                Send Mail
+              </button>
               {viewingBooking.status === 'Confirmed' && !noProfile && (
                 <button onClick={() => { setIsViewModalOpen(false); openInvoiceModal(viewingBooking); }}
                   className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium text-sm transition-colors flex items-center gap-1.5">
@@ -1847,7 +1891,7 @@ export default function BookingsPage() {
                     const netTotal = pkg
                       ? calcTotalPrice(createFormData.ticketQty, pkg) - (Number(createFormData.discountAmount) || 0)
                       : 0;
-                    const defaultAdv = getDefaultAdvanceAmount(netTotal);
+                    const defaultAdv = getDefaultAdvanceAmount(netTotal, getTotalPersons(createFormData.ticketQty));
 
                     if (paymentMethod === 'razorpay') {
                       return (
@@ -1897,6 +1941,22 @@ export default function BookingsPage() {
                   })()}
                 </div>
               </div>
+
+              <label className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700">
+                <input
+                  type="checkbox"
+                  checked={sendCreateBookingEmail}
+                  onChange={e => setSendCreateBookingEmail(e.target.checked)}
+                  className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                />
+                <span className="flex min-w-0 flex-1 items-center gap-2">
+                  <Mail className="h-4 w-4 text-indigo-500" />
+                  <span>
+                    <span className="font-semibold text-gray-900">Send confirmation email now</span>
+                    <span className="block text-xs text-gray-400">Uses the customer email on this booking.</span>
+                  </span>
+                </span>
+              </label>
 
               {/* Step 1 footer — hidden when on step 2 */}
               {createStep === 1 && (

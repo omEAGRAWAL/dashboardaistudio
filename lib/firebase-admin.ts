@@ -17,3 +17,10 @@ export const adminDb = getFirestore(getApp(), firebaseConfig.firestoreDatabaseId
 
 import { getAuth } from 'firebase-admin/auth';
 export const adminAuth = getAuth();
+
+export function isFirebaseAdminCredentialsError(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  return message.includes('Could not load the default credentials')
+    || message.includes('Your default credentials were not found')
+    || message.includes('FIREBASE_SERVICE_ACCOUNT_KEY');
+}

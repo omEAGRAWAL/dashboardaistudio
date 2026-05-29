@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import crypto from 'crypto';
+import { calculateAdvanceAmount, getBookingTicketCount } from '@/lib/advance-amount';
 
 export async function POST(req: NextRequest) {
   try {
@@ -70,9 +71,7 @@ export async function POST(req: NextRequest) {
       // Fallback: derive from stored paymentType and current config.
       const config = configSnap.data()!;
       amountPaid = booking.paymentType === 'advance'
-        ? (config.advanceType === 'fixed' && config.advanceFixedAmount > 0
-          ? Math.round(Math.min(config.advanceFixedAmount, netTotal))
-          : Math.round((netTotal * (config.advancePercentage ?? 30)) / 100))
+        ? calculateAdvanceAmount(netTotal, config, getBookingTicketCount(booking))
         : Math.round(netTotal);
     }
 

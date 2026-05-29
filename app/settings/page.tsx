@@ -1110,7 +1110,7 @@ export default function SettingsPage() {
                         onClick={() => setRzpAdvanceType('fixed')}
                         className={`flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-colors ${rzpAdvanceType === 'fixed' ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-gray-300 text-gray-600 hover:border-indigo-400'}`}
                       >
-                        ₹ Fixed Amount
+                        ₹ Fixed / Ticket
                       </button>
                     </div>
 
@@ -1133,7 +1133,7 @@ export default function SettingsPage() {
                       </div>
                     ) : (
                       <div className="space-y-1.5">
-                        <label className="block text-sm text-gray-600">Fixed Advance Amount (₹)</label>
+                        <label className="block text-sm text-gray-600">Fixed Advance Amount Per Ticket (₹)</label>
                         <div className="relative">
                           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium">₹</span>
                           <input
@@ -1148,7 +1148,7 @@ export default function SettingsPage() {
                       </div>
                     )}
                     <p className="text-xs text-gray-500">
-                      Customers will see an option to pay this advance when booking. Agents can still override the amount manually per booking.
+                      Fixed advance is multiplied by the number of selected tickets and capped at the booking total. Agents can still override the amount manually per booking.
                     </p>
                   </div>
 
@@ -1259,18 +1259,35 @@ function ReferEarnSection({ orgId }: { orgId: string | null }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!orgId) return;
-    const uid = getAuth().currentUser?.uid;
-    if (!uid) { setLoading(false); return; }
-    fetch(`/api/admin/manage-referral-code?orgId=${orgId}`, {
-      headers: { 'x-uid': uid },
-    }).then(async (res) => {
-      if (res.ok) {
-        const data = await res.json();
-        setReferralCode(data.code);
-        setStats(data.stats);
+    let isMounted = true;
+
+    const loadReferral = async () => {
+      if (!orgId) return;
+      const uid = getAuth().currentUser?.uid;
+      if (!uid) {
+        if (isMounted) setLoading(false);
+        return;
       }
-    }).catch(() => {}).finally(() => setLoading(false));
+
+      try {
+        const res = await fetch(`/api/admin/manage-referral-code?orgId=${orgId}`, {
+          headers: { 'x-uid': uid },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (!isMounted) return;
+          setReferralCode(data.code);
+          setStats(data.stats);
+        }
+      } catch {
+        // Keep referral card quiet if the optional referral API is unavailable.
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    loadReferral();
+    return () => { isMounted = false; };
   }, [orgId]);
 
   const shareLink = typeof window !== 'undefined' && referralCode
@@ -1297,7 +1314,7 @@ function ReferEarnSection({ orgId }: { orgId: string | null }) {
           </div>
         ) : !referralCode ? (
           <div className="text-sm text-gray-500">
-            Your referral code hasn't been set up yet. Contact support to get your unique referral link and start earning rewards.
+            Your referral code hasn&apos;t been set up yet. Contact support to get your unique referral link and start earning rewards.
           </div>
         ) : (
           <div className="space-y-5">

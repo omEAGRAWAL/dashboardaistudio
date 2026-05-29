@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { adminDb, adminAuth } from '@/lib/firebase-admin';
+import { adminDb, adminAuth, isFirebaseAdminCredentialsError } from '@/lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
+
+const firebaseAdminCredentialsError = 'Firebase Admin credentials are not configured. Set FIREBASE_SERVICE_ACCOUNT_KEY in .env.local.';
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,7 +16,10 @@ export async function POST(req: NextRequest) {
     try {
       const decoded = await adminAuth.verifyIdToken(idToken);
       uid = decoded.uid;
-    } catch {
+    } catch (err) {
+      if (isFirebaseAdminCredentialsError(err)) {
+        return NextResponse.json({ error: firebaseAdminCredentialsError }, { status: 503 });
+      }
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
@@ -54,7 +59,7 @@ export async function POST(req: NextRequest) {
     }
     const fixedAmt = Number(advanceFixedAmount ?? 0);
     if (type === 'fixed' && (isNaN(fixedAmt) || fixedAmt < 1)) {
-      return NextResponse.json({ error: 'advanceFixedAmount must be at least ₹1' }, { status: 400 });
+      return NextResponse.json({ error: 'advanceFixedAmount per ticket must be at least ₹1' }, { status: 400 });
     }
 
     // Store config — keySecret never goes back to client
@@ -72,6 +77,9 @@ export async function POST(req: NextRequest) {
     // Return only non-sensitive fields
     return NextResponse.json({ success: true, keyId: keyId.trim(), advanceType: type, advancePercentage: pct, advanceFixedAmount: fixedAmt });
   } catch (err: any) {
+    if (isFirebaseAdminCredentialsError(err)) {
+      return NextResponse.json({ error: firebaseAdminCredentialsError }, { status: 503 });
+    }
     console.error('[save-config]', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
@@ -89,7 +97,10 @@ export async function GET(req: NextRequest) {
     try {
       const decoded = await adminAuth.verifyIdToken(idToken);
       uid = decoded.uid;
-    } catch {
+    } catch (err) {
+      if (isFirebaseAdminCredentialsError(err)) {
+        return NextResponse.json({ error: firebaseAdminCredentialsError }, { status: 503 });
+      }
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
@@ -118,6 +129,9 @@ export async function GET(req: NextRequest) {
       hasWebhookSecret: !!data.webhookSecret,
     });
   } catch (err: any) {
+    if (isFirebaseAdminCredentialsError(err)) {
+      return NextResponse.json({ error: firebaseAdminCredentialsError }, { status: 503 });
+    }
     console.error('[get-config]', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

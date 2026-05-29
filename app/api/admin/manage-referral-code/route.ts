@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { adminDb } from '@/lib/firebase-admin';
+import { adminDb, isFirebaseAdminCredentialsError } from '@/lib/firebase-admin';
 
 const CHARSET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no 0/O/1/I
+const firebaseAdminCredentialsError = 'Firebase Admin credentials are not configured. Set FIREBASE_SERVICE_ACCOUNT_KEY in .env.local.';
 
 async function generateUniqueCode(): Promise<string> {
   for (let attempt = 0; attempt < 5; attempt++) {
@@ -53,6 +54,9 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (err: any) {
+    if (isFirebaseAdminCredentialsError(err)) {
+      return NextResponse.json({ error: firebaseAdminCredentialsError }, { status: 503 });
+    }
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
@@ -80,6 +84,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   } catch (err: any) {
+    if (isFirebaseAdminCredentialsError(err)) {
+      return NextResponse.json({ error: firebaseAdminCredentialsError }, { status: 503 });
+    }
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

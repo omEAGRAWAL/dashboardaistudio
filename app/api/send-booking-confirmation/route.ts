@@ -71,7 +71,7 @@ function buildRows(rows: [string, string][]) {
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
-  const { orgId, bookingId } = body as { orgId?: string; bookingId?: string };
+  const { orgId, bookingId, force } = body as { orgId?: string; bookingId?: string; force?: boolean };
 
   if (!orgId || !bookingId) {
     return NextResponse.json({ error: 'orgId and bookingId are required' }, { status: 400 });
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Booking does not belong to this org' }, { status: 403 });
     }
 
-    if (booking.confirmationEmail?.status === 'sent') {
+    if (booking.confirmationEmail?.status === 'sent' && !force) {
       return NextResponse.json({ success: true, skipped: true, reason: 'already_sent' });
     }
 
