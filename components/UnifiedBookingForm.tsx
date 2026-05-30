@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { AlertCircle, ChevronRight } from 'lucide-react';
 
 export type FieldType = 'text' | 'tel' | 'email' | 'date' | 'select' | 'number' | 'textarea';
+export type BookingPageType = 'standard' | 'participants';
 
 export interface BookingField {
   id: string;
@@ -22,6 +23,8 @@ export interface BookingPage {
   id: string;
   title: string;
   fields: BookingField[];
+  type?: BookingPageType;
+  enabled?: boolean;
 }
 
 export const DEFAULT_BOOKING_FIELDS: BookingField[] = [
@@ -35,8 +38,28 @@ export const DEFAULT_BOOKING_FIELDS: BookingField[] = [
 ];
 
 export const DEFAULT_BOOKING_PAGES: BookingPage[] = [
-  { id: 'page_1', title: 'Details', fields: DEFAULT_BOOKING_FIELDS }
+  { id: 'page_1', title: 'Details', type: 'standard', enabled: true, fields: DEFAULT_BOOKING_FIELDS },
+  {
+    id: 'page_participants',
+    title: 'Passenger Details',
+    type: 'participants',
+    enabled: true,
+    fields: [
+      { id: 'pf_name', key: 'participantName', label: 'Passenger Name', type: 'text', placeholder: 'Passenger Name', required: false, enabled: true, order: 0, isDefault: true },
+      { id: 'pf_phone', key: 'participantPhone', label: 'Passenger Phone', type: 'tel', placeholder: 'Passenger Phone', required: false, enabled: true, order: 1, isDefault: true },
+      { id: 'pf_age', key: 'participantAge', label: 'Age', type: 'number', placeholder: 'Age', required: false, enabled: true, order: 2, isDefault: true },
+      { id: 'pf_gender', key: 'participantGender', label: 'Gender', type: 'select', options: ['Male', 'Female', 'Other'], required: false, enabled: true, order: 3, isDefault: true },
+    ],
+  },
 ];
+
+const PARTICIPANT_FIELD_PREFIX = '__participant_';
+const PARTICIPANT_KEY_MAP: Record<string, string> = {
+  participantName: 'name',
+  participantPhone: 'phone',
+  participantAge: 'age',
+  participantGender: 'gender',
+};
 
 interface UnifiedBookingFormProps {
   pages: BookingPage[];
@@ -48,6 +71,7 @@ interface UnifiedBookingFormProps {
   submitLabel?: string;
   nextLabel?: string;
   isSubmitting?: boolean;
+  participantCount?: number;
 }
 
 export function UnifiedBookingForm({
@@ -60,13 +84,17 @@ export function UnifiedBookingForm({
   submitLabel = 'Submit Booking',
   nextLabel = 'Next',
   isSubmitting = false,
+  participantCount = 0,
 }: UnifiedBookingFormProps) {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [formData, setFormData] = useState<Record<string, any>>(initialData);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const safeParticipantCount = Math.max(0, Math.floor(Number(participantCount) || 0));
 
   const safePages = useMemo(() => {
     const normalized = (pages || [])
+      .filter(page => page.enabled !== false)
+      .filter(page => page.type !== 'participants' || safeParticipantCount > 0)
       .map(page => ({
         ...page,
         fields: (page.fields || [])
@@ -75,8 +103,19 @@ export function UnifiedBookingForm({
       }))
       .filter(page => page.fields.length > 0);
 
-    return normalized.length > 0 ? normalized : DEFAULT_BOOKING_PAGES;
-  }, [pages]);
+    const fallbackPages = DEFAULT_BOOKING_PAGES
+      .filter(page => page.enabled !== false)
+      .filter(page => page.type !== 'participants' || safeParticipantCount > 0)
+      .map(page => ({
+        ...page,
+        fields: (page.fields || [])
+          .filter(field => field.enabled)
+          .sort((a, b) => a.order - b.order),
+      }))
+      .filter(page => page.fields.length > 0);
+
+    return normalized.length > 0 ? normalized : fallbackPages;
+  }, [pages, safeParticipantCount]);
 
   const safeCurrentPage = safePages[Math.min(currentPageIndex, safePages.length - 1)];
   const activeFields = safeCurrentPage?.fields || [];
@@ -84,18 +123,63 @@ export function UnifiedBookingForm({
 
   const validateCurrentPage = () => {
     const nextErrors: Record<string, string> = {};
-    for (const field of activeFields) {
-      const value = formData[field.id];
+    const validateField = (field: BookingField, fieldKey: string) => {
+      const value = formData[fieldKey];
       if (field.required && (value === undefined || value === null || String(value).trim() === '')) {
-        nextErrors[field.id] = `${field.label} is required.`;
+        nextErrors[fieldKey] = `${field.label} is required.`;
       }
 
       if (value && field.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value))) {
-        nextErrors[field.id] = 'Enter a valid email address.';
+        nextErrors[fieldKey] = 'Enter a valid email address.';
+      }
+    };
+
+    if (safeCurrentPage?.type === 'participants') {
+      for (let passengerIndex = 0; passengerIndex < safeParticipantCount; passengerIndex++) {
+        for (const field of activeFields) {
+          validateField(field, getParticipantFieldKey(field.id, passengerIndex));
+        }
+      }
+    } else {
+      for (const field of activeFields) {
+        validateField(field, field.id);
       }
     }
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
+  };
+
+  const getParticipantFieldKey = (fieldId: string, passengerIndex: number) =>
+    `${PARTICIPANT_FIELD_PREFIX}${passengerIndex}_${fieldId}`;
+
+  const buildParticipants = () => {
+    const participantPages = safePages.filter(page => page.type === 'participants');
+    if (participantPages.length === 0 || safeParticipantCount < 1) return [];
+
+    return Array.from({ length: safeParticipantCount }).map((_, passengerIndex) => {
+      const participant: Record<string, any> = {};
+      const customFields: Record<string, any> = {};
+
+      for (const page of participantPages) {
+        for (const field of page.fields) {
+          const value = formData[getParticipantFieldKey(field.id, passengerIndex)];
+          if (value === undefined || value === null || String(value).trim() === '') continue;
+
+          const participantKey = field.key ? PARTICIPANT_KEY_MAP[field.key] : undefined;
+          if (participantKey) {
+            participant[participantKey] = value;
+          } else {
+            customFields[field.label || field.id] = value;
+          }
+        }
+      }
+
+      if (Object.keys(customFields).length > 0) {
+        participant.customFields = customFields;
+      }
+
+      return participant;
+    }).filter(participant => Object.keys(participant).length > 0);
   };
 
   const handleNext = async () => {
@@ -104,7 +188,7 @@ export function UnifiedBookingForm({
     if (currentPageIndex < safePages.length - 1) {
       setCurrentPageIndex(prev => prev + 1);
     } else {
-      await onComplete(formData);
+      await onComplete({ ...formData, __participants: buildParticipants() });
     }
   };
 
@@ -127,6 +211,71 @@ export function UnifiedBookingForm({
   };
 
   if (!safeCurrentPage) return null;
+
+  const renderField = (field: BookingField, fieldKey: string, label?: string) => {
+    const hasError = !!errors[fieldKey];
+    return (
+      <div key={fieldKey} className="space-y-1">
+        <label htmlFor={fieldKey} className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+          {label || field.label} {field.required && <span className="text-red-500">*</span>}
+        </label>
+
+        {field.type === 'select' ? (
+          <div className="relative">
+            <select
+              id={fieldKey}
+              value={formData[fieldKey] || ''}
+              onChange={(e) => handleChange(fieldKey, e.target.value)}
+              required={field.required}
+              aria-invalid={hasError}
+              className={`w-full appearance-none rounded-xl border px-4 py-3.5 pr-9 text-base bg-white text-gray-900 outline-none transition-colors focus:ring-2 sm:text-sm ${
+                hasError ? 'border-red-300 focus:ring-red-100' : 'border-gray-200 focus:border-gray-300 focus:ring-gray-100'
+              }`}
+            >
+              <option value="">Select...</option>
+              {(field.options || []).map(opt => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+            <ChevronRight className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 rotate-90 pointer-events-none" />
+          </div>
+        ) : field.type === 'textarea' ? (
+          <textarea
+            id={fieldKey}
+            value={formData[fieldKey] || ''}
+            onChange={(e) => handleChange(fieldKey, e.target.value)}
+            placeholder={field.placeholder || ''}
+            required={field.required}
+            rows={3}
+            aria-invalid={hasError}
+            className={`w-full resize-y rounded-xl border px-4 py-3.5 text-base bg-white text-gray-900 outline-none transition-colors placeholder:text-gray-400 focus:ring-2 sm:text-sm ${
+              hasError ? 'border-red-300 focus:ring-red-100' : 'border-gray-200 focus:border-gray-300 focus:ring-gray-100'
+            }`}
+          />
+        ) : (
+          <input
+            id={fieldKey}
+            type={field.type}
+            value={formData[fieldKey] || ''}
+            onChange={(e) => handleChange(fieldKey, e.target.value)}
+            placeholder={field.placeholder || ''}
+            required={field.required}
+            aria-invalid={hasError}
+            inputMode={field.type === 'tel' ? 'tel' : field.type === 'number' ? 'numeric' : undefined}
+            className={`w-full rounded-xl border px-4 py-3.5 text-base bg-white text-gray-900 outline-none transition-colors placeholder:text-gray-400 focus:ring-2 sm:text-sm ${
+              hasError ? 'border-red-300 focus:ring-red-100' : 'border-gray-200 focus:border-gray-300 focus:ring-gray-100'
+            }`}
+            style={field.type === 'date' ? { accentColor } : undefined}
+          />
+        )}
+        {hasError && (
+          <p className="flex items-center gap-1.5 text-xs font-medium text-red-600">
+            <AlertCircle className="h-3.5 w-3.5" /> {errors[fieldKey]}
+          </p>
+        )}
+      </div>
+    );
+  };
 
   return (
     <form
@@ -158,70 +307,26 @@ export function UnifiedBookingForm({
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 py-4 overscroll-contain">
         {currentPageIndex === 0 && children}
 
-        {activeFields.map(field => {
-          const hasError = !!errors[field.id];
-          return (
-            <div key={field.id} className="space-y-1">
-              <label htmlFor={field.id} className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                {field.label} {field.required && <span className="text-red-500">*</span>}
-              </label>
-
-              {field.type === 'select' ? (
-                <div className="relative">
-                  <select
-                    id={field.id}
-                    value={formData[field.id] || ''}
-                    onChange={(e) => handleChange(field.id, e.target.value)}
-                    required={field.required}
-                    aria-invalid={hasError}
-                    className={`w-full appearance-none rounded-xl border px-4 py-3.5 pr-9 text-base bg-white text-gray-900 outline-none transition-colors focus:ring-2 sm:text-sm ${
-                      hasError ? 'border-red-300 focus:ring-red-100' : 'border-gray-200 focus:border-gray-300 focus:ring-gray-100'
-                    }`}
-                  >
-                    <option value="">Select...</option>
-                    {(field.options || []).map(opt => (
-                      <option key={opt} value={opt}>{opt}</option>
-                    ))}
-                  </select>
-                  <ChevronRight className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 rotate-90 pointer-events-none" />
+        {safeCurrentPage.type === 'participants' ? (
+          <div className="space-y-4">
+            <p className="text-xs text-gray-400">Optional passenger details. You can leave unknown fields blank.</p>
+            {Array.from({ length: safeParticipantCount }).map((_, passengerIndex) => (
+              <div key={passengerIndex} className="rounded-2xl border border-gray-100 bg-gray-50/70 p-3">
+                <div className="mb-3 flex items-center gap-2">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white" style={{ backgroundColor: accentColor }}>
+                    {passengerIndex + 1}
+                  </span>
+                  <p className="text-sm font-bold text-gray-800">Passenger {passengerIndex + 1}</p>
                 </div>
-              ) : field.type === 'textarea' ? (
-                <textarea
-                  id={field.id}
-                  value={formData[field.id] || ''}
-                  onChange={(e) => handleChange(field.id, e.target.value)}
-                  placeholder={field.placeholder || ''}
-                  required={field.required}
-                  rows={3}
-                  aria-invalid={hasError}
-                  className={`w-full resize-y rounded-xl border px-4 py-3.5 text-base bg-white text-gray-900 outline-none transition-colors placeholder:text-gray-400 focus:ring-2 sm:text-sm ${
-                    hasError ? 'border-red-300 focus:ring-red-100' : 'border-gray-200 focus:border-gray-300 focus:ring-gray-100'
-                  }`}
-                />
-              ) : (
-                <input
-                  id={field.id}
-                  type={field.type}
-                  value={formData[field.id] || ''}
-                  onChange={(e) => handleChange(field.id, e.target.value)}
-                  placeholder={field.placeholder || ''}
-                  required={field.required}
-                  aria-invalid={hasError}
-                  inputMode={field.type === 'tel' ? 'tel' : field.type === 'number' ? 'numeric' : undefined}
-                  className={`w-full rounded-xl border px-4 py-3.5 text-base bg-white text-gray-900 outline-none transition-colors placeholder:text-gray-400 focus:ring-2 sm:text-sm ${
-                    hasError ? 'border-red-300 focus:ring-red-100' : 'border-gray-200 focus:border-gray-300 focus:ring-gray-100'
-                  }`}
-                  style={field.type === 'date' ? { accentColor } : undefined}
-                />
-              )}
-              {hasError && (
-                <p className="flex items-center gap-1.5 text-xs font-medium text-red-600">
-                  <AlertCircle className="h-3.5 w-3.5" /> {errors[field.id]}
-                </p>
-              )}
-            </div>
-          );
-        })}
+                <div className="space-y-4">
+                  {activeFields.map(field => renderField(field, getParticipantFieldKey(field.id, passengerIndex)))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          activeFields.map(field => renderField(field, field.id))
+        )}
       </div>
 
       <div className="flex-shrink-0 border-t border-gray-100 bg-white px-5 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] pt-3">

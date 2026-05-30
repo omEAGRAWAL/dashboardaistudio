@@ -233,10 +233,12 @@ export default function CampaignPage() {
       };
       const standardData: Record<string, any> = {};
       const customFields: Record<string, any> = {};
+      const participants = Array.isArray(collectedFormData.__participants) ? collectedFormData.__participants : [];
 
       // Build a lookup of field definitions from all pages
       const allFields = bookingPages.flatMap(p => p.fields);
       for (const [fieldId, value] of Object.entries(collectedFormData)) {
+        if (fieldId === '__participants' || fieldId.startsWith('__participant_')) continue;
         const fieldDef = allFields.find(f => f.id === fieldId);
         const fieldKey = fieldDef?.key;
         if (fieldKey && STANDARD_KEYS[fieldKey]) {
@@ -272,6 +274,7 @@ export default function CampaignPage() {
         totalPrice: calcTotal(selectedPkg),
         couponCode: couponCode || '',
         customFields,
+        participants,
         status: 'Pending',
         source: 'Campaign',
         paymentStatus: 'payment_pending',

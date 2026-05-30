@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 
 type FieldType = 'text' | 'tel' | 'email' | 'date' | 'select' | 'number' | 'textarea';
+type BookingPageType = 'standard' | 'participants';
 
 interface BookingField {
   id: string;
@@ -31,6 +32,8 @@ interface BookingPage {
   id: string;
   title: string;
   fields: BookingField[];
+  type?: BookingPageType;
+  enabled?: boolean;
 }
 
 const INDIAN_STATES = [
@@ -55,6 +58,23 @@ const DEFAULT_BOOKING_FIELDS: BookingField[] = [
   { id: 'f_source', key: 'leadSource', label: 'Source (How did you hear?)', type: 'select', options: SOURCE_OPTIONS, required: false, enabled: true, order: 6, isDefault: true },
 ];
 
+const DEFAULT_PARTICIPANT_FIELDS: BookingField[] = [
+  { id: 'pf_name', key: 'participantName', label: 'Passenger Name', type: 'text', placeholder: 'Passenger Name', required: false, enabled: true, order: 0, isDefault: true },
+  { id: 'pf_phone', key: 'participantPhone', label: 'Passenger Phone', type: 'tel', placeholder: 'Passenger Phone', required: false, enabled: true, order: 1, isDefault: true },
+  { id: 'pf_age', key: 'participantAge', label: 'Age', type: 'number', placeholder: 'Age', required: false, enabled: true, order: 2, isDefault: true },
+  { id: 'pf_gender', key: 'participantGender', label: 'Gender', type: 'select', options: ['Male', 'Female', 'Other'], required: false, enabled: true, order: 3, isDefault: true },
+];
+
+const DEFAULT_PARTICIPANT_PAGE: BookingPage = {
+  id: 'page_participants',
+  title: 'Passenger Details',
+  type: 'participants',
+  enabled: true,
+  fields: DEFAULT_PARTICIPANT_FIELDS,
+};
+
+const clonePage = (page: BookingPage): BookingPage => JSON.parse(JSON.stringify(page));
+
 const COLOR_PRESETS = ['#22c55e','#4f46e5','#f97316','#ef4444','#0ea5e9','#8b5cf6','#ec4899','#14b8a6','#f59e0b','#64748b'];
 const TYPE_LABELS: Record<FieldType, string> = {
   text: 'Text Input', tel: 'Phone', email: 'Email', date: 'Date Picker',
@@ -64,7 +84,8 @@ const TYPE_LABELS: Record<FieldType, string> = {
 export default function BookingFormPage() {
   const { user, orgId } = useAuth();
   const [pages, setPages] = useState<BookingPage[]>([
-    { id: 'page_1', title: 'Details', fields: DEFAULT_BOOKING_FIELDS }
+    { id: 'page_1', title: 'Details', type: 'standard', enabled: true, fields: DEFAULT_BOOKING_FIELDS },
+    clonePage(DEFAULT_PARTICIPANT_PAGE),
   ]);
   const [bookingColor, setBookingColor] = useState('#22c55e');
   const [loading, setLoading] = useState(true);
@@ -78,6 +99,43 @@ export default function BookingFormPage() {
   const [termsMandatory, setTermsMandatory] = useState(true);
   const [termsContent, setTermsContent] = useState('');
 
+  const normalizePages = (sourcePages: BookingPage[]) => {
+    const normalized = sourcePages.map((page, index) => ({
+      ...page,
+      type: page.type ?? 'standard',
+      enabled: page.enabled ?? true,
+      fields: page.fields || [],
+      id: page.id || `page_${index + 1}`,
+      title: page.title || `Page ${index + 1}`,
+    }));
+
+    const participantIndex = normalized.findIndex(page => page.type === 'participants');
+    if (participantIndex === -1) {
+      return [...normalized, clonePage(DEFAULT_PARTICIPANT_PAGE)];
+    }
+
+    const participantPage = normalized[participantIndex];
+    const savedMap: Record<string, BookingField> = Object.fromEntries(
+      (participantPage.fields || []).map((field: BookingField) => [field.id, field])
+    );
+    const mergedDefaultFields = DEFAULT_PARTICIPANT_FIELDS.map(defaultField => ({
+      ...defaultField,
+      ...(savedMap[defaultField.id] ? {
+        ...savedMap[defaultField.id],
+        key: defaultField.key,
+        isDefault: true,
+      } : {}),
+    }));
+    const customParticipantFields = (participantPage.fields || []).filter(field => !DEFAULT_PARTICIPANT_FIELDS.some(defaultField => defaultField.id === field.id));
+
+    normalized[participantIndex] = {
+      ...participantPage,
+      fields: [...mergedDefaultFields, ...customParticipantFields].sort((a, b) => a.order - b.order),
+    };
+
+    return normalized;
+  };
+
   useEffect(() => {
     if (!orgId) return;
     (async () => {
@@ -88,7 +146,7 @@ export default function BookingFormPage() {
           setBookingColor(bf.bookingColor || '#22c55e');
           
           if (bf.pages && bf.pages.length > 0) {
-            setPages(bf.pages);
+            setPages(normalizePages(bf.pages));
           } else if (bf.fields?.length) {
             // Backwards compatibility migration
             const savedMap: Record<string, BookingField> = Object.fromEntries(
@@ -105,7 +163,7 @@ export default function BookingFormPage() {
             }));
             const custom = bf.fields.filter((f: BookingField) => !f.isDefault);
             const migratedFields = [...merged, ...custom].sort((a, b) => a.order - b.order);
-            setPages([{ id: 'page_1', title: 'Details', fields: migratedFields }]);
+            setPages(normalizePages([{ id: 'page_1', title: 'Details', type: 'standard', enabled: true, fields: migratedFields }]));
           }
 
           // Load T&C settings
@@ -149,11 +207,17 @@ export default function BookingFormPage() {
   };
 
   const addPage = () => {
-    setPages(p => [...p, { id: `page_${Date.now()}`, title: `Page ${p.length + 1}`, fields: [] }]);
+    setPages(p => [...p, { id: `page_${Date.now()}`, title: `Page ${p.length + 1}`, type: 'standard', enabled: true, fields: [] }]);
   };
 
   const removePage = (pIdx: number) => {
-    setPages(p => p.filter((_, i) => i !== pIdx));
+    setPages(p => {
+      const page = p[pIdx];
+      if (page?.type === 'participants') {
+        return p.map((item, index) => index === pIdx ? { ...item, enabled: false } : item);
+      }
+      return p.filter((_, i) => i !== pIdx);
+    });
   };
 
   const updatePageTitle = (pIdx: number, title: string) => {
@@ -162,6 +226,10 @@ export default function BookingFormPage() {
       np[pIdx].title = title;
       return np;
     });
+  };
+
+  const togglePageEnabled = (pIdx: number) => {
+    setPages(p => p.map((page, index) => index === pIdx ? { ...page, enabled: page.enabled === false } : page));
   };
 
   const moveField = (pIdx: number, fIdx: number, dir: 'up' | 'down') => {
@@ -292,7 +360,7 @@ export default function BookingFormPage() {
             ) : (
               <div className="space-y-6 mb-6">
                 {pages.map((page, pIdx) => (
-                  <div key={page.id} className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                  <div key={page.id} className={`bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden ${page.enabled === false ? 'opacity-60' : ''}`}>
                     <div className="p-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
                       <div className="flex items-center gap-3 flex-1">
                         <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center font-bold text-indigo-700">
@@ -306,13 +374,32 @@ export default function BookingFormPage() {
                             className="font-bold text-gray-900 border-none bg-transparent p-0 focus:ring-0 text-lg w-full placeholder-gray-300"
                             placeholder="Page Title (e.g., Personal Details)"
                           />
+                          <div className="mt-1 flex items-center gap-2">
+                            {page.type === 'participants' && (
+                              <span className="text-[10px] font-bold uppercase tracking-wide text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
+                                Repeats per ticket
+                              </span>
+                            )}
+                            {page.enabled === false && (
+                              <span className="text-[10px] font-bold uppercase tracking-wide text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                                Hidden
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
-                      {pIdx > 0 && (
+                      <div className="flex items-center gap-1">
+                        {pIdx > 0 && (
+                          <button onClick={() => togglePageEnabled(pIdx)} className="text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 p-2 rounded-lg transition-colors" title={page.enabled === false ? 'Show Page' : 'Hide Page'}>
+                            {page.enabled === false ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        )}
+                        {pIdx > 0 && page.type !== 'participants' && (
                         <button onClick={() => removePage(pIdx)} className="text-gray-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors" title="Remove Page">
                           <Trash2 className="w-4 h-4" />
                         </button>
-                      )}
+                        )}
+                      </div>
                     </div>
 
                     <div className="divide-y divide-gray-100">

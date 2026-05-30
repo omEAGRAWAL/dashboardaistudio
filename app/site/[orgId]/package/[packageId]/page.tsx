@@ -249,9 +249,11 @@ export default function PackageDetailsPage() {
       };
       const standardData: Record<string, any> = {};
       const customFields: Record<string, any> = {};
+      const participants = Array.isArray(formData.__participants) ? formData.__participants : [];
 
       const allFields = bookingPages.flatMap(p => p.fields);
       for (const [fieldId, value] of Object.entries(formData)) {
+        if (fieldId === '__participants' || fieldId.startsWith('__participant_')) continue;
         const fieldDef = allFields.find(f => f.id === fieldId);
         const fieldKey = fieldDef?.key;
         if (fieldKey && STANDARD_KEYS[fieldKey]) {
@@ -283,6 +285,7 @@ export default function PackageDetailsPage() {
         status: 'Pending',
         source: 'Website',
         paymentStatus: 'payment_pending',
+        participants,
         customFields,
         createdAt: serverTimestamp(),
       });
@@ -406,6 +409,7 @@ export default function PackageDetailsPage() {
               nextLabel="Continue"
               submitLabel={rzpConfig ? 'Submit & choose payment' : 'Submit booking'}
               isSubmitting={submitting}
+              participantCount={totalPersons()}
               headerRenderer={(currentPage, _total, _title, onBack) => (
                 <div className="px-5 py-3 border-b border-gray-100 flex-shrink-0">
                   <button type="button" onClick={() => currentPage === 0 ? setBookingStep(1) : onBack()} className="text-xs text-gray-500 hover:text-gray-800 font-medium flex items-center gap-1">
@@ -887,6 +891,7 @@ export default function PackageDetailsPage() {
                         nextLabel="Continue"
                         submitLabel={rzpConfig ? 'Submit & choose payment' : 'Submit booking'}
                         isSubmitting={submitting}
+                        participantCount={totalPersons()}
                         headerRenderer={(currentPage, _total, _title, onBack) => (
                           <div className="flex items-center gap-2 px-5 pt-4 pb-2">
                             <button type="button" onClick={() => currentPage === 0 ? setBookingStep(1) : onBack()} className="text-xs text-gray-500 hover:text-gray-800 font-medium flex items-center gap-1">
