@@ -36,7 +36,7 @@ export async function generateMetadata(
   const canonical = absoluteUrl(canonicalBase, pkg ? packagePath(pkg) : `/package/${packageId}`);
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: { canonical },
     openGraph: {

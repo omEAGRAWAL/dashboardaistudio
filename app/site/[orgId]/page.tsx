@@ -9,6 +9,7 @@ import { adminDb } from '@/lib/firebase-admin';
 import {
   absoluteUrl,
   blogPostPath,
+  buildAgencySeoDescription,
   estimateReadTime,
   getMinPackagePrice,
   getPublishedBlogPosts,
@@ -48,6 +49,7 @@ export default async function PublicSitePage({ params }: { params: Promise<{ org
   const settings = settingsSnap.exists ? (settingsSnap.data() as Record<string, any>) : null;
   const packages = pkgsSnap.docs.map(d => ({ id: d.id, ...d.data() } as PublicPackageSeo));
   const blogPosts = getPublishedBlogPosts(settings).slice(0, 3);
+  const seoDescription = buildAgencySeoDescription(settings, packages);
 
   const tc = settings?.themeColor || '#4f46e5';
   const agencyName = settings?.agencyName || 'Travel Agency';
@@ -75,6 +77,27 @@ export default async function PublicSitePage({ params }: { params: Promise<{ org
   const showTestimonials = settings?.testimonialsEnabled && testimonialItems.length > 0;
   const showFeatures = settings?.featuresEnabled !== false;
   const showStats = settings?.statsEnabled !== false;
+  const contactMethod = settings?.contactWhatsApp
+    ? 'WhatsApp'
+    : settings?.contactPhone
+      ? 'phone'
+      : settings?.contactEmail
+        ? 'email'
+        : 'the enquiry form';
+  const faqItems = [
+    {
+      question: `Can I customize ${agencyName} travel packages?`,
+      answer: `Yes. Share your dates, budget, hotel preference, and destination choices, and ${agencyName} can adjust the itinerary before booking.`,
+    },
+    {
+      question: 'What should I check before booking a package?',
+      answer: 'Review the itinerary, inclusions, exclusions, hotel category, payment schedule, and cancellation terms for the package you choose.',
+    },
+    {
+      question: 'How do I contact the agency for booking support?',
+      answer: `Use ${contactMethod} to ask questions, compare package options, or request a custom trip plan.`,
+    },
+  ];
 
   const navLinks = [
     { href: '#packages', label: 'Packages' },
@@ -89,7 +112,7 @@ export default async function PublicSitePage({ params }: { params: Promise<{ org
     '@type': 'TravelAgency',
     name: agencyName,
     url: absolutePublicUrl('/'),
-    description: truncateDescription(settings?.metaDescription || settings?.heroSubtitle, `${agencyName} curates travel packages and accepts trip enquiries online.`, 240),
+    description: seoDescription,
     image: settings?.agencyLogo || heroImage,
     telephone: settings?.contactPhone,
     email: settings?.contactEmail,
@@ -126,6 +149,19 @@ export default async function PublicSitePage({ params }: { params: Promise<{ org
     })),
   };
 
+  const faqSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqItems.map(item => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.answer,
+      },
+    })),
+  };
+
   return (
     <div className="min-h-screen bg-white antialiased" style={{ fontFamily: isSerif ? headingFont : 'inherit' }}>
 
@@ -156,6 +192,10 @@ export default async function PublicSitePage({ params }: { params: Promise<{ org
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(packageListSchema) }}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
 
       {/* Hero */}
       <section className="relative h-[50vh] flex items-center justify-center overflow-hidden">
@@ -181,10 +221,10 @@ export default async function PublicSitePage({ params }: { params: Promise<{ org
             className="text-2xl sm:text-4xl md:text-5xl font-black text-white mb-2 sm:mb-3 leading-tight tracking-tight drop-shadow-xl"
             style={{ fontFamily: headingFont }}
           >
-            {settings?.heroTitle || 'Discover Your Next Adventure'}
+            {settings?.heroTitle || `${agencyName} Travel Packages & Tours`}
           </h1>
           <p className="text-xs sm:text-sm md:text-base text-white/75 mb-4 sm:mb-5 font-normal max-w-xl mx-auto leading-relaxed">
-            {settings?.heroSubtitle || 'Explore the world with our curated travel packages.'}
+            {settings?.heroSubtitle || `Explore curated destinations, transparent prices, and custom trip planning with ${agencyName}.`}
           </p>
           <div className="flex items-center justify-center gap-2.5">
             <a
@@ -249,6 +289,7 @@ export default async function PublicSitePage({ params }: { params: Promise<{ org
               {packages.map(pkg => {
                 const coverImage = pkg.images?.[0] || pkg.imageUrl || 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=800&auto=format&fit=crop';
                 const minPrice = getMinPackagePrice(pkg);
+                const hasPackageDetails = Boolean(pkg.duration || pkg.itinerary?.length || pkg.inclusions?.length || pkg.exclusions?.length);
                 return (
                   <Link href={sitePath(packagePath(pkg))} key={pkg.id} className="group block">
                     <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 h-full flex flex-col">
@@ -285,7 +326,31 @@ export default async function PublicSitePage({ params }: { params: Promise<{ org
                         <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 leading-tight" style={{ fontFamily: headingFont }}>
                           {pkg.title}
                         </h3>
-                        <p className="text-gray-500 text-sm leading-relaxed line-clamp-2 flex-1 mb-5">{pkg.description}</p>
+                        <p className="text-gray-500 text-sm leading-relaxed line-clamp-2 flex-1 mb-4">{pkg.description}</p>
+                        {hasPackageDetails && (
+                          <div className="grid grid-cols-2 gap-2 text-[11px] text-gray-500 mb-5">
+                            {pkg.duration && (
+                              <span className="rounded-lg bg-gray-50 px-2.5 py-2 font-semibold">
+                                {pkg.duration}
+                              </span>
+                            )}
+                            {pkg.itinerary?.length ? (
+                              <span className="rounded-lg bg-gray-50 px-2.5 py-2 font-semibold">
+                                {pkg.itinerary.length} day itinerary
+                              </span>
+                            ) : null}
+                            {pkg.inclusions?.length ? (
+                              <span className="rounded-lg bg-gray-50 px-2.5 py-2 font-semibold">
+                                {pkg.inclusions.length} inclusions
+                              </span>
+                            ) : null}
+                            {pkg.exclusions?.length ? (
+                              <span className="rounded-lg bg-gray-50 px-2.5 py-2 font-semibold">
+                                Clear exclusions
+                              </span>
+                            ) : null}
+                          </div>
+                        )}
                         <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                           <div className="flex gap-4">
                             {[{ label: 'Dbl', price: pkg.priceDouble }, { label: 'Tri', price: pkg.priceTriple }, { label: 'Quad', price: pkg.priceQuad }].map((t: any) => (
@@ -487,6 +552,29 @@ export default async function PublicSitePage({ params }: { params: Promise<{ org
           </div>
         </section>
       )}
+
+      {/* FAQ */}
+      <section className="py-24 bg-white">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <p className="text-xs font-bold tracking-[0.25em] uppercase mb-3" style={{ color: tc }}>Travel FAQ</p>
+            <h2 className="text-3xl md:text-5xl font-black text-gray-900 mb-5" style={{ fontFamily: headingFont }}>
+              Questions Before You Book
+            </h2>
+            <p className="text-lg text-gray-500 max-w-2xl mx-auto">
+              Clear answers about customization, inclusions, and booking support.
+            </p>
+          </div>
+          <div className="space-y-4">
+            {faqItems.map(item => (
+              <div key={item.question} className="rounded-2xl border border-gray-100 bg-gray-50 p-6">
+                <h3 className="font-bold text-gray-900 mb-2">{item.question}</h3>
+                <p className="text-sm leading-relaxed text-gray-500">{item.answer}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Contact */}
       <section id="contact" className="py-24 bg-gray-50">

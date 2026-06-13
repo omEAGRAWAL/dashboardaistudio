@@ -45,7 +45,7 @@ export async function generateMetadata(
   );
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: { canonical: absolutePublicUrl('/blog') },
     openGraph: {

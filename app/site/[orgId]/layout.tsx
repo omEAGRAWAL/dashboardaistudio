@@ -2,11 +2,14 @@ import { Metadata } from 'next';
 import { headers } from 'next/headers';
 import {
   absoluteUrl,
+  buildAgencySeoDescription,
+  buildAgencySeoTitle,
   cleanPublicPath,
   getOrgCanonicalBase,
+  getPublicPackages,
   getWebsiteSettings,
+  getSeoDestinations,
   protocolFromHeader,
-  truncateDescription,
 } from '@/lib/public-seo';
 
 export async function generateMetadata(
@@ -18,23 +21,23 @@ export async function generateMetadata(
   const protocol = protocolFromHeader(h.get('x-forwarded-proto'));
   const publicPath = cleanPublicPath(h.get('x-public-pathname') || '/', orgId);
 
-  const [settings, canonicalBase] = await Promise.all([
+  const [settings, packages, canonicalBase] = await Promise.all([
     getWebsiteSettings(orgId),
+    getPublicPackages(orgId),
     getOrgCanonicalBase(orgId, host, protocol),
   ]);
 
   const agencyName = settings?.agencyName || 'Travel Agency';
-  const title = settings?.metaTitle || settings?.heroTitle || agencyName;
-  const description = truncateDescription(
-    settings?.metaDescription || settings?.heroSubtitle,
-    `Explore travel packages and destinations from ${agencyName}.`
-  );
+  const title = buildAgencySeoTitle(settings, packages);
+  const description = buildAgencySeoDescription(settings, packages);
   const image = settings?.heroImage || settings?.agencyLogo;
   const canonical = absoluteUrl(canonicalBase, publicPath);
+  const keywords = [agencyName, 'travel packages', 'tour packages', 'trip planning', ...getSeoDestinations(packages, 6)];
 
   return {
-    title,
+    title: { absolute: title },
     description,
+    keywords,
     alternates: { canonical },
     openGraph: {
       type: 'website',

@@ -44,7 +44,7 @@ export async function generateMetadata(
 
   if (!post) {
     return {
-      title: `Travel Guide | ${agencyName}`,
+      title: { absolute: `Travel Guide | ${agencyName}` },
       robots: { index: false, follow: true },
     };
   }
@@ -56,7 +56,7 @@ export async function generateMetadata(
   );
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: { canonical: absolutePublicUrl(blogPostPath(post)) },
     openGraph: {

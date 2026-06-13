@@ -73,6 +73,12 @@ const nextConfig: NextConfig = {
         destination: 'https://travelycrm.reviu.store/:path*',
         permanent: true,
       },
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'www\\.(?<domain>.+)' }],
+        destination: 'https://:domain/:path*',
+        permanent: true,
+      },
     ];
   },
   transpilePackages: ['motion'],

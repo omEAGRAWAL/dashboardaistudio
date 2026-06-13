@@ -224,6 +224,77 @@ export function stripHtml(value: string | undefined) {
     .trim();
 }
 
+function cleanSeoText(value: string | undefined) {
+  return stripHtml(value).replace(/\s+/g, ' ').trim();
+}
+
+function truncateTitle(value: string, max = 60) {
+  const source = cleanSeoText(value);
+  if (source.length <= max) return source;
+  return source.slice(0, max - 1).replace(/\s+\S*$/, '').trim();
+}
+
+function hasSearchIntent(value: string) {
+  return /\b(travel|tour|trip|package|holiday|vacation|destination|agency)\b/i.test(value);
+}
+
+export function getSeoDestinations(packages: Pick<PublicPackageSeo, 'destination'>[], limit = 4) {
+  const seen = new Set<string>();
+  const destinations: string[] = [];
+
+  for (const pkg of packages) {
+    const destination = cleanSeoText(pkg.destination);
+    if (!destination) continue;
+    const key = destination.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    destinations.push(destination);
+    if (destinations.length >= limit) break;
+  }
+
+  return destinations;
+}
+
+export function buildAgencySeoTitle(settings: WebsiteSettingsSeo | null | undefined, packages: Pick<PublicPackageSeo, 'destination'>[] = []) {
+  const agencyName = cleanSeoText(settings?.agencyName) || 'Travel Agency';
+  const customTitle = cleanSeoText(settings?.metaTitle);
+
+  if (customTitle.length >= 24 && hasSearchIntent(customTitle)) {
+    return truncateTitle(customTitle);
+  }
+
+  const destinations = getSeoDestinations(packages, 2);
+  const titleWithDestinations = `${agencyName} Travel Packages & Tours${destinations.length ? ` for ${destinations.join(' & ')}` : ''}`;
+  return truncateTitle(titleWithDestinations.length <= 60 ? titleWithDestinations : `${agencyName} Travel Packages & Tours`);
+}
+
+export function buildAgencySeoDescription(
+  settings: WebsiteSettingsSeo | null | undefined,
+  packages: Pick<PublicPackageSeo, 'destination'>[] = [],
+) {
+  const agencyName = cleanSeoText(settings?.agencyName) || 'Travel Agency';
+  const customDescription = cleanSeoText(settings?.metaDescription || settings?.heroSubtitle);
+
+  if (customDescription.length >= 120) {
+    return truncateDescription(customDescription, customDescription, 220);
+  }
+
+  const destinations = getSeoDestinations(packages, 4);
+  const packageLabel = packages.length > 0
+    ? `${packages.length} curated travel package${packages.length === 1 ? '' : 's'}`
+    : 'curated travel packages';
+  const destinationText = destinations.length ? ` for ${destinations.join(', ')}` : '';
+  const contactText = settings?.contactWhatsApp
+    ? 'Get WhatsApp booking support'
+    : 'Contact the team';
+
+  return truncateDescription(
+    `${agencyName} offers ${packageLabel}${destinationText} with itinerary planning, hotel options, pricing details, and custom trip support. ${contactText} to plan your next holiday.`,
+    `Explore travel packages and destinations from ${agencyName}.`,
+    220,
+  );
+}
+
 export function sanitizePublicHtml(value: string | undefined) {
   return (value || '')
     .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '')
