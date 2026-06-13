@@ -17,6 +17,7 @@ import {
   ShieldCheck,
   UsersRound,
 } from 'lucide-react';
+import ScrollReveal from './ScrollReveal';
 
 const WHATSAPP_NUMBER = '917609098787';
 const WHATSAPP_URL =
@@ -195,10 +196,10 @@ function SectionIntro({
   description: string;
 }) {
   return (
-    <div className="mx-auto mb-10 max-w-3xl text-center">
-      <p className="mb-3 text-sm font-semibold text-emerald-700">{eyebrow}</p>
-      <h2 className="text-3xl font-bold text-gray-950">{title}</h2>
-      <p className="mt-4 text-base leading-7 text-gray-600">{description}</p>
+    <div className="mx-auto mb-8 max-w-3xl text-center sm:mb-10">
+      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-emerald-700 sm:mb-3 sm:text-sm">{eyebrow}</p>
+      <h2 className="text-2xl font-bold text-gray-950 sm:text-3xl">{title}</h2>
+      <p className="mt-3 text-sm leading-6 text-gray-600 sm:mt-4 sm:text-base sm:leading-7">{description}</p>
     </div>
   );
 }
@@ -278,22 +279,69 @@ function DashboardPreview() {
   );
 }
 
+function HeroSnapshot() {
+  return (
+    <div className="hero-float rounded-xl border border-gray-200 bg-white/95 p-3 shadow-2xl shadow-gray-950/10 backdrop-blur sm:p-4">
+      <div className="mb-3 flex items-center justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Live pipeline</p>
+          <p className="text-sm font-bold text-gray-950 sm:text-base">4 hot enquiries today</p>
+        </div>
+        <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700">
+          +31%
+        </span>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2">
+        {[
+          ['New', '18'],
+          ['Due', '7'],
+          ['Booked', '5'],
+        ].map(([label, value]) => (
+          <div key={label} className="rounded-lg bg-gray-50 p-3 text-center">
+            <p className="text-lg font-bold text-gray-950">{value}</p>
+            <p className="text-[11px] font-medium text-gray-500">{label}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-3 space-y-2">
+        {[
+          ['Dubai family trip', 'Google search', 'Qualified'],
+          ['Kashmir group tour', 'WhatsApp', 'Follow-up'],
+          ['Bali honeymoon', 'Meta Ads', 'Proposal'],
+        ].map(([lead, source, status], index) => (
+          <div key={lead} className={`${index === 2 ? 'hidden sm:flex' : 'flex'} items-center justify-between gap-3 rounded-lg border border-gray-100 bg-white px-3 py-2`}>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-gray-950">{lead}</p>
+              <p className="text-xs text-gray-500">{source}</p>
+            </div>
+            <span className="shrink-0 rounded-full bg-amber-50 px-2 py-1 text-[11px] font-bold text-amber-700">
+              {status}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function MarketingPageContent() {
   return (
     <main className="min-h-screen bg-white text-gray-950">
-      <section className="relative overflow-hidden border-b border-gray-200">
+      <section className="relative overflow-hidden border-b border-gray-200 bg-white">
         <Image
           src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=2200&q=80"
           alt="A bright travel agency team working together on a laptop"
           fill
           priority
           sizes="100vw"
-          className="object-cover"
+          className="hidden object-cover sm:block"
         />
-        <div className="absolute inset-0 bg-white/90" />
+        <div className="absolute inset-0 hidden bg-white/90 sm:block" />
         <div className="relative">
           <header className="border-b border-gray-200/80 bg-white/80 backdrop-blur">
-            <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+            <nav className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:h-16 sm:px-6 lg:px-8">
               <Logo />
               <div className="hidden items-center gap-7 text-sm font-semibold text-gray-700 md:flex">
                 <a href="#workflow" className="hover:text-gray-950">Workflow</a>
@@ -313,73 +361,81 @@ export default function MarketingPageContent() {
                 </a>
                 <Link
                   href="/login"
-                  className="inline-flex h-10 items-center gap-2 rounded-md bg-gray-950 px-4 text-sm font-semibold text-white shadow-sm hover:bg-gray-800"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-md bg-gray-950 px-3 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 sm:h-10 sm:gap-2 sm:px-4"
                 >
-                  Start trial
+                  <span className="sm:hidden">Try free</span>
+                  <span className="hidden sm:inline">Start trial</span>
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
             </nav>
           </header>
 
-          <div className="mx-auto max-w-7xl px-4 pb-10 pt-12 sm:px-6 lg:px-8">
-            <div className="max-w-3xl">
-              <p className="mb-5 inline-flex rounded-full border border-emerald-200 bg-white/80 px-4 py-2 text-sm font-semibold text-emerald-800">
-                Built for Indian travel agencies, tour operators, DMCs, and holiday sellers
+          <div className="mx-auto grid max-w-7xl gap-7 px-4 pb-8 pt-6 sm:px-6 sm:pb-12 sm:pt-12 lg:grid-cols-[0.9fr_1fr] lg:items-center lg:px-8 lg:py-16">
+            <div className="max-w-2xl">
+              <p className="hero-enter mb-3 inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-800 sm:mb-5 sm:bg-white/80 sm:px-4 sm:py-2 sm:text-sm">
+                Travel CRM for Indian agencies
               </p>
-              <h1 className="max-w-3xl text-4xl font-bold leading-tight text-gray-950">
+              <h1 className="hero-enter hero-enter-delay-1 max-w-3xl text-[2.15rem] font-bold leading-[1.05] text-gray-950 sm:text-5xl sm:leading-tight lg:text-6xl">
                 Travel CRM software for Indian travel agencies
               </h1>
-              <p className="mt-6 max-w-2xl text-lg leading-8 text-gray-700">
+              <p className="hero-enter hero-enter-delay-2 mt-4 max-w-xl text-base leading-7 text-gray-700 sm:hidden">
+                Capture Google, Meta Ads, WhatsApp, and website leads. Follow up faster and close more bookings.
+              </p>
+              <p className="hero-enter hero-enter-delay-2 mt-6 hidden max-w-2xl text-lg leading-8 text-gray-700 sm:block">
                 Yatrik helps you capture travel leads from Google, Meta Ads, WhatsApp, and your
                 website, then turn them into booked tours with follow-ups, packages, bookings,
                 team assignment, and SEO-ready agency pages.
               </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <div className="hero-enter hero-enter-delay-3 mt-5 grid grid-cols-[1fr_auto] gap-3 sm:mt-8 sm:flex sm:flex-row">
                 <Link
                   href="/login"
-                  className="inline-flex h-12 items-center justify-center gap-2 rounded-md bg-gray-950 px-6 text-sm font-bold text-white shadow-lg shadow-gray-950/15 hover:bg-gray-800"
+                  className="inline-flex h-12 items-center justify-center gap-2 rounded-md bg-gray-950 px-5 text-sm font-bold text-white shadow-lg shadow-gray-950/15 hover:bg-gray-800 sm:px-6"
                 >
-                  Start free trial
+                  Start trial
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <a
                   href={WHATSAPP_URL}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex h-12 items-center justify-center gap-2 rounded-md border border-gray-300 bg-white px-6 text-sm font-bold text-gray-900 shadow-sm hover:border-gray-400"
+                  className="inline-flex h-12 w-12 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm hover:border-gray-400 sm:w-auto sm:gap-2 sm:px-6"
+                  aria-label="Book WhatsApp demo"
                 >
                   <MessageCircle className="h-4 w-4 text-emerald-600" />
-                  Book WhatsApp demo
+                  <span className="hidden text-sm font-bold sm:inline">Book WhatsApp demo</span>
                 </a>
               </div>
-              <div className="mt-9 grid max-w-2xl grid-cols-3 gap-3">
+              <div className="hero-enter hero-enter-delay-3 mt-5 flex max-w-2xl gap-2 overflow-x-auto pb-1 sm:mt-9 sm:grid sm:grid-cols-3 sm:gap-3 sm:overflow-visible sm:pb-0">
                 {[
-                  ['15-day', 'free trial'],
-                  ['INR 999', 'starting plan'],
-                  ['SEO', 'website pages'],
+                  ['15-day trial', 'No card'],
+                  ['INR 999', 'Starter'],
+                  ['SEO pages', 'Included'],
                 ].map(([stat, label]) => (
-                  <div key={stat} className="rounded-lg border border-gray-200 bg-white/80 p-3">
-                    <p className="text-lg font-bold text-gray-950">{stat}</p>
+                  <div key={stat} className="min-w-28 rounded-lg border border-gray-200 bg-white/85 p-3 shadow-sm sm:min-w-0">
+                    <p className="text-sm font-bold text-gray-950 sm:text-lg">{stat}</p>
                     <p className="text-xs font-medium text-gray-600">{label}</p>
                   </div>
                 ))}
               </div>
             </div>
+            <div className="hero-enter hero-enter-delay-3">
+              <HeroSnapshot />
+            </div>
           </div>
         </div>
       </section>
 
-      <section id="workflow" className="border-b border-gray-200 bg-gray-50 py-14">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <section id="workflow" className="border-b border-gray-200 bg-gray-50 py-10 sm:py-14">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" data-reveal="left">
           <SectionIntro
             eyebrow="Lead to booking workflow"
             title="A CRM built around how travel agencies actually sell"
             description="Generic CRMs stop at contacts. Yatrik keeps the full travel sales journey connected: enquiry source, traveller needs, package options, WhatsApp history, payments, and final booking."
           />
-          <div className="grid gap-4 md:grid-cols-4">
-            {workflow.map((item) => (
-              <article key={item.title} className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+          <div className="grid auto-cols-[82%] grid-flow-col gap-4 overflow-x-auto pb-2 md:grid-flow-row md:grid-cols-4 md:overflow-visible md:pb-0">
+            {workflow.map((item, index) => (
+              <article key={item.title} className={`snap-start rounded-lg border border-gray-200 bg-white p-5 shadow-sm reveal-delay-${Math.min(index, 3)}`} data-reveal="up">
                 <item.icon className="mb-4 h-6 w-6 text-emerald-700" />
                 <h3 className="text-base font-bold text-gray-950">{item.title}</h3>
                 <p className="mt-3 text-sm leading-6 text-gray-600">{item.description}</p>
@@ -389,11 +445,11 @@ export default function MarketingPageContent() {
         </div>
       </section>
 
-      <section className="py-16">
+      <section className="py-10 sm:py-16">
         <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8">
-          <div>
+          <div data-reveal="left">
             <p className="mb-3 text-sm font-semibold text-emerald-700">Product preview</p>
-            <h2 className="text-3xl font-bold text-gray-950">One dashboard for leads, packages, bookings, and revenue</h2>
+            <h2 className="text-2xl font-bold text-gray-950 sm:text-3xl">One dashboard for leads, packages, bookings, and revenue</h2>
             <p className="mt-5 text-base leading-7 text-gray-600">
               See which enquiries need attention, which package was shared, which agent owns the
               lead, and how much revenue is sitting in your travel pipeline.
@@ -412,20 +468,22 @@ export default function MarketingPageContent() {
               ))}
             </div>
           </div>
-          <DashboardPreview />
+          <div data-reveal="right">
+            <DashboardPreview />
+          </div>
         </div>
       </section>
 
-      <section id="seo" className="border-y border-gray-200 bg-[#fbfaf7] py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <section id="seo" className="border-y border-gray-200 bg-[#fbfaf7] py-10 sm:py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" data-reveal="right">
           <SectionIntro
             eyebrow="Google organic lead strategy"
             title="Turn travel agency searches into CRM demos"
             description="The landing page now targets commercial travel-agency software searches while the product supports agency websites that can rank for packages, destinations, and local travel services."
           />
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {keywordClusters.map((cluster) => (
-              <article key={cluster.label} className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+          <div className="grid auto-cols-[86%] grid-flow-col gap-4 overflow-x-auto pb-2 md:grid-flow-row md:grid-cols-2 md:overflow-visible md:pb-0 lg:grid-cols-4">
+            {keywordClusters.map((cluster, index) => (
+              <article key={cluster.label} className={`snap-start rounded-lg border border-gray-200 bg-white p-5 shadow-sm reveal-delay-${Math.min(index, 3)}`} data-reveal="up">
                 <Search className="mb-4 h-5 w-5 text-amber-700" />
                 <h3 className="text-base font-bold text-gray-950">{cluster.label}</h3>
                 <ul className="mt-4 space-y-2">
@@ -438,7 +496,7 @@ export default function MarketingPageContent() {
               </article>
             ))}
           </div>
-          <div className="mt-10 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="mt-8 rounded-lg border border-gray-200 bg-white p-5 shadow-sm sm:mt-10 sm:p-6" data-reveal="left">
             <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
               <div>
                 <MapPinned className="mb-4 h-6 w-6 text-rose-700" />
@@ -464,16 +522,16 @@ export default function MarketingPageContent() {
         </div>
       </section>
 
-      <section id="features" className="py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <section id="features" className="py-10 sm:py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" data-reveal="left">
           <SectionIntro
             eyebrow="Complete travel CRM toolkit"
             title="The pages, automations, and reports your agency needs"
             description="Yatrik combines the buying keywords travellers and agency owners search with the operational features your team needs every day."
           />
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {features.map((feature) => (
-              <article key={feature.title} className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {features.map((feature, index) => (
+              <article key={feature.title} className={`rounded-lg border border-gray-200 bg-white p-5 shadow-sm sm:p-6 reveal-delay-${index % 3}`} data-reveal={index % 2 === 0 ? 'left' : 'right'}>
                 <feature.icon className="mb-5 h-6 w-6 text-gray-950" />
                 <h3 className="text-lg font-bold text-gray-950">{feature.title}</h3>
                 <p className="mt-3 text-sm leading-6 text-gray-600">{feature.description}</p>
@@ -492,8 +550,8 @@ export default function MarketingPageContent() {
         </div>
       </section>
 
-      <section className="border-y border-gray-200 bg-gray-50 py-16">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <section className="border-y border-gray-200 bg-gray-50 py-10 sm:py-16">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8" data-reveal="right">
           <SectionIntro
             eyebrow="Why switch"
             title="Built for travel work, not generic contact storage"
@@ -540,20 +598,21 @@ export default function MarketingPageContent() {
         </div>
       </section>
 
-      <section id="pricing" className="py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <section id="pricing" className="py-10 sm:py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" data-reveal="left">
           <SectionIntro
             eyebrow="Pricing"
             title="Start lean, then scale your agency workflow"
             description="All plans are built for travel agencies and include a free trial. Upgrade when your team, lead volume, or website needs grow."
           />
           <div className="grid gap-4 lg:grid-cols-3">
-            {plans.map((plan) => (
+            {plans.map((plan, index) => (
               <article
                 key={plan.name}
                 className={`rounded-lg border p-6 shadow-sm ${
                   plan.highlighted ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200 bg-white'
-                }`}
+                } reveal-delay-${index}`}
+                data-reveal={index === 1 ? 'up' : index === 0 ? 'left' : 'right'}
               >
                 {plan.highlighted && (
                   <p className="mb-4 inline-flex rounded-full bg-emerald-700 px-3 py-1 text-xs font-bold text-white">
@@ -592,16 +651,16 @@ export default function MarketingPageContent() {
         </div>
       </section>
 
-      <section id="faq" className="border-y border-gray-200 bg-gray-50 py-16">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+      <section id="faq" className="border-y border-gray-200 bg-gray-50 py-10 sm:py-16">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8" data-reveal="right">
           <SectionIntro
             eyebrow="FAQ"
             title="Questions travel agency owners ask before switching"
             description="Short answers for agency owners comparing CRM, spreadsheets, WhatsApp workflows, and organic lead generation."
           />
           <div className="space-y-3">
-            {faqs.map((faq) => (
-              <details key={faq.question} className="group rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+            {faqs.map((faq, index) => (
+              <details key={faq.question} className={`group rounded-lg border border-gray-200 bg-white p-5 shadow-sm reveal-delay-${index % 3}`} data-reveal="up">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-left text-base font-bold text-gray-950">
                   {faq.question}
                   <ArrowRight className="h-4 w-4 text-gray-400 transition group-open:rotate-90" />
@@ -613,10 +672,10 @@ export default function MarketingPageContent() {
         </div>
       </section>
 
-      <section className="bg-white py-16">
-        <div className="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
+      <section className="bg-white py-10 sm:py-16">
+        <div className="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8" data-reveal="left">
           <Plane className="mx-auto mb-5 h-9 w-9 text-emerald-700" />
-          <h2 className="text-3xl font-bold text-gray-950">Ready to stop losing travel enquiries?</h2>
+          <h2 className="text-2xl font-bold text-gray-950 sm:text-3xl">Ready to stop losing travel enquiries?</h2>
           <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-gray-600">
             Start with the CRM, publish your SEO-ready agency pages, and bring every Google,
             Meta, WhatsApp, and website enquiry into one pipeline.
@@ -694,6 +753,7 @@ export default function MarketingPageContent() {
         <MessageCircle className="h-5 w-5" />
         <span className="hidden sm:inline">WhatsApp</span>
       </a>
+      <ScrollReveal />
     </main>
   );
 }
