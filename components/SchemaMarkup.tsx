@@ -6,28 +6,34 @@ const softwareApp = {
   name: 'Yatrik',
   url: BASE_URL,
   description:
-    'Yatrik is travel CRM software for Indian travel agencies. Manage leads, automate WhatsApp follow-ups, handle bookings, and build your agency website — all in one place.',
+    'Yatrik is travel CRM software for Indian travel agencies. Manage leads, automate WhatsApp follow-ups, handle bookings, and build your agency website in one place.',
   applicationCategory: 'BusinessApplication',
   operatingSystem: 'Web',
   inLanguage: 'en-IN',
+  audience: {
+    '@type': 'BusinessAudience',
+    audienceType: 'Travel agencies, tour operators, DMCs, and holiday sellers in India',
+  },
   offers: {
     '@type': 'AggregateOffer',
     priceCurrency: 'INR',
     lowPrice: '999',
     highPrice: '4999',
+    offerCount: '3',
     priceSpecification: {
       '@type': 'UnitPriceSpecification',
       billingDuration: 'P1M',
       unitText: 'month',
     },
   },
-  aggregateRating: {
-    '@type': 'AggregateRating',
-    ratingValue: '4.8',
-    reviewCount: '127',
-    bestRating: '5',
-    worstRating: '1',
-  },
+  featureList: [
+    'Travel lead management software',
+    'Meta Ads lead capture',
+    'WhatsApp follow-up automation',
+    'Booking management',
+    'Package management',
+    'Travel agency website builder',
+  ],
 };
 
 const faqPage = {
@@ -39,7 +45,8 @@ const faqPage = {
       name: 'What is Yatrik and who is it for?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yatrik is a travel CRM software built specifically for Indian travel agencies and tour operators. It helps you capture leads from Meta Ads, manage bookings, automate WhatsApp follow-ups, and publish a branded agency website — all from one dashboard.',
+        text:
+          'Yatrik is travel CRM software built for Indian travel agencies and tour operators. It helps capture leads from Meta Ads, manage bookings, automate WhatsApp follow-ups, and publish a branded agency website from one dashboard.',
       },
     },
     {
@@ -47,7 +54,8 @@ const faqPage = {
       name: 'How much does Yatrik cost?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yatrik plans start at ₹999/month (incl. GST) for the Starter plan and go up to ₹4,999/month for the Pro plan with unlimited team members and advanced automation. All plans include a 15-day free trial.',
+        text:
+          'Yatrik plans start at INR 999/month including GST. Growth and Pro plans add higher lead volume, booking workflows, campaign pages, custom domains, and onboarding support.',
       },
     },
     {
@@ -55,7 +63,8 @@ const faqPage = {
       name: 'Does Yatrik integrate with WhatsApp?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes. Yatrik includes a built-in WhatsApp chatbot and inbox powered by Twilio. You can set up automated Q&A flows to qualify leads, and switch to manual chat anytime from the WhatsApp inbox.',
+        text:
+          'Yes. Yatrik supports WhatsApp-first travel sales with lead qualification, follow-up workflows, and customer conversation context connected to CRM records.',
       },
     },
     {
@@ -63,39 +72,17 @@ const faqPage = {
       name: 'Can Yatrik capture leads from Facebook and Instagram ads?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes. Yatrik connects to Meta Lead Ads via a webhook so every lead from your Facebook or Instagram campaigns lands directly in your CRM in real time — no manual export required.',
+        text:
+          'Yes. Yatrik connects to Meta Lead Ads so Facebook and Instagram enquiries can land directly in the CRM without manual exports.',
       },
     },
     {
       '@type': 'Question',
-      name: 'How is Yatrik different from LeadSquared?',
+      name: 'How is Yatrik different from generic CRMs?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'LeadSquared is a general-purpose CRM that requires significant setup for travel use cases and is priced for enterprise. Yatrik is purpose-built for travel agencies — it includes package management, booking forms, itinerary builder, and WhatsApp chatbot out of the box, at a fraction of the cost.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: 'Why should I stop using spreadsheets to manage travel leads?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Spreadsheets don\'t remind you to follow up, can\'t auto-capture leads, break with multiple users, and give zero visibility into your sales pipeline. Yatrik centralises leads, tracks status, assigns agents, and shows you exactly where every deal stands.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: 'Is Yatrik available in Hindi or regional languages?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'The Yatrik dashboard is in English, but your customer-facing agency website and WhatsApp chatbot can be configured to communicate in any language including Hindi, Gujarati, and Tamil.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: 'Can I build my travel agency website with Yatrik?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Yes. Every Yatrik plan includes a website builder with customizable sections — hero banner, packages, gallery, testimonials, contact form, Google Maps, and WhatsApp button. No coding required.',
+        text:
+          'Yatrik includes travel-specific workflows such as packages, itineraries, bookings, WhatsApp follow-ups, and agency website pages. Generic CRMs usually need custom fields and third-party tools for these workflows.',
       },
     },
   ],

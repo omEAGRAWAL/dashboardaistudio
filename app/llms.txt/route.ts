@@ -1,7 +1,10 @@
 import { headers } from 'next/headers';
 import {
   absoluteUrl,
+  blogPostPath,
+  getPublishedBlogPosts,
   PLATFORM_URL,
+  packagePath,
   resolveAgencyByHost,
   getPublicPackages,
   getWebsiteSettings,
@@ -52,7 +55,12 @@ Yatrik helps agencies manage leads, packages, bookings, campaigns, WhatsApp foll
   const summary = truncateDescription(settings?.metaDescription || settings?.heroSubtitle, `${agencyName} publishes travel packages and accepts enquiries online.`, 260);
   const packageLines = packages
     .slice(0, 50)
-    .map(pkg => `- ${pkg.title || 'Travel Package'}: ${absoluteUrl(base, `/package/${pkg.id}`)}${pkg.destination ? ` (${pkg.destination})` : ''}`)
+    .map(pkg => `- ${pkg.title || 'Travel Package'}: ${absoluteUrl(base, packagePath(pkg))}${pkg.destination ? ` (${pkg.destination})` : ''}`)
+    .join('\n');
+  const blogPosts = getPublishedBlogPosts(settings);
+  const blogLines = blogPosts
+    .slice(0, 20)
+    .map((post, index) => `- ${post.title || 'Travel Guide'}: ${absoluteUrl(base, blogPostPath(post, index))}${post.excerpt ? ` - ${truncateDescription(post.excerpt, '', 120)}` : ''}`)
     .join('\n');
 
   return textResponse(`# ${agencyName}
@@ -62,6 +70,7 @@ ${summary}
 ## Key URLs
 - Home: ${absoluteUrl(base, '/')}
 - Packages: ${absoluteUrl(base, '/')}#packages
+- Travel guides: ${absoluteUrl(base, '/blog')}
 - Contact: ${absoluteUrl(base, '/')}#contact
 - Sitemap: ${absoluteUrl(base, '/sitemap.xml')}
 
@@ -69,5 +78,8 @@ ${summary}
 ${settings?.contactPhone ? `- Phone: ${settings.contactPhone}\n` : ''}${settings?.contactEmail ? `- Email: ${settings.contactEmail}\n` : ''}${settings?.contactWhatsApp ? `- WhatsApp: ${settings.contactWhatsApp}\n` : ''}
 ## Packages
 ${packageLines || '- No public packages are currently listed.'}
+
+## Travel Guides
+${blogLines || '- No public travel guides are currently published.'}
 `);
 }

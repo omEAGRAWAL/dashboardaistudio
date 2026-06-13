@@ -1,42 +1,51 @@
 import type { Metadata } from 'next';
-import RootGate from '@/components/RootGate';
+import AuthRedirect from '@/components/AuthRedirect';
+import MarketingPageContent from '@/components/MarketingPageContent';
+
+const BASE_URL = 'https://travelycrm.reviu.store';
+const TITLE = 'Travel CRM Software India for Agencies | Yatrik';
+const DESCRIPTION =
+  'Yatrik is travel CRM software for Indian travel agencies. Capture Google, Meta Ads, WhatsApp, and website leads, then manage packages, bookings, and follow-ups.';
 
 export const metadata: Metadata = {
-  title: 'Yatrik — #1 CRM for Travel Agencies in India | Plans from ₹899',
-  description:
-    'Yatrik is the all-in-one CRM for Indian travel agencies. Manage leads, packages, bookings, campaigns & your website. Plans from ₹899/month incl. GST. 15-day free trial. WhatsApp: 7609098787.',
+  title: TITLE,
+  description: DESCRIPTION,
   keywords: [
+    'travel CRM software India',
     'travel agency CRM India',
     'CRM for travel agents India',
     'travel agency management software India',
-    'tour operator software India',
-    'travel leads management software',
+    'travel lead management software',
+    'tour operator CRM India',
+    'travel booking management software',
+    'WhatsApp bot for travel agency',
     'travel agency website builder India',
-    'travel booking management software India',
-    'best CRM for travel agencies India',
-    'travel agency software',
-    'tour operator management software India',
-    'DMC software India',
-    'travel agency software Delhi',
-    'travel agency software Mumbai',
-    'travel agency software Bangalore',
-    'travel CRM India',
-  ].join(', '),
+    'Meta Ads lead capture CRM',
+  ],
+  alternates: {
+    canonical: BASE_URL,
+  },
   openGraph: {
-    title: 'Yatrik — #1 CRM for Travel Agencies in India',
-    description:
-      'Stop losing leads. Start closing more bookings. Yatrik is the all-in-one CRM for Indian travel agencies & DMCs. Try free for 15 days.',
+    title: TITLE,
+    description: DESCRIPTION,
+    url: BASE_URL,
+    siteName: 'Yatrik',
     type: 'website',
     locale: 'en_IN',
+    images: [
+      {
+        url: '/opengraph-image',
+        width: 1200,
+        height: 630,
+        alt: 'Yatrik travel CRM software for Indian travel agencies',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Yatrik — #1 CRM for Travel Agencies in India',
-    description:
-      'All-in-one travel agency CRM. Leads, packages, bookings & website builder. ₹1,000/month. 15-day free trial.',
-  },
-  alternates: {
-    canonical: 'https://travelycrm.reviu.store',
+    title: TITLE,
+    description: DESCRIPTION,
+    images: ['/opengraph-image'],
   },
 };
 
@@ -44,88 +53,108 @@ const jsonLd = {
   '@context': 'https://schema.org',
   '@graph': [
     {
+      '@type': 'Organization',
+      '@id': `${BASE_URL}/#organization`,
+      name: 'Yatrik',
+      url: BASE_URL,
+      description: 'Travel CRM software for Indian travel agencies and tour operators.',
+      areaServed: {
+        '@type': 'Country',
+        name: 'India',
+      },
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${BASE_URL}/#website`,
+      name: 'Yatrik',
+      url: BASE_URL,
+      inLanguage: 'en-IN',
+      publisher: {
+        '@id': `${BASE_URL}/#organization`,
+      },
+    },
+    {
       '@type': 'SoftwareApplication',
+      '@id': `${BASE_URL}/#software`,
       name: 'Yatrik',
       applicationCategory: 'BusinessApplication',
       operatingSystem: 'Web',
-      url: 'https://travelycrm.reviu.store',
-      description:
-        'All-in-one CRM software for travel agencies and tour operators in India. Manage leads, packages, bookings, team, and build your travel website — all in one place.',
+      url: BASE_URL,
+      inLanguage: 'en-IN',
+      description: DESCRIPTION,
+      audience: {
+        '@type': 'BusinessAudience',
+        audienceType: 'Travel agencies, tour operators, DMCs, and holiday sellers in India',
+      },
+      featureList: [
+        'Travel lead management software',
+        'Meta Ads lead capture',
+        'WhatsApp follow-up automation',
+        'Package and itinerary management',
+        'Booking management',
+        'Travel agency website builder',
+        'SEO-ready landing pages',
+        'Team assignment and analytics',
+      ],
       offers: [
         {
           '@type': 'Offer',
-          name: 'Basic CRM',
-          price: '899',
+          name: 'Starter',
+          price: '999',
           priceCurrency: 'INR',
-          priceValidUntil: '2027-12-31',
           availability: 'https://schema.org/InStock',
-          description: 'Lead management, packages, analytics. 15-day free trial. GST included.',
+          url: `${BASE_URL}/pricing`,
         },
         {
           '@type': 'Offer',
           name: 'Growth',
-          price: '1499',
+          price: '2499',
           priceCurrency: 'INR',
-          priceValidUntil: '2027-12-31',
           availability: 'https://schema.org/InStock',
-          description: 'Basic CRM + bookings + campaign page + WhatsApp. GST included.',
+          url: `${BASE_URL}/pricing`,
         },
         {
           '@type': 'Offer',
           name: 'Pro',
-          price: '3000',
+          price: '4999',
           priceCurrency: 'INR',
-          priceValidUntil: '2027-12-31',
           availability: 'https://schema.org/InStock',
-          description: 'Full CRM + custom landing page + website builder. GST included. Free setup.',
+          url: `${BASE_URL}/pricing`,
         },
-      ],
-      featureList: [
-        'Lead Management',
-        'Package Management',
-        'Booking Management',
-        'Website Builder',
-        'Team Management',
-        'Meta Ads Integration',
-        'WhatsApp Integration',
-        'Analytics & Reports',
       ],
     },
     {
       '@type': 'FAQPage',
+      '@id': `${BASE_URL}/#faq`,
       mainEntity: [
         {
           '@type': 'Question',
-          name: 'Is there a free trial for Yatrik?',
+          name: 'What is the best CRM for travel agencies in India?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Yes! Yatrik offers a full 15-day free trial with all features included. No credit card required.',
+            text:
+              'A strong travel agency CRM should manage leads, packages, WhatsApp conversations, bookings, team assignment, and website enquiries together. Yatrik is built around those travel-specific workflows.',
           },
         },
         {
           '@type': 'Question',
-          name: 'How much does Yatrik cost?',
+          name: 'Can Yatrik help my agency get organic leads from Google?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Yatrik has three plans, all incl. GST: Basic CRM at ₹899/month (leads, packages, analytics), Growth at ₹1,499/month (adds bookings & campaign page), and Pro at ₹3,000/month (adds custom landing page & website builder). All plans include 15-day free trial. Contact: 7609098787.',
+            text:
+              'Yes. Yatrik supports SEO-ready agency websites, package pages, destination pages, FAQs, local landing pages, and CRM-focused pages targeting searches like travel CRM software India and CRM for travel agents India.',
           },
         },
         {
           '@type': 'Question',
-          name: 'Is Yatrik better than Travefy or Sembark for India?',
+          name: 'Does Yatrik work with WhatsApp?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Yatrik is purpose-built for India. Unlike Travefy (US-based, ~₹4,000/month, no India support), Yatrik offers Indian payment gateways, local support, GST invoices, and a built-in website builder at just ₹1,000/month.',
+            text:
+              'Yes. Yatrik is designed for WhatsApp-first travel sales, with WhatsApp lead qualification and follow-up context connected to CRM records.',
           },
         },
       ],
-    },
-    {
-      '@type': 'Organization',
-      name: 'Yatrik',
-      url: 'https://travelycrm.reviu.store',
-      description: 'Travel Agency CRM Software built for India',
-      areaServed: 'IN',
     },
   ],
 };
@@ -137,7 +166,8 @@ export default function RootPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <RootGate />
+      <AuthRedirect />
+      <MarketingPageContent />
     </>
   );
 }

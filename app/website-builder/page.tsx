@@ -14,13 +14,30 @@ const MobilePreview = dynamic(() => import('@/components/MobilePreview').then(m 
 const ImageUploadGrid = dynamic(() => import('@/components/ImageUploadGrid').then(m => ({ default: m.ImageUploadGrid })), { ssr: false });
 import { doc, getDoc, setDoc, serverTimestamp, collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { slugify } from '@/lib/slug';
 import {
   Globe, Save, ExternalLink, ChevronDown, ChevronRight,
   Palette, Type, Image as ImageIcon, Info, Phone,
   FileText, Search, Loader2, Smartphone, Monitor,
   Megaphone, BarChart2, Star, Zap, Package, Plus, X, Quote,
-  BookOpen, Bold, Italic, Underline, List, Heading1, Heading2, AlignLeft
+  BookOpen, Bold, Italic, Underline, List, Heading1, Heading2, AlignLeft,
+  CalendarDays, Link2
 } from 'lucide-react';
+
+interface BlogPostSettings {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  coverImage: string;
+  authorName: string;
+  category: string;
+  status: 'draft' | 'published';
+  publishedAt: string;
+  metaTitle: string;
+  metaDescription: string;
+}
 
 interface WebsiteSettings {
   themeColor: string; secondaryColor: string;
@@ -41,6 +58,7 @@ interface WebsiteSettings {
   contactPhone: string; contactEmail: string; contactWhatsApp: string;
   socialInstagram: string; socialFacebook: string; googleMapsUrl: string;
   footerText: string; metaTitle: string; metaDescription: string;
+  blogEnabled: boolean; blogTitle: string; blogSubtitle: string; blogPosts: BlogPostSettings[];
   cloudinaryCloudName: string; cloudinaryUploadPreset: string;
   pageAboutUs: string;
   pageCancellationRefund: string;
@@ -84,6 +102,10 @@ const DEFAULT_SETTINGS: WebsiteSettings = {
   contactPhone: '', contactEmail: '', contactWhatsApp: '',
   socialInstagram: '', socialFacebook: '', googleMapsUrl: '',
   footerText: '', metaTitle: '', metaDescription: '',
+  blogEnabled: true,
+  blogTitle: 'Latest Travel Guides',
+  blogSubtitle: 'Destination advice, seasonal travel ideas, and trip planning notes from our travel experts.',
+  blogPosts: [],
   cloudinaryCloudName: '', cloudinaryUploadPreset: '',
   pageAboutUs: '',
   pageCancellationRefund: '',
@@ -100,7 +122,7 @@ const COLOR_PRESETS = [
   { name: 'Amber', primary: '#b45309', secondary: '#d97706' },
 ];
 
-type SectionId = 'appearance' | 'announcement' | 'brand' | 'hero' | 'features' | 'packages' | 'gallery' | 'stats' | 'about' | 'testimonials' | 'contact' | 'footer' | 'seo' | 'pages';
+type SectionId = 'appearance' | 'announcement' | 'brand' | 'hero' | 'features' | 'packages' | 'gallery' | 'stats' | 'about' | 'testimonials' | 'contact' | 'footer' | 'seo' | 'blog' | 'pages';
 
 const SECTIONS: { id: SectionId; label: string; icon: React.ReactNode; description: string }[] = [
   { id: 'appearance', label: 'Appearance', icon: <Palette className="w-4 h-4" />, description: 'Font, colors & theme presets' },
@@ -116,6 +138,7 @@ const SECTIONS: { id: SectionId; label: string; icon: React.ReactNode; descripti
   { id: 'contact', label: 'Contact & Social', icon: <Phone className="w-4 h-4" />, description: 'Phone, email, socials & map' },
   { id: 'footer', label: 'Footer', icon: <FileText className="w-4 h-4" />, description: 'Footer text & copyright' },
   { id: 'seo', label: 'SEO', icon: <Search className="w-4 h-4" />, description: 'Meta title & description' },
+  { id: 'blog', label: 'Blog / Guides', icon: <BookOpen className="w-4 h-4" />, description: 'Write SEO-rich travel articles' },
   { id: 'pages', label: 'Legal Pages', icon: <BookOpen className="w-4 h-4" />, description: 'About Us, Privacy Policy, Terms & more' },
 ];
 
@@ -202,6 +225,7 @@ function RichTextEditor({ label, value, onChange }: { label: string; value: stri
 export default function WebsiteBuilderPage() {
   const { user, orgId, role } = useAuth();
   const [activePage, setActivePage] = React.useState<string | null>(null);
+  const [activeBlogIndex, setActiveBlogIndex] = React.useState(0);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [settings, setSettings] = useState<WebsiteSettings>(DEFAULT_SETTINGS);
@@ -259,6 +283,41 @@ export default function WebsiteBuilderPage() {
 
   const S = settings;
   const set = (patch: Partial<WebsiteSettings>) => setSettings(prev => ({ ...prev, ...patch }));
+  const blogPosts = S.blogPosts || [];
+  const safeBlogIndex = Math.min(activeBlogIndex, Math.max(blogPosts.length - 1, 0));
+  const activeBlogPost = blogPosts[safeBlogIndex];
+
+  const updateBlogPost = (index: number, patch: Partial<BlogPostSettings>) => {
+    const next = [...blogPosts];
+    next[index] = { ...next[index], ...patch };
+    set({ blogPosts: next });
+  };
+
+  const addBlogPost = () => {
+    const now = new Date().toISOString().slice(0, 10);
+    const nextPost: BlogPostSettings = {
+      id: `post_${Date.now()}`,
+      title: '',
+      slug: '',
+      excerpt: '',
+      content: '<h2>Start with the traveler question</h2><p>Write a helpful guide with destination tips, ideal season, itinerary suggestions, pricing notes, and clear links to your packages.</p>',
+      coverImage: '',
+      authorName: S.agencyName || 'Travel Expert',
+      category: 'Travel Guide',
+      status: 'draft',
+      publishedAt: now,
+      metaTitle: '',
+      metaDescription: '',
+    };
+    set({ blogPosts: [...blogPosts, nextPost] });
+    setActiveBlogIndex(blogPosts.length);
+  };
+
+  const removeBlogPost = (index: number) => {
+    const next = blogPosts.filter((_, i) => i !== index);
+    set({ blogPosts: next });
+    setActiveBlogIndex(Math.max(0, Math.min(index, next.length - 1)));
+  };
 
   const renderInput = (label: string, value: string, onChange: (v: string) => void, opts?: { placeholder?: string; type?: string }) => (
     <div className="space-y-1.5">
@@ -417,7 +476,7 @@ export default function WebsiteBuilderPage() {
 
     packages: (
       <div className="space-y-5">
-        <p className="text-xs text-gray-500 bg-gray-50 rounded-lg p-3 border border-gray-100">Packages are managed in the <strong>Packages</strong> section of the CRM. Here you can customize how they're displayed on your public site.</p>
+        <p className="text-xs text-gray-500 bg-gray-50 rounded-lg p-3 border border-gray-100">Packages are managed in the <strong>Packages</strong> section of the CRM. Here you can customize how they&apos;re displayed on your public site.</p>
         {renderInput('Section Title', S.packagesTitle, v => set({ packagesTitle: v }), { placeholder: 'Popular Packages' })}
         {renderTextarea('Section Subtitle', S.packagesSubtitle, v => set({ packagesSubtitle: v }), { placeholder: 'Choose from our handpicked selection...', rows: 2 })}
       </div>
@@ -550,6 +609,174 @@ export default function WebsiteBuilderPage() {
       <div className="space-y-5">
         {renderInput('Meta Title', S.metaTitle, v => set({ metaTitle: v }), { placeholder: 'Agency Name - Best Travel Packages' })}
         {renderTextarea('Meta Description', S.metaDescription, v => set({ metaDescription: v }), { placeholder: 'Describe your travel agency for search engines...', rows: 2 })}
+        <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4">
+          <p className="text-sm font-bold text-emerald-900 mb-3">SEO checklist for your travel website</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-emerald-800">
+            {[
+              'Use your agency name plus main destination/service in the meta title.',
+              'Keep the meta description specific: destinations, phone/WhatsApp, and trust proof.',
+              'Give every package a readable URL slug like europe-honeymoon-package.',
+              'Write blog guides that answer real traveler searches and link to matching packages.',
+              'Use original destination photos with descriptive titles and alt text.',
+              'Add testimonials, contact details, Google Maps, and policies to build local trust.',
+            ].map(item => (
+              <div key={item} className="flex gap-2">
+                <span className="mt-1 h-1.5 w-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
+                <span>{item}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    ),
+
+    blog: (
+      <div className="space-y-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-gray-900">Enable Blog / Travel Guides</p>
+            <p className="text-xs text-gray-500 mt-0.5">Adds /blog and /blog/your-article pages to your public website</p>
+          </div>
+          <Toggle value={S.blogEnabled !== false} onChange={v => set({ blogEnabled: v })} />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {renderInput('Blog Section Title', S.blogTitle, v => set({ blogTitle: v }), { placeholder: 'Latest Travel Guides' })}
+          {renderInput('Blog Section Subtitle', S.blogSubtitle, v => set({ blogSubtitle: v }), { placeholder: 'Destination advice and planning tips...' })}
+        </div>
+        <div className="rounded-xl border border-blue-100 bg-blue-50 p-3 text-xs text-blue-800">
+          <p className="font-semibold mb-1">Content idea</p>
+          <p>Write posts like &quot;Best time to visit Kashmir&quot;, &quot;5-day Bali itinerary&quot;, or &quot;Dubai family trip cost&quot;. Link those posts to your matching packages to improve internal linking.</p>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-bold text-gray-900">Blog Posts</p>
+          <button type="button" onClick={addBlogPost}
+            className="flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-700 font-semibold">
+            <Plus className="w-4 h-4" /> Add Post
+          </button>
+        </div>
+
+        {blogPosts.length === 0 ? (
+          <button type="button" onClick={addBlogPost}
+            className="w-full rounded-xl border border-dashed border-gray-200 bg-gray-50 px-4 py-10 text-center hover:bg-gray-100 transition-colors">
+            <BookOpen className="w-8 h-8 mx-auto text-gray-300 mb-3" />
+            <span className="text-sm font-semibold text-gray-700">Create your first travel guide</span>
+            <span className="block text-xs text-gray-400 mt-1">Publish destination guides, itinerary advice, and package buying tips.</span>
+          </button>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-4">
+            <div className="space-y-2">
+              {blogPosts.map((post, i) => (
+                <button key={post.id || i} type="button" onClick={() => setActiveBlogIndex(i)}
+                  className={`w-full text-left rounded-xl border px-3 py-2.5 transition-all ${
+                    safeBlogIndex === i
+                      ? 'border-indigo-500 bg-indigo-50'
+                      : 'border-gray-200 bg-white hover:border-gray-300'
+                  }`}>
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="text-xs font-bold text-gray-900 line-clamp-2">{post.title || 'Untitled post'}</span>
+                    <span className={`text-[9px] uppercase font-bold px-1.5 py-0.5 rounded-full ${
+                      post.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                    }`}>
+                      {post.status === 'published' ? 'Live' : 'Draft'}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-gray-400 mt-1 truncate">/{post.slug || slugify(post.title, 'travel-guide')}</p>
+                </button>
+              ))}
+            </div>
+
+            {activeBlogPost && (
+              <div className="rounded-xl border border-gray-200 bg-white p-4 space-y-5">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-bold text-gray-900">Edit Travel Guide</p>
+                    <p className="text-xs text-gray-400">Save changes from the top bar when you are done.</p>
+                  </div>
+                  <button type="button" onClick={() => removeBlogPost(safeBlogIndex)}
+                    className="text-gray-300 hover:text-red-500 p-1.5 transition-colors">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-gray-700">Post Title</label>
+                    <input
+                      value={activeBlogPost.title}
+                      onChange={e => {
+                        const title = e.target.value;
+                        updateBlogPost(safeBlogIndex, {
+                          title,
+                          slug: activeBlogPost.slug ? activeBlogPost.slug : slugify(title, ''),
+                        });
+                      }}
+                      className="w-full px-3.5 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm bg-gray-50 focus:bg-white"
+                      placeholder="Best time to visit Kashmir"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-gray-700">URL Slug</label>
+                    <div className="relative">
+                      <Link2 className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input
+                        value={activeBlogPost.slug}
+                        onChange={e => updateBlogPost(safeBlogIndex, { slug: slugify(e.target.value, '') })}
+                        className="w-full pl-8 pr-3.5 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm bg-gray-50 focus:bg-white"
+                        placeholder={slugify(activeBlogPost.title, 'travel-guide')}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-gray-700">Status</label>
+                    <select
+                      value={activeBlogPost.status}
+                      onChange={e => updateBlogPost(safeBlogIndex, { status: e.target.value as BlogPostSettings['status'] })}
+                      className="w-full px-3.5 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm bg-gray-50 focus:bg-white"
+                    >
+                      <option value="draft">Draft</option>
+                      <option value="published">Published</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-gray-700">Publish Date</label>
+                    <div className="relative">
+                      <CalendarDays className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="date"
+                        value={activeBlogPost.publishedAt || ''}
+                        onChange={e => updateBlogPost(safeBlogIndex, { publishedAt: e.target.value })}
+                        className="w-full pl-8 pr-3.5 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm bg-gray-50 focus:bg-white"
+                      />
+                    </div>
+                  </div>
+                  {renderInput('Category', activeBlogPost.category, v => updateBlogPost(safeBlogIndex, { category: v }), { placeholder: 'Travel Guide' })}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {renderInput('Author Name', activeBlogPost.authorName, v => updateBlogPost(safeBlogIndex, { authorName: v }), { placeholder: S.agencyName || 'Travel Expert' })}
+                  {renderImageUpload('Cover Image', activeBlogPost.coverImage, `blog-${activeBlogPost.id}`, v => updateBlogPost(safeBlogIndex, { coverImage: v }))}
+                </div>
+
+                {renderTextarea('Excerpt', activeBlogPost.excerpt, v => updateBlogPost(safeBlogIndex, { excerpt: v }), { placeholder: 'Short summary shown on blog cards and search previews.', rows: 3 })}
+                <RichTextEditor
+                  label="Article Content"
+                  value={activeBlogPost.content}
+                  onChange={v => updateBlogPost(safeBlogIndex, { content: v })}
+                />
+
+                <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 space-y-4">
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Search Preview</p>
+                  {renderInput('Meta Title', activeBlogPost.metaTitle, v => updateBlogPost(safeBlogIndex, { metaTitle: v }), { placeholder: activeBlogPost.title || 'Article title' })}
+                  {renderTextarea('Meta Description', activeBlogPost.metaDescription, v => updateBlogPost(safeBlogIndex, { metaDescription: v }), { placeholder: activeBlogPost.excerpt || 'Summarize the article in 150 characters.', rows: 2 })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     ),
 

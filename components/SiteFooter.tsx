@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Phone, Mail, MessageCircle } from 'lucide-react';
 
 interface SiteFooterProps {
@@ -9,13 +10,17 @@ interface SiteFooterProps {
 }
 
 export default function SiteFooter({ orgId, settings }: SiteFooterProps) {
+  const pathname = usePathname();
   const tc = settings?.themeColor || '#4f46e5';
   const agencyName = settings?.agencyName || 'Travel Agency';
+  const isDirectSiteRoute = pathname?.startsWith(`/site/${orgId}`);
+  const sitePath = (path: string) => isDirectSiteRoute ? `/site/${orgId}${path === '/' ? '' : path}` : path;
 
   const navLinks = [
-    { href: `/site/${orgId}#packages`, label: 'Packages' },
-    { href: `/site/${orgId}#about`, label: 'About' },
-    { href: `/site/${orgId}#contact`, label: 'Contact' },
+    { href: sitePath('/#packages'), label: 'Packages' },
+    { href: sitePath('/#about'), label: 'About' },
+    { href: sitePath('/blog'), label: 'Blog' },
+    { href: sitePath('/#contact'), label: 'Contact' },
   ];
 
   return (
@@ -67,10 +72,10 @@ export default function SiteFooter({ orgId, settings }: SiteFooterProps) {
           <div>
             <h4 className="font-bold text-xs uppercase tracking-wider text-gray-400 mb-5">Legal</h4>
             <div className="space-y-3">
-              <Link href={`/site/${orgId}/about-us`} className="block text-sm text-gray-500 hover:text-white transition-colors">About Us</Link>
-              <Link href={`/site/${orgId}/privacy-policy`} className="block text-sm text-gray-500 hover:text-white transition-colors">Privacy Policy</Link>
-              <Link href={`/site/${orgId}/terms-conditions`} className="block text-sm text-gray-500 hover:text-white transition-colors">Terms &amp; Conditions</Link>
-              <Link href={`/site/${orgId}/cancellation-refund`} className="block text-sm text-gray-500 hover:text-white transition-colors">Cancellation &amp; Refund</Link>
+              <Link href={sitePath('/about-us')} className="block text-sm text-gray-500 hover:text-white transition-colors">About Us</Link>
+              <Link href={sitePath('/privacy-policy')} className="block text-sm text-gray-500 hover:text-white transition-colors">Privacy Policy</Link>
+              <Link href={sitePath('/terms-conditions')} className="block text-sm text-gray-500 hover:text-white transition-colors">Terms &amp; Conditions</Link>
+              <Link href={sitePath('/cancellation-refund')} className="block text-sm text-gray-500 hover:text-white transition-colors">Cancellation &amp; Refund</Link>
             </div>
           </div>
         </div>

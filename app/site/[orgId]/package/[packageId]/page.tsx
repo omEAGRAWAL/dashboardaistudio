@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
-import { doc, getDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, getDocs, addDoc, collection, query, where, limit, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import {
   MapPin, Clock, ArrowLeft, CheckCircle2, ChevronLeft, ChevronRight,
@@ -86,7 +86,20 @@ export default function PackageDetailsPage() {
             }
           }
         }
-        if (pSnap.exists()) setPkg({ id: pSnap.id, ...pSnap.data() });
+        if (pSnap.exists() && pSnap.data()?.orgId === orgId) {
+          setPkg({ id: pSnap.id, ...pSnap.data() });
+        } else {
+          const slugSnap = await getDocs(query(
+            collection(db, 'packages'),
+            where('orgId', '==', orgId),
+            where('slug', '==', packageId),
+            limit(1)
+          ));
+          if (!slugSnap.empty) {
+            const slugDoc = slugSnap.docs[0];
+            setPkg({ id: slugDoc.id, ...slugDoc.data() });
+          }
+        }
       } catch (e) { console.error(e); }
       finally { setLoading(false); }
     })();

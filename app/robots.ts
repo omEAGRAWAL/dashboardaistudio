@@ -52,12 +52,12 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
       rules: [
         {
           userAgent: '*',
-          allow: ['/', '/package/', '/about-us', '/terms-conditions', '/privacy-policy', '/cancellation-refund', '/campaign'],
+          allow: ['/', '/package/', '/blog', '/about-us', '/terms-conditions', '/privacy-policy', '/cancellation-refund', '/campaign'],
           disallow: PRIVATE_ROUTES,
         },
         {
           userAgent: 'OAI-SearchBot',
-          allow: ['/'],
+          allow: ['/', '/package/', '/blog', '/about-us'],
           disallow: PRIVATE_ROUTES,
         },
       ],

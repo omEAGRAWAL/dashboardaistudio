@@ -1,4 +1,5 @@
 import { adminDb } from '@/lib/firebase-admin';
+import { slugify } from '@/lib/slug';
 
 export const PLATFORM_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://travelycrm.reviu.store';
 export const PLATFORM_HOST = process.env.NEXT_PUBLIC_PLATFORM_HOST || new URL(PLATFORM_URL).host;
@@ -13,6 +14,7 @@ export interface AgencyDomainContext {
 export interface WebsiteSettingsSeo {
   agencyName?: string;
   agencyLogo?: string;
+  agencyTagline?: string;
   heroImage?: string;
   heroTitle?: string;
   heroSubtitle?: string;
@@ -26,18 +28,50 @@ export interface WebsiteSettingsSeo {
   pageTermsConditions?: string;
   pagePrivacyPolicy?: string;
   pageCancellationRefund?: string;
+  blogEnabled?: boolean;
+  blogTitle?: string;
+  blogSubtitle?: string;
+  blogPosts?: PublicBlogPostSeo[];
   updatedAt?: any;
 }
 
 export interface PublicPackageSeo {
   id: string;
+  orgId?: string;
+  slug?: string;
   title?: string;
   description?: string;
   destination?: string;
+  duration?: string;
+  category?: string;
   imageUrl?: string;
   images?: string[];
+  priceDouble?: number;
+  priceTriple?: number;
+  priceQuad?: number;
+  itinerary?: Array<{ day?: number; title?: string; description?: string }>;
+  highlights?: string[];
+  inclusions?: string[];
+  exclusions?: string[];
   createdAt?: any;
   updatedAt?: any;
+}
+
+export interface PublicBlogPostSeo {
+  id?: string;
+  slug?: string;
+  title?: string;
+  excerpt?: string;
+  content?: string;
+  coverImage?: string;
+  authorName?: string;
+  category?: string;
+  status?: 'draft' | 'published';
+  publishedAt?: any;
+  updatedAt?: any;
+  metaTitle?: string;
+  metaDescription?: string;
+  relatedPackageIds?: string[];
 }
 
 export function normalizeHost(host: string | null | undefined) {
@@ -147,13 +181,101 @@ export async function getPublicPackages(orgId: string): Promise<PublicPackageSeo
   return snap.docs.map(doc => ({ id: doc.id, ...(doc.data() as Record<string, any>) }));
 }
 
-export async function getPublicPackage(packageId: string): Promise<PublicPackageSeo | null> {
-  const snap = await adminDb.doc(`packages/${packageId}`).get();
-  return snap.exists ? ({ id: snap.id, ...(snap.data() as Record<string, any>) }) : null;
+export async function getPublicPackage(packageIdOrSlug: string, orgId?: string): Promise<PublicPackageSeo | null> {
+  const snap = await adminDb.doc(`packages/${packageIdOrSlug}`).get();
+  if (snap.exists) {
+    const pkg = { id: snap.id, ...(snap.data() as Record<string, any>) } as PublicPackageSeo;
+    if (!orgId || pkg.orgId === orgId) return pkg;
+  }
+
+  if (!orgId) return null;
+
+  const cleanSlug = slugify(packageIdOrSlug, packageIdOrSlug);
+  const bySlug = await adminDb
+    .collection('packages')
+    .where('orgId', '==', orgId)
+    .where('slug', '==', cleanSlug)
+    .limit(1)
+    .get();
+
+  if (bySlug.empty) return null;
+  const doc = bySlug.docs[0];
+  return { id: doc.id, ...(doc.data() as Record<string, any>) } as PublicPackageSeo;
 }
 
 export function truncateDescription(value: string | undefined, fallback: string, max = 155) {
   const source = (value || fallback).replace(/\s+/g, ' ').trim();
   if (source.length <= max) return source;
   return `${source.slice(0, max - 1).trim()}...`;
+}
+
+export function stripHtml(value: string | undefined) {
+  return (value || '')
+    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?>[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+export function sanitizePublicHtml(value: string | undefined) {
+  return (value || '')
+    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?>[\s\S]*?<\/style>/gi, '')
+    .replace(/\s(on\w+)=(["']).*?\2/gi, '')
+    .replace(/\s(href|src)=(["'])javascript:[\s\S]*?\2/gi, ' $1="#"');
+}
+
+export function getPackageSlug(pkg: Pick<PublicPackageSeo, 'id' | 'slug' | 'title' | 'destination'>) {
+  return slugify(pkg.slug, pkg.id);
+}
+
+export function packagePath(pkg: Pick<PublicPackageSeo, 'id' | 'slug' | 'title' | 'destination'>) {
+  return `/package/${getPackageSlug(pkg)}`;
+}
+
+export function getMinPackagePrice(pkg: Pick<PublicPackageSeo, 'priceDouble' | 'priceTriple' | 'priceQuad'>) {
+  const prices = [pkg.priceDouble, pkg.priceTriple, pkg.priceQuad].filter((price): price is number => typeof price === 'number' && price > 0);
+  return prices.length ? Math.min(...prices) : undefined;
+}
+
+export function getBlogSlug(post: PublicBlogPostSeo, index = 0) {
+  return slugify(post.slug || post.title, `travel-guide-${index + 1}`);
+}
+
+export function blogPostPath(post: PublicBlogPostSeo, index = 0) {
+  return `/blog/${getBlogSlug(post, index)}`;
+}
+
+export function getPublishedBlogPosts(settings: WebsiteSettingsSeo | null | undefined) {
+  if (settings?.blogEnabled === false) return [];
+
+  return (settings?.blogPosts || [])
+    .map((post, index) => ({
+      ...post,
+      slug: getBlogSlug(post, index),
+      id: post.id || getBlogSlug(post, index),
+    }))
+    .filter(post => post.title && post.status !== 'draft')
+    .sort((a, b) => {
+      const bDate = timestampToDate(b.publishedAt || b.updatedAt)?.getTime() || 0;
+      const aDate = timestampToDate(a.publishedAt || a.updatedAt)?.getTime() || 0;
+      return bDate - aDate;
+    });
+}
+
+export function getPublishedBlogPost(settings: WebsiteSettingsSeo | null | undefined, slug: string) {
+  const cleanSlug = slugify(slug, slug);
+  return getPublishedBlogPosts(settings).find(post => post.slug === cleanSlug) || null;
+}
+
+export function estimateReadTime(value: string | undefined) {
+  const words = stripHtml(value).split(/\s+/).filter(Boolean).length;
+  return `${Math.max(1, Math.ceil(words / 220))} min read`;
 }

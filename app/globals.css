@@ -14,3 +14,65 @@
 html {
   scroll-behavior: smooth;
 }
+
+.blog-content {
+  color: #374151;
+  font-size: 1.0625rem;
+  line-height: 1.85;
+}
+
+.blog-content h1,
+.blog-content h2,
+.blog-content h3 {
+  color: #111827;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.blog-content h1 {
+  font-size: 2.25rem;
+  margin: 2.5rem 0 1rem;
+}
+
+.blog-content h2 {
+  font-size: 1.75rem;
+  margin: 2.25rem 0 0.875rem;
+}
+
+.blog-content h3 {
+  font-size: 1.25rem;
+  margin: 1.75rem 0 0.75rem;
+}
+
+.blog-content p,
+.blog-content ul,
+.blog-content ol,
+.blog-content blockquote {
+  margin-bottom: 1.25rem;
+}
+
+.blog-content ul,
+.blog-content ol {
+  padding-left: 1.5rem;
+}
+
+.blog-content ul {
+  list-style: disc;
+}
+
+.blog-content ol {
+  list-style: decimal;
+}
+
+.blog-content a {
+  color: #4f46e5;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.blog-content blockquote {
+  border-left: 4px solid #e5e7eb;
+  color: #4b5563;
+  padding-left: 1rem;
+}

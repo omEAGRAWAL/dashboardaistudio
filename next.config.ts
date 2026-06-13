@@ -1,6 +1,9 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  compress: true,
+  outputFileTracingRoot: process.cwd(),
+  poweredByHeader: false,
   serverExternalPackages: ['pdfmake'],
   reactStrictMode: true,
   eslint: {
@@ -10,6 +13,8 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: false,
   },
   images: {
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 86400,
     remotePatterns: [
       {
         protocol: 'https',

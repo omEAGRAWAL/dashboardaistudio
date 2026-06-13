@@ -6,11 +6,11 @@ const BASE_URL = 'https://travelycrm.reviu.store';
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: {
-    template: '%s | Yatrik — Travel CRM Software India',
-    default: 'Yatrik — #1 Travel CRM Software for Indian Agencies',
+    template: '%s | Yatrik - Travel CRM Software India',
+    default: 'Yatrik - Travel CRM Software for Indian Agencies',
   },
   description:
-    'Yatrik is the best travel CRM software in India. Capture Meta Ads leads, automate WhatsApp follow-ups, manage bookings & build your agency website. Plans from ₹999/month.',
+    'Yatrik is travel CRM software for Indian travel agencies. Capture Meta Ads leads, automate WhatsApp follow-ups, manage bookings, and build your agency website. Plans from INR 999/month.',
   keywords: [
     'travel CRM software India',
     'travel agency CRM',
@@ -39,24 +39,24 @@ export const metadata: Metadata = {
     locale: 'en_IN',
     url: BASE_URL,
     siteName: 'Yatrik',
-    title: 'Yatrik — #1 Travel CRM Software for Indian Agencies',
+    title: 'Yatrik - Travel CRM Software for Indian Agencies',
     description:
-      'Manage leads, automate WhatsApp, handle bookings & build your agency website. Plans from ₹999/month incl. GST.',
+      'Manage leads, automate WhatsApp, handle bookings, and build your agency website. Plans from INR 999/month incl. GST.',
     images: [
       {
-        url: '/og-image.png',
+        url: '/opengraph-image',
         width: 1200,
         height: 630,
-        alt: 'Yatrik — Travel CRM Software India',
+        alt: 'Yatrik travel CRM software for Indian agencies',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Yatrik — #1 Travel CRM Software for Indian Agencies',
+    title: 'Yatrik - Travel CRM Software for Indian Agencies',
     description:
-      'Manage leads, automate WhatsApp, handle bookings & build your agency website. Plans from ₹999/month.',
-    images: ['/og-image.png'],
+      'Manage leads, automate WhatsApp, handle bookings, and build your agency website. Plans from INR 999/month.',
+    images: ['/opengraph-image'],
     creator: '@yatrikcrm',
   },
   alternates: {

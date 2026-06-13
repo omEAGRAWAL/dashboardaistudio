@@ -1,10 +1,23 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { headers } from 'next/headers';
 import {
   MapPin, Clock, ArrowRight, Phone, Mail, MessageCircle,
-  Instagram, Star, Award, Shield, Users, Globe,
+  Instagram, Star, Award, Shield, Users, Globe, BookOpen,
 } from 'lucide-react';
 import { adminDb } from '@/lib/firebase-admin';
+import {
+  absoluteUrl,
+  blogPostPath,
+  estimateReadTime,
+  getMinPackagePrice,
+  getPublishedBlogPosts,
+  packagePath,
+  stripHtml,
+  timestampToDate,
+  truncateDescription,
+} from '@/lib/public-seo';
+import type { PublicPackageSeo } from '@/lib/public-seo';
 import { NavbarClient } from './NavbarClient';
 import { ContactForm } from './ContactForm';
 
@@ -19,6 +32,13 @@ const FEAT_ICONS = [
 
 export default async function PublicSitePage({ params }: { params: Promise<{ orgId: string }> }) {
   const { orgId } = await params;
+  const h = await headers();
+  const host = h.get('x-forwarded-host') || h.get('host') || '';
+  const protocol = (h.get('x-forwarded-proto') || 'https').split(',')[0];
+  const publicPathname = h.get('x-public-pathname') || `/site/${orgId}`;
+  const isDirectSiteRoute = publicPathname.startsWith(`/site/${orgId}`);
+  const sitePath = (path: string) => isDirectSiteRoute ? `/site/${orgId}${path === '/' ? '' : path}` : path;
+  const absolutePublicUrl = (path = '/') => absoluteUrl(`${protocol}://${host}`, sitePath(path));
 
   const [settingsSnap, pkgsSnap] = await Promise.all([
     adminDb.doc(`website_settings/${orgId}`).get(),
@@ -26,7 +46,8 @@ export default async function PublicSitePage({ params }: { params: Promise<{ org
   ]);
 
   const settings = settingsSnap.exists ? (settingsSnap.data() as Record<string, any>) : null;
-  const packages = pkgsSnap.docs.map(d => ({ id: d.id, ...d.data() } as Record<string, any>));
+  const packages = pkgsSnap.docs.map(d => ({ id: d.id, ...d.data() } as PublicPackageSeo));
+  const blogPosts = getPublishedBlogPosts(settings).slice(0, 3);
 
   const tc = settings?.themeColor || '#4f46e5';
   const agencyName = settings?.agencyName || 'Travel Agency';
@@ -59,8 +80,51 @@ export default async function PublicSitePage({ params }: { params: Promise<{ org
     { href: '#packages', label: 'Packages' },
     ...(galleryImages.length > 0 ? [{ href: '#gallery', label: 'Gallery' }] : []),
     ...(settings?.aboutTitle ? [{ href: '#about', label: 'About' }] : []),
+    ...(blogPosts.length > 0 ? [{ href: sitePath('/blog'), label: 'Blog' }] : []),
     { href: '#contact', label: 'Contact' },
   ];
+
+  const agencySchema = {
+    '@context': 'https://schema.org',
+    '@type': 'TravelAgency',
+    name: agencyName,
+    url: absolutePublicUrl('/'),
+    description: truncateDescription(settings?.metaDescription || settings?.heroSubtitle, `${agencyName} curates travel packages and accepts trip enquiries online.`, 240),
+    image: settings?.agencyLogo || heroImage,
+    telephone: settings?.contactPhone,
+    email: settings?.contactEmail,
+    sameAs: [settings?.socialInstagram, settings?.socialFacebook].filter(Boolean),
+    areaServed: packages.map(pkg => pkg.destination).filter(Boolean).slice(0, 20),
+  };
+
+  const packageListSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: `${agencyName} travel packages`,
+    itemListElement: packages.slice(0, 30).map((pkg, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      url: absolutePublicUrl(packagePath(pkg)),
+      name: pkg.title,
+      item: {
+        '@type': 'TouristTrip',
+        name: pkg.title,
+        description: truncateDescription(pkg.description, `${pkg.title || 'Travel package'} by ${agencyName}`, 220),
+        image: pkg.images?.[0] || pkg.imageUrl,
+        touristType: pkg.category,
+        itinerary: pkg.itinerary?.map((day: any) => day.title || day.description).filter(Boolean),
+        offers: getMinPackagePrice(pkg)
+          ? {
+              '@type': 'Offer',
+              priceCurrency: 'INR',
+              price: getMinPackagePrice(pkg),
+              availability: 'https://schema.org/InStock',
+              url: absolutePublicUrl(packagePath(pkg)),
+            }
+          : undefined,
+      },
+    })),
+  };
 
   return (
     <div className="min-h-screen bg-white antialiased" style={{ fontFamily: isSerif ? headingFont : 'inherit' }}>
@@ -84,13 +148,21 @@ export default async function PublicSitePage({ params }: { params: Promise<{ org
         agencyName={agencyName}
         navLinks={navLinks}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(agencySchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(packageListSchema) }}
+      />
 
       {/* Hero */}
       <section className="relative h-[50vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <Image
             src={heroImage}
-            alt="Hero"
+            alt={`${agencyName} travel packages and tour planning`}
             fill
             className="object-cover"
             priority
@@ -176,15 +248,14 @@ export default async function PublicSitePage({ params }: { params: Promise<{ org
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {packages.map(pkg => {
                 const coverImage = pkg.images?.[0] || pkg.imageUrl || 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=800&auto=format&fit=crop';
-                const prices = [pkg.priceDouble, pkg.priceTriple, pkg.priceQuad].filter((p: any) => p > 0);
-                const minPrice = prices.length ? Math.min(...prices) : null;
+                const minPrice = getMinPackagePrice(pkg);
                 return (
-                  <Link href={`/package/${pkg.id}`} key={pkg.id} className="group block">
+                  <Link href={sitePath(packagePath(pkg))} key={pkg.id} className="group block">
                     <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 h-full flex flex-col">
                       <div className="relative overflow-hidden h-60">
                         <Image
                           src={coverImage}
-                          alt={pkg.title}
+                          alt={`${pkg.title || 'Travel package'}${pkg.destination ? ` in ${pkg.destination}` : ''}`}
                           fill
                           className="object-cover group-hover:scale-110 transition-transform duration-700"
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -238,6 +309,72 @@ export default async function PublicSitePage({ params }: { params: Promise<{ org
         </div>
       </section>
 
+      {/* Blog */}
+      {blogPosts.length > 0 && (
+        <section className="py-24 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
+              <div>
+                <p className="text-xs font-bold tracking-[0.25em] uppercase mb-3" style={{ color: tc }}>Travel Guides</p>
+                <h2 className="text-3xl md:text-5xl font-black text-gray-900 mb-4 leading-tight" style={{ fontFamily: headingFont }}>
+                  {settings?.blogTitle || 'Latest Travel Guides'}
+                </h2>
+                <p className="text-lg text-gray-500 max-w-2xl">
+                  {settings?.blogSubtitle || 'Destination advice, seasonal tips, and planning notes from our travel experts.'}
+                </p>
+              </div>
+              <Link
+                href={sitePath('/blog')}
+                className="inline-flex items-center gap-2 text-sm font-bold px-5 py-3 rounded-full text-white shadow-md hover:shadow-lg transition-all"
+                style={{ backgroundColor: tc }}
+              >
+                View all guides <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {blogPosts.map((post, index) => {
+                const published = timestampToDate(post.publishedAt || post.updatedAt);
+                const excerpt = post.excerpt || truncateDescription(stripHtml(post.content), `Read ${post.title || 'this travel guide'} from ${agencyName}.`, 140);
+                return (
+                  <article key={post.id || post.slug} className="group">
+                    <Link href={sitePath(blogPostPath(post, index))} className="block">
+                      <div className="bg-gray-50 border border-gray-100 rounded-2xl overflow-hidden h-full transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-xl">
+                        <div className="relative h-52 bg-gray-100">
+                          {post.coverImage ? (
+                            <Image
+                              src={post.coverImage}
+                              alt={post.title || `${agencyName} travel guide`}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-700"
+                              sizes="(max-width: 768px) 100vw, 33vw"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center" style={{ color: tc }}>
+                              <BookOpen className="w-12 h-12 opacity-50" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="p-6">
+                          <div className="flex items-center gap-2 text-xs text-gray-400 font-semibold mb-3">
+                            {post.category && <span style={{ color: tc }}>{post.category}</span>}
+                            {post.category && <span>/</span>}
+                            <span>{published ? published.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }) : estimateReadTime(post.content)}</span>
+                          </div>
+                          <h3 className="text-xl font-bold text-gray-900 leading-tight mb-3 group-hover:opacity-80" style={{ fontFamily: headingFont }}>
+                            {post.title}
+                          </h3>
+                          <p className="text-sm text-gray-500 leading-relaxed line-clamp-3">{excerpt}</p>
+                        </div>
+                      </div>
+                    </Link>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Gallery */}
       {galleryImages.length > 0 && (
         <section id="gallery" className="py-24 bg-white">
@@ -254,7 +391,7 @@ export default async function PublicSitePage({ params }: { params: Promise<{ org
                 <div key={i} className="break-inside-avoid rounded-2xl overflow-hidden group relative">
                   <Image
                     src={img}
-                    alt={`Destination ${i + 1}`}
+                    alt={`${agencyName} destination gallery ${i + 1}`}
                     width={800}
                     height={600}
                     className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-700"
@@ -294,7 +431,7 @@ export default async function PublicSitePage({ params }: { params: Promise<{ org
                   <div className="rounded-3xl overflow-hidden shadow-2xl aspect-[4/5] relative">
                     <Image
                       src={settings.aboutImage}
-                      alt="About"
+                      alt={`About ${agencyName}`}
                       fill
                       className="object-cover"
                       sizes="(max-width: 1024px) 100vw, 50vw"
@@ -439,10 +576,10 @@ export default async function PublicSitePage({ params }: { params: Promise<{ org
             <div>
               <h4 className="font-bold text-xs uppercase tracking-wider text-gray-400 mb-5">Legal</h4>
               <div className="space-y-3">
-                <Link href={`/site/${orgId}/about-us`} className="block text-sm text-gray-500 hover:text-white transition-colors">About Us</Link>
-                <Link href={`/site/${orgId}/privacy-policy`} className="block text-sm text-gray-500 hover:text-white transition-colors">Privacy Policy</Link>
-                <Link href={`/site/${orgId}/terms-conditions`} className="block text-sm text-gray-500 hover:text-white transition-colors">Terms &amp; Conditions</Link>
-                <Link href={`/site/${orgId}/cancellation-refund`} className="block text-sm text-gray-500 hover:text-white transition-colors">Cancellation &amp; Refund</Link>
+                <Link href={sitePath('/about-us')} className="block text-sm text-gray-500 hover:text-white transition-colors">About Us</Link>
+                <Link href={sitePath('/privacy-policy')} className="block text-sm text-gray-500 hover:text-white transition-colors">Privacy Policy</Link>
+                <Link href={sitePath('/terms-conditions')} className="block text-sm text-gray-500 hover:text-white transition-colors">Terms &amp; Conditions</Link>
+                <Link href={sitePath('/cancellation-refund')} className="block text-sm text-gray-500 hover:text-white transition-colors">Cancellation &amp; Refund</Link>
               </div>
             </div>
           </div>

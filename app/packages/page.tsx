@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { collection, query, where, onSnapshot, addDoc, serverTimestamp, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { slugify } from '@/lib/slug';
 import {
   Package, Plus, Trash2, Edit2, Image as ImageIcon, MapPin, Clock,
   X, ChevronDown, ChevronUp, CheckCircle, XCircle, List, Zap,
@@ -20,6 +21,7 @@ const DIFFICULTY_COLOR: Record<string, string> = { Easy: 'bg-green-100 text-gree
 
 const EMPTY_FORM = {
   title: '', destination: '', category: '', difficulty: 'Easy', departureCity: '',
+  slug: '',
   description: '', imageUrl: '', images: [] as string[], duration: '',
   priceDouble: '', priceTriple: '', priceQuad: '',
   highlights: [''],
@@ -81,6 +83,7 @@ export default function PackagesPage() {
         title: pkg.title || '', destination: pkg.destination || '',
         category: pkg.category || '', difficulty: pkg.difficulty || 'Easy',
         departureCity: pkg.departureCity || '',
+        slug: pkg.slug || slugify([pkg.destination, pkg.title].filter(Boolean).join(' '), pkg.id),
         description: pkg.description || '',
         imageUrl: pkg.imageUrl || '',
         images: pkg.images || (pkg.imageUrl ? [pkg.imageUrl] : []),
@@ -116,6 +119,7 @@ export default function PackagesPage() {
       category: formData.category, difficulty: formData.difficulty,
       departureCity: formData.departureCity,
       description: formData.description,
+      slug: slugify(formData.slug || [formData.destination, formData.title].filter(Boolean).join(' '), editingPackage?.id || 'package'),
       imageUrl: formData.images[0] || formData.imageUrl,
       images: formData.images,
       duration: formData.duration,
@@ -331,6 +335,18 @@ export default function PackagesPage() {
                           <label className="text-sm font-semibold text-gray-700">Destination *</label>
                           <input required value={formData.destination} onChange={e => set({ destination: e.target.value })} className={inp} placeholder="e.g. Bali, Indonesia" />
                         </div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-sm font-semibold text-gray-700">SEO URL Slug</label>
+                        <input
+                          value={formData.slug}
+                          onChange={e => set({ slug: slugify(e.target.value, '') })}
+                          className={inp}
+                          placeholder={slugify([formData.destination, formData.title].filter(Boolean).join(' '), 'package-name')}
+                        />
+                        <p className="text-xs text-gray-400">
+                          Public URL: /package/{formData.slug || slugify([formData.destination, formData.title].filter(Boolean).join(' '), 'package-name')}
+                        </p>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">

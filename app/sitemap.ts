@@ -1,8 +1,12 @@
 import type { MetadataRoute } from 'next';
 import { headers } from 'next/headers';
+import { platformBlogPosts } from '@/lib/platform-blog';
 import {
   absoluteUrl,
+  blogPostPath,
+  getPublishedBlogPosts,
   latestDate,
+  packagePath,
   PLATFORM_URL,
   resolveAgencyByHost,
   getPublicPackages,
@@ -36,7 +40,14 @@ function platformSitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...cityPages];
+  const blogPages: MetadataRoute.Sitemap = platformBlogPosts.map(post => ({
+    url: `${PLATFORM_URL}/blog/${post.slug}`,
+    lastModified: new Date(post.date),
+    changeFrequency: 'monthly',
+    priority: 0.7,
+  }));
+
+  return [...staticPages, ...cityPages, ...blogPages];
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -90,10 +101,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   for (const pkg of packages) {
     urls.push({
-      url: absoluteUrl(base, `/package/${pkg.id}`),
+      url: absoluteUrl(base, packagePath(pkg)),
       lastModified: latestDate(pkg.updatedAt, pkg.createdAt, settingsUpdated),
       changeFrequency: 'weekly',
       priority: 0.8,
+    });
+  }
+
+  const blogPosts = getPublishedBlogPosts(settings);
+  if (blogPosts.length > 0) {
+    urls.push({
+      url: absoluteUrl(base, '/blog'),
+      lastModified: latestDate(settingsUpdated, ...blogPosts.flatMap(post => [post.updatedAt, post.publishedAt])),
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    });
+  }
+
+  for (const [index, post] of blogPosts.entries()) {
+    urls.push({
+      url: absoluteUrl(base, blogPostPath(post, index)),
+      lastModified: latestDate(post.updatedAt, post.publishedAt, settingsUpdated),
+      changeFrequency: 'monthly',
+      priority: 0.65,
     });
   }
 
