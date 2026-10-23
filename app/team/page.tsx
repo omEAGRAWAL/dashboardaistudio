@@ -9,34 +9,206 @@ import {
   doc, getDoc, serverTimestamp, deleteField,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { UserPlus, Trash2, Mail, Shield, User, ToggleLeft, ToggleRight } from 'lucide-react';
+import {
+  UserPlus, Trash2, Mail, Shield, User, ToggleLeft, ToggleRight,
+  Eye, EyeOff, KeyRound, Lock, CheckCircle, AlertCircle, RefreshCw,
+} from 'lucide-react';
 
+// ── Password Manager Modal ────────────────────────────────────────────────────
+function PasswordModal({
+  member,
+  currentUserId,
+  onClose,
+}: {
+  member: any;
+  currentUserId: string;
+  onClose: () => void;
+}) {
+  const [loading, setLoading] = useState(true);
+  const [passwordPlain, setPasswordPlain] = useState<string | null>(null);
+  const [showPass, setShowPass] = useState(false);
+  const [newPass, setNewPass] = useState('');
+  const [changing, setChanging] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    // Fetch password from the admin API
+    fetch('/api/org-members', {
+      headers: { 'x-uid': currentUserId },
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        const found = data.members?.find((m: any) => m.uid === member.id);
+        setPasswordPlain(found?.passwordPlain ?? null);
+      })
+      .catch(() => setPasswordPlain(null))
+      .finally(() => setLoading(false));
+  }, [member.id, currentUserId]);
+
+  const handleChangePassword = async () => {
+    if (!newPass.trim() || newPass.length < 6) {
+      setError('Password must be at least 6 characters.');
+      return;
+    }
+    setChanging(true);
+    setError('');
+    setMessage('');
+    try {
+      const res = await fetch('/api/org-members', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'x-uid': currentUserId },
+        body: JSON.stringify({ targetUid: member.id, newPassword: newPass }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed');
+      setPasswordPlain(newPass);
+      setNewPass('');
+      setMessage('Password changed successfully.');
+    } catch (err: any) {
+      setError(err.message || 'Failed to change password.');
+    } finally {
+      setChanging(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          ✕
+        </button>
+
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold flex-shrink-0">
+            {member.displayName?.charAt(0) || member.email?.charAt(0) || '?'}
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900 text-base">{member.displayName || 'No name'}</h3>
+            <p className="text-xs text-gray-500">{member.email}</p>
+          </div>
+        </div>
+
+        {/* Current Password */}
+        <div className="mb-5 p-4 bg-gray-50 rounded-xl border border-gray-200">
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Current Password</p>
+          {loading ? (
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+              Loading…
+            </div>
+          ) : member.authMethod === 'google' || !passwordPlain ? (
+            <p className="text-sm text-gray-500 italic">
+              {member.authMethod === 'google'
+                ? 'This member signed up via Google — no password stored.'
+                : 'No password on record (invited via email link).'}
+            </p>
+          ) : (
+            <div className="flex items-center gap-2">
+              <code className="flex-1 text-sm font-mono bg-white px-3 py-1.5 rounded-lg border border-gray-200 text-gray-800">
+                {showPass ? passwordPlain : '•'.repeat(passwordPlain.length)}
+              </code>
+              <button
+                onClick={() => setShowPass((v) => !v)}
+                className="p-2 text-gray-400 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+                title={showPass ? 'Hide' : 'Show'}
+              >
+                {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Change Password */}
+        <div className="space-y-3">
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Set New Password</p>
+
+          {message && (
+            <div className="flex items-center gap-2 p-3 bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm rounded-lg">
+              <CheckCircle className="w-4 h-4 flex-shrink-0" />
+              {message}
+            </div>
+          )}
+          {error && (
+            <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-100 text-red-700 text-sm rounded-lg">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              {error}
+            </div>
+          )}
+
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              value={newPass}
+              onChange={(e) => setNewPass(e.target.value)}
+              placeholder="New password (min 6 chars)"
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+            />
+          </div>
+
+          <button
+            onClick={handleChangePassword}
+            disabled={changing || !newPass.trim()}
+            className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 px-4 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50"
+          >
+            {changing ? (
+              <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <KeyRound className="w-4 h-4" />
+            )}
+            {changing ? 'Saving…' : 'Change Password'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Main Page ─────────────────────────────────────────────────────────────────
 export default function TeamPage() {
   const { user, orgId, role, loading } = useAuth();
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const [invites, setInvites] = useState<any[]>([]);
   const [orgName, setOrgName] = useState('');
+
+  // Invite flow
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('agent');
   const [isInviting, setIsInviting] = useState(false);
+
+  // Create with password flow
+  const [createEmail, setCreateEmail] = useState('');
+  const [createPassword, setCreatePassword] = useState('');
+  const [createName, setCreateName] = useState('');
+  const [createRole, setCreateRole] = useState('agent');
+  const [showCreatePass, setShowCreatePass] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  // Invite / Create tabs
+  const [formTab, setFormTab] = useState<'invite' | 'create'>('invite');
+
+  // Password modal
+  const [passModal, setPassModal] = useState<any | null>(null);
 
   useEffect(() => {
     if (!orgId) return;
 
-    // Fetch org name
     getDoc(doc(db, 'organizations', orgId)).then(snap => {
       if (snap.exists()) setOrgName(snap.data().name || '');
     });
 
-    // Listen to team members
     const usersQuery = query(collection(db, 'users'), where('orgId', '==', orgId));
     const unsubscribeUsers = onSnapshot(usersQuery, (snapshot) => {
       setTeamMembers(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
     });
 
-    // Listen to pending invites
     const invitesQuery = query(collection(db, 'invites'), where('orgId', '==', orgId));
     const unsubscribeInvites = onSnapshot(invitesQuery, (snapshot) => {
       setInvites(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
@@ -57,21 +229,16 @@ export default function TeamPage() {
     }
   };
 
+  // ── Invite via email link ──────────────────────────────────────────────────
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inviteEmail.trim() || !orgId) return;
-
     setIsInviting(true);
     setError('');
     setSuccess('');
-
     try {
-      if (teamMembers.some(m => m.email === inviteEmail.trim())) {
-        throw new Error('User is already in the team.');
-      }
-      if (invites.some(i => i.email === inviteEmail.trim())) {
-        throw new Error('An invite has already been sent to this email.');
-      }
+      if (teamMembers.some(m => m.email === inviteEmail.trim())) throw new Error('User is already in the team.');
+      if (invites.some(i => i.email === inviteEmail.trim())) throw new Error('An invite has already been sent to this email.');
 
       await addDoc(collection(db, 'invites'), {
         email: inviteEmail.trim(),
@@ -80,14 +247,7 @@ export default function TeamPage() {
         createdAt: serverTimestamp(),
       });
 
-      // Fire-and-forget invite email
-      sendRoleNotification({
-        targetEmail: inviteEmail.trim(),
-        targetName: inviteEmail.split('@')[0],
-        type: 'invited',
-        inviteRole,
-      });
-
+      sendRoleNotification({ targetEmail: inviteEmail.trim(), targetName: inviteEmail.split('@')[0], type: 'invited', inviteRole });
       setSuccess(`Invite sent to ${inviteEmail}`);
       setInviteEmail('');
       setInviteRole('agent');
@@ -98,12 +258,40 @@ export default function TeamPage() {
     }
   };
 
-  const handleRevokeInvite = async (inviteId: string) => {
+  // ── Create with email + password ───────────────────────────────────────────
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!createEmail.trim() || !createPassword.trim() || !orgId || !user) return;
+    setIsCreating(true);
+    setError('');
+    setSuccess('');
     try {
-      await deleteDoc(doc(db, 'invites', inviteId));
-    } catch (err) {
-      console.error('Error revoking invite:', err);
+      const res = await fetch('/api/org-members', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-uid': user.uid },
+        body: JSON.stringify({
+          email: createEmail.trim(),
+          password: createPassword,
+          role: createRole,
+          displayName: createName.trim() || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to create member.');
+      setSuccess(`${createRole === 'org_admin' ? 'Admin' : 'Agent'} account created for ${createEmail}.`);
+      setCreateEmail('');
+      setCreatePassword('');
+      setCreateName('');
+      setCreateRole('agent');
+    } catch (err: any) {
+      setError(err.message || 'Failed to create member.');
+    } finally {
+      setIsCreating(false);
     }
+  };
+
+  const handleRevokeInvite = async (inviteId: string) => {
+    try { await deleteDoc(doc(db, 'invites', inviteId)); } catch (err) { console.error(err); }
   };
 
   const handleRoleChange = async (member: any, newRole: string) => {
@@ -111,18 +299,13 @@ export default function TeamPage() {
     try {
       await updateDoc(doc(db, 'users', member.id), { role: newRole });
       sendRoleNotification({ targetEmail: member.email, targetName: member.displayName || member.email, type: 'role_changed', newRole });
-    } catch (err) {
-      console.error('Error changing role:', err);
-    }
+    } catch (err) { console.error(err); }
   };
 
   const handleToggleAssignment = async (member: any) => {
     const newValue = member.assignmentActive === false ? true : false;
-    try {
-      await updateDoc(doc(db, 'users', member.id), { assignmentActive: newValue });
-    } catch (err) {
-      console.error('Error toggling assignment status:', err);
-    }
+    try { await updateDoc(doc(db, 'users', member.id), { assignmentActive: newValue }); }
+    catch (err) { console.error(err); }
   };
 
   const handleRemoveMember = async (member: any) => {
@@ -131,9 +314,7 @@ export default function TeamPage() {
     try {
       await updateDoc(doc(db, 'users', member.id), { orgId: deleteField(), status: 'suspended' });
       sendRoleNotification({ targetEmail: member.email, targetName: member.displayName || member.email, type: 'removed' });
-    } catch (err) {
-      console.error('Error removing member:', err);
-    }
+    } catch (err) { console.error(err); }
   };
 
   if (loading) {
@@ -172,57 +353,162 @@ export default function TeamPage() {
           <div className="max-w-5xl mx-auto">
             <div className="mb-8">
               <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Team Management</h1>
-              <p className="text-gray-500 mt-1">Manage your agency members and send invites.</p>
+              <p className="text-gray-500 mt-1">Add agents &amp; admins to your organization.</p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-              {/* Invite Form */}
+              {/* Left: Add Member Panel */}
               <div className="lg:col-span-1">
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <UserPlus className="w-5 h-5 text-indigo-600" />
-                    Invite Member
-                  </h2>
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
 
-                  {error && <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm border border-red-100">{error}</div>}
-                  {success && <div className="mb-4 p-3 bg-emerald-50 text-emerald-700 rounded-lg text-sm border border-emerald-100">{success}</div>}
-
-                  <form onSubmit={handleInvite} className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                      <input
-                        type="email"
-                        required
-                        value={inviteEmail}
-                        onChange={(e) => setInviteEmail(e.target.value)}
-                        placeholder="agent@example.com"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                      <select
-                        value={inviteRole}
-                        onChange={(e) => setInviteRole(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-                      >
-                        <option value="agent">Agent (Can manage leads)</option>
-                        <option value="org_admin">Admin (Can manage team)</option>
-                      </select>
-                    </div>
+                  {/* Tab bar */}
+                  <div className="flex border-b border-gray-200">
                     <button
-                      type="submit"
-                      disabled={isInviting || !inviteEmail.trim()}
-                      className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg font-medium transition-colors shadow-sm disabled:opacity-50"
+                      onClick={() => { setFormTab('invite'); setError(''); setSuccess(''); }}
+                      className={`flex-1 py-3 text-sm font-medium transition-colors ${
+                        formTab === 'invite'
+                          ? 'text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50/50'
+                          : 'text-gray-500 hover:text-gray-700'
+                      }`}
                     >
-                      {isInviting ? 'Sending...' : 'Send Invite'}
+                      <Mail className="w-4 h-4 inline mr-1.5 -mt-0.5" />
+                      Invite Link
                     </button>
-                  </form>
+                    <button
+                      onClick={() => { setFormTab('create'); setError(''); setSuccess(''); }}
+                      className={`flex-1 py-3 text-sm font-medium transition-colors ${
+                        formTab === 'create'
+                          ? 'text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50/50'
+                          : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      <UserPlus className="w-4 h-4 inline mr-1.5 -mt-0.5" />
+                      With Password
+                    </button>
+                  </div>
+
+                  <div className="p-5">
+                    {error && <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm border border-red-100 flex items-start gap-2"><AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />{error}</div>}
+                    {success && <div className="mb-4 p-3 bg-emerald-50 text-emerald-700 rounded-lg text-sm border border-emerald-100 flex items-start gap-2"><CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />{success}</div>}
+
+                    {/* ── Invite via link ── */}
+                    {formTab === 'invite' && (
+                      <form onSubmit={handleInvite} className="space-y-4">
+                        <p className="text-xs text-gray-500 leading-relaxed">
+                          Send an invite email. The member must sign in with Google to accept it.
+                        </p>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                          <input
+                            type="email"
+                            required
+                            value={inviteEmail}
+                            onChange={(e) => setInviteEmail(e.target.value)}
+                            placeholder="agent@example.com"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                          <select
+                            value={inviteRole}
+                            onChange={(e) => setInviteRole(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                          >
+                            <option value="agent">Agent (Can manage leads)</option>
+                            <option value="org_admin">Admin (Can manage team)</option>
+                          </select>
+                        </div>
+                        <button
+                          type="submit"
+                          disabled={isInviting || !inviteEmail.trim()}
+                          className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg font-medium transition-colors shadow-sm disabled:opacity-50 text-sm"
+                        >
+                          {isInviting ? 'Sending…' : 'Send Invite'}
+                        </button>
+                      </form>
+                    )}
+
+                    {/* ── Create with password ── */}
+                    {formTab === 'create' && (
+                      <form onSubmit={handleCreate} className="space-y-4">
+                        <p className="text-xs text-gray-500 leading-relaxed">
+                          Create an account with email &amp; password. The member can log in immediately using the Email &amp; Password tab on the login page.
+                        </p>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Full Name <span className="text-gray-400 font-normal">(optional)</span></label>
+                          <input
+                            type="text"
+                            value={createName}
+                            onChange={(e) => setCreateName(e.target.value)}
+                            placeholder="e.g. Priya Sharma"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                          <input
+                            type="email"
+                            required
+                            value={createEmail}
+                            onChange={(e) => setCreateEmail(e.target.value)}
+                            placeholder="agent@example.com"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                          <div className="relative">
+                            <input
+                              type={showCreatePass ? 'text' : 'password'}
+                              required
+                              minLength={6}
+                              value={createPassword}
+                              onChange={(e) => setCreatePassword(e.target.value)}
+                              placeholder="Min 6 characters"
+                              className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowCreatePass(v => !v)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                              tabIndex={-1}
+                            >
+                              {showCreatePass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                          <select
+                            value={createRole}
+                            onChange={(e) => setCreateRole(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                          >
+                            <option value="agent">Agent (Can manage leads)</option>
+                            <option value="org_admin">Admin (Can manage team)</option>
+                          </select>
+                        </div>
+                        <button
+                          type="submit"
+                          disabled={isCreating || !createEmail.trim() || !createPassword.trim()}
+                          className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-4 rounded-lg font-medium transition-colors shadow-sm disabled:opacity-50 text-sm"
+                        >
+                          {isCreating ? (
+                            <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <UserPlus className="w-4 h-4" />
+                          )}
+                          {isCreating ? 'Creating…' : 'Create Account'}
+                        </button>
+                      </form>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* Team Members List */}
+              {/* Right: Members List */}
               <div className="lg:col-span-2 space-y-6">
 
                 {/* Active Members */}
@@ -242,6 +528,7 @@ export default function TeamPage() {
                     ) : (
                       teamMembers.map((member) => {
                         const isSelf = member.id === user.uid;
+                        const hasPassword = member.authMethod === 'email_password';
                         return (
                           <div key={member.id} className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
                             <div className="flex items-center gap-3 min-w-0">
@@ -258,14 +545,20 @@ export default function TeamPage() {
                                   {isSelf && <span className="ml-1.5 text-xs text-gray-400">(you)</span>}
                                 </p>
                                 <p className="text-xs text-gray-500 truncate">{member.email}</p>
+                                {hasPassword && (
+                                  <span className="inline-flex items-center gap-1 text-xs text-amber-600 mt-0.5">
+                                    <Lock className="w-3 h-3" />
+                                    Password login
+                                  </span>
+                                )}
                               </div>
                             </div>
                             <div className="flex items-center gap-2 flex-shrink-0 ml-3">
-                              {/* Assignment active/inactive toggle */}
+                              {/* Assignment toggle */}
                               {!isSelf && (
                                 <button
                                   onClick={() => handleToggleAssignment(member)}
-                                  title={member.assignmentActive === false ? 'Inactive for lead assignment — click to activate' : 'Active for lead assignment — click to deactivate'}
+                                  title={member.assignmentActive === false ? 'Inactive — click to activate' : 'Active — click to deactivate'}
                                   className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full border transition-colors ${
                                     member.assignmentActive === false
                                       ? 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-amber-50 hover:text-amber-700 hover:border-amber-200'
@@ -278,7 +571,8 @@ export default function TeamPage() {
                                   }
                                 </button>
                               )}
-                              {/* Role dropdown */}
+
+                              {/* Role select */}
                               <select
                                 value={member.role}
                                 disabled={isSelf}
@@ -292,7 +586,23 @@ export default function TeamPage() {
                                 <option value="agent">Agent</option>
                                 <option value="org_admin">Admin</option>
                               </select>
-                              {/* Remove button */}
+
+                              {/* Password manager button (only for password-login members, non-self) */}
+                              {!isSelf && (
+                                <button
+                                  onClick={() => setPassModal(member)}
+                                  title="Manage password"
+                                  className={`p-1.5 rounded-lg transition-colors ${
+                                    hasPassword
+                                      ? 'text-amber-500 hover:text-amber-700 hover:bg-amber-50'
+                                      : 'text-gray-300 hover:text-gray-500 hover:bg-gray-50'
+                                  }`}
+                                >
+                                  <KeyRound className="w-4 h-4" />
+                                </button>
+                              )}
+
+                              {/* Remove */}
                               {!isSelf && (
                                 <button
                                   onClick={() => handleRemoveMember(member)}
@@ -343,12 +653,20 @@ export default function TeamPage() {
                     </div>
                   </div>
                 )}
-
               </div>
             </div>
           </div>
         </main>
       </div>
+
+      {/* Password Modal */}
+      {passModal && (
+        <PasswordModal
+          member={passModal}
+          currentUserId={user.uid}
+          onClose={() => setPassModal(null)}
+        />
+      )}
     </div>
   );
 }

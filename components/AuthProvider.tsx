@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import { User, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
+import { User, onAuthStateChanged, signInWithPopup, signOut, signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, query, where, getDocs, deleteDoc } from 'firebase/firestore';
 import { auth, db, googleProvider } from '@/lib/firebase';
 
@@ -12,6 +12,7 @@ interface AuthContextType {
   status: string | null;
   loading: boolean;
   signIn: () => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
   logOut: () => Promise<void>;
 }
 
@@ -22,6 +23,7 @@ const AuthContext = createContext<AuthContextType>({
   status: null,
   loading: true,
   signIn: async () => {},
+  signInWithEmail: async () => {},
   logOut: async () => {},
 });
 
@@ -151,6 +153,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const signInWithEmail = async (email: string, password: string) => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (error: any) {
+      console.error('Error signing in with email/password', error);
+      throw error;
+    }
+  };
+
   const logOut = async () => {
     try {
       await signOut(auth);
@@ -160,7 +171,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, role, orgId, status, loading, signIn, logOut }}>
+    <AuthContext.Provider value={{ user, role, orgId, status, loading, signIn, signInWithEmail, logOut }}>
       {children}
     </AuthContext.Provider>
   );
