@@ -47,7 +47,7 @@ export async function POST(req: Request) {
 
       // Send push notification to assigned agent (fire-and-forget)
       if (assigneeId) {
-        sendLeadNotification(assigneeId, { name: leadData.name, phone: leadData.phone, source: leadData.source, pax: leadData.pax, travelDate: leadData.travelDate }, docRef.id).catch(() => {});
+        sendLeadNotification(assigneeId, { name: leadData.name, phone: leadData.phone, source: leadData.source, pax: leadData.pax, travelDate: leadData.travelDate }, docRef.id).catch(() => { });
       }
     } catch (err) {
       console.error('Webhook error [leads.add]:', err);

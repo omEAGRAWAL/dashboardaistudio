@@ -45,9 +45,11 @@ service cloud.firestore {
       return isSignedIn() && resource.data.createdById == request.auth.uid;
     }
 
-    // Users: owner or admin only
+    // Users: owner, superadmin/admin, or org_admin of the same org
     match /users/{uid} {
-      allow read, write: if isOwner(uid) || isAdmin();
+      allow read: if isOwner(uid) || isAdmin() || isAgency();
+      allow write: if isOwner(uid) || isAdmin()
+        || (isAgency() && userOrgId() == resource.data.orgId);
     }
 
     // Categories: public read, admin write

@@ -304,8 +304,12 @@ export default function TeamPage() {
 
   const handleToggleAssignment = async (member: any) => {
     const newValue = member.assignmentActive === false ? true : false;
-    try { await updateDoc(doc(db, 'users', member.id), { assignmentActive: newValue }); }
-    catch (err) { console.error(err); }
+    try {
+      await updateDoc(doc(db, 'users', member.id), { assignmentActive: newValue });
+    } catch (err: any) {
+      console.error('[handleToggleAssignment]', err);
+      setError(err?.message || 'Failed to update assignment status. Check Firestore rules.');
+    }
   };
 
   const handleRemoveMember = async (member: any) => {
