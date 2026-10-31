@@ -117,5 +117,48 @@ service cloud.firestore {
     match /leads/{id} {
       allow read, write: if isAgency();
     }
+
+    // Business profiles: org members read, org_admin write
+    match /business_profiles/{orgId} {
+      allow read: if isSignedIn() && userOrgId() == orgId;
+      allow write: if isOrgAdminFor(orgId);
+    }
+
+    // Organizations: org members read, org_admin write
+    match /organizations/{orgId} {
+      allow read: if isSignedIn() && (userOrgId() == orgId || userRole() == 'superadmin');
+      allow write: if isOrgAdminFor(orgId);
+    }
+
+    // Invites: org_admin can manage, anyone can read their own
+    match /invites/{id} {
+      allow read, write: if isAgency();
+    }
+
+    // Razorpay config: org_admin only (sensitive)
+    match /razorpay_config/{orgId} {
+      allow read, write: if isOrgAdminFor(orgId);
+    }
+
+    // WhatsApp numbers & inbox: agency only
+    match /whatsapp_numbers/{id} {
+      allow read, write: if isAgency();
+    }
+    match /whatsapp_inbox/{id} {
+      allow read, write: if isAgency();
+    }
+
+    // Chatbot flows & builder: agency only
+    match /chatbot_flows/{id} {
+      allow read, write: if isAgency();
+    }
+
+    // Email settings & templates: agency only
+    match /email_settings/{id} {
+      allow read, write: if isAgency();
+    }
+    match /templates/{id} {
+      allow read, write: if isAgency();
+    }
   }
 }

@@ -119,9 +119,9 @@ export default function BusinessProfilePage() {
       await setDoc(doc(db, 'business_profiles', orgId), clean, { merge: true });
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error saving profile:', err);
-      alert('Failed to save business profile');
+      alert(Failed to save: ${err?.message || 'Unknown error'});
     } finally {
       setSaving(false);
     }
