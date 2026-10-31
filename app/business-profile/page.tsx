@@ -121,7 +121,7 @@ export default function BusinessProfilePage() {
       setTimeout(() => setSaved(false), 3000);
     } catch (err: any) {
       console.error('Error saving profile:', err);
-      alert(Failed to save: ${err?.message || 'Unknown error'});
+      alert(`Failed to save: ${err?.message || 'Unknown error'}`);
     } finally {
       setSaving(false);
     }
