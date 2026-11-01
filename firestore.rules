@@ -153,6 +153,12 @@ service cloud.firestore {
       allow read, write: if isAgency();
     }
 
+    // Custom domain reverse-lookup - read by middleware (unauthenticated REST API), write by Admin SDK
+    match /domains/{hostname} {
+      allow read: if true;
+      allow write: if false;
+    }
+
     // Email settings & templates: agency only
     match /email_settings/{id} {
       allow read, write: if isAgency();
